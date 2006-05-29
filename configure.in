@@ -1,0 +1,74 @@
+# Process this file with autoconf to produce a configure script.
+# most of this file was taken from the output of autoscan
+
+AC_PREREQ(2.59)
+AC_INIT(tag, 0.1)
+AC_CONFIG_SRCDIR([src/absorient.cpp])
+AM_INIT_AUTOMAKE
+AC_LANG(C++)
+
+#AC_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_LIBTOOL
+
+# Checks for libraries.
+
+# Checks for header files.
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+
+# Checks for library functions.
+AC_HEADER_STDC
+
+###################################################
+#
+#Allow the user to specify the location of TooN
+#taken from libcvd
+
+AC_ARG_WITH(TooN, [  --with-TooN=directory   Specify location for TooN ], [opt_toon_dir=$withval])
+
+if test "$opt_toon_dir" = no
+then
+        AC_MSG_ERROR(TooN is not optional. Use --with-TooN=dir to specify where it can be found.)
+fi
+
+#Yes is not a useful answer. We know the answer is yes.
+if test "$opt_toon_dir" = yes
+then
+        opt_toon_dir=
+fi
+
+#Check for TooN in a bunch of places
+
+save_CPPFLAGS="$CPPFLAGS"
+toondir="Missing"
+for dir in $opt_toon_dir "$prefix/include" "../TooN" ".."
+do
+    if test "$dir" = ""
+    then
+        CPPFLAGS="$save_CPPFLAGS"
+    else
+        CPPFLAGS="$save_CPPFLAGS -I$dir"
+    fi
+    AC_MSG_CHECKING(Checking for TooN in $dir )
+    AC_CHECK_HEADER([TooN/TooN.h], [toondir="$dir"], [], [])
+    if test "$toondir" != Missing
+    then
+        AC_MSG_RESULT(found TooN in $toondir)
+        break
+    fi
+done
+
+if test "$toondir" = Missing
+then
+    AC_MSG_ERROR(TooN is not optional. Use --with-TooN=dir to specify where it can be found.)
+fi
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
