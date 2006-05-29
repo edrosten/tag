@@ -7,14 +7,13 @@
 
 namespace tag {
 
-/// @defgroup kalmanfilter Kalman Filter
-/// A basic Kalman filter implementation and various state, process models and measurement functions
-
 /**
-template class providing a basic implementation of the Kalman filter.
+@defgroup kalmanfiltergroup Kalman Filter
+A basic Kalman filter implementation and various state, process models and measurement functions.
+
+Template class providing a basic implementation of the Kalman filter.
 The state and the process model are both template parameter classes
 to keep it flexible. Both parameters have to implement a certain interface to make the filter work.
-
 @code
 class State {
 public:
@@ -34,11 +33,9 @@ public:
     void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation );
 };
 @endcode
-
 Measurements are incorporated through the template member function
 template<class Measurement> void KalmanFilter<class State, class Model>::filter(Measurement & m);
 where class Measurement also has to implement a certain protocol:
-
 @code
 class Measurement {
 public:
@@ -51,7 +48,6 @@ public:
     Vector<M_DIMENSION> getInnovation( const State & state );
 };
 @endcode
-
 All of the member functions take the state as parameters, because the returned values are typically
 functions of the state in some form.
 
@@ -75,8 +71,11 @@ while(true){
     filter.filter(m);
 }
 @endcode
+*/
 
-@ingroup kalmanfilter
+/**
+the basic template class implementing the Kalman Filter, see @ref kalmanfilter documentation for details.
+@ingroup kalmanfiltergroup
 */
 template<class State, class Model>
 class KalmanFilter{
