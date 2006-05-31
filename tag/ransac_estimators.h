@@ -1,5 +1,5 @@
-#ifndef __RANSAC_ESTIMATORS_H_
-#define __RANSAC_ESTIMATORS_H_
+#ifndef TAG_RANSAC_ESTIMATORS_H
+#define TAG_RANSAC_ESTIMATORS_H
 
 #include <TooN/TooN.h>
 #include <TooN/SVD.h>

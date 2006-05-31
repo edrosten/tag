@@ -1,5 +1,5 @@
-#ifndef __FILTERKALMANFILTER_H
-#define __FILTERKALMANFILTER_H
+#ifndef TAG_FILTERKALMANFILTER_H
+#define TAG_FILTERKALMANFILTER_H
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
@@ -74,7 +74,7 @@ while(true){
 */
 
 /**
-the basic template class implementing the Kalman Filter, see @ref kalmanfilter documentation for details.
+the basic template class implementing the Kalman Filter, see @ref kalmanfiltergroup documentation for details.
 @ingroup kalmanfiltergroup
 */
 template<class State, class Model>

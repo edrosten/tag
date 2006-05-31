@@ -1,5 +1,5 @@
-#ifndef __FOURPOINTPOSE_H_
-#define __FOURPOINTPOSE_H_
+#ifndef TAG_FOURPOINTPOSE_H_
+#define TAG_FOURPOINTPOSE_H_
 
 #include <vector>
 
@@ -66,6 +66,6 @@ struct Point4SE3Estimation {
     }
 };
 
-}
+} // namespace tag
 
 #endif /*FOURPOINTPOSE*/

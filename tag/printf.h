@@ -14,7 +14,7 @@ namespace tag
 	#ifndef DOXYGEN_IGNORE_INTERNAL
 	namespace Internal
 	{
-		
+
 		// Code for parsing and interpreting printf style format specifiers.
 		//Code for groking format strings
 		struct format
@@ -24,7 +24,7 @@ namespace tag
 				ALT = 1, ZP=2, LEFT=4, SPACE=8, SIGN=16, PERCENT=32, BAD=64,
 				NO_PRECISION=-1, NO_WIDTH=-1
 			};
-			
+
 			int flags;
 			int  width, precision;
 			char conversion;
@@ -43,7 +43,7 @@ namespace tag
 					flags |= BAD;
 					return 0;
 				}
-				
+
 				//Check for literal
 				if(fmt[pos] == '%')
 				{
@@ -109,7 +109,7 @@ namespace tag
 				return pos;
 			}
 		};
-		
+
 		//To make it looks like ostream << format works
 		template<class Char, class Traits> struct bound_format
 		{
@@ -126,7 +126,7 @@ namespace tag
 		{
 			return bound_format<Char, Traits>(o, f);
 		}
-		
+
 		//Evaluate the result of osteram << format << X
 		template<class Char, class Traits, class C> std::basic_ostream<Char, Traits>& operator<<(bound_format<Char,Traits> f, const C& c)
 		{
@@ -134,13 +134,13 @@ namespace tag
 			using namespace std;
 
 			bool precision_is_max_width=0;
-			
+
 
 			//Save old stream state.
 			int old_p = f.o.precision();
 			Char old_fill = f.o.fill();
 			ios::fmtflags old_flags = f.o.flags();
-			
+
 			//Conversion specific tricks
 			//Defaults
 			f.o.unsetf(ios::floatfield | ios::boolalpha);
@@ -155,12 +155,12 @@ namespace tag
 				case 'F':
 					f.o.setf(ios::fixed);
 					break;
-					
+
 				case 'e':
 				case 'E':
 					f.o.setf(ios::scientific);
 					break;
-				
+
 				case 'g':
 				case 'G':
 					f.o.unsetf(ios::floatfield);
@@ -192,8 +192,8 @@ namespace tag
 					break;
 			}
 
-			
-			
+
+
 			if(f.f.width != format::NO_WIDTH)
 				f.o.width(f.f.width);
 
@@ -214,22 +214,22 @@ namespace tag
 				f.o.setf(ios::showbase | ios::showpoint);
 			else
 				f.o.unsetf(ios::showbase | ios::showpoint);
-				
-			
+
+
 			if(isupper(f.f.conversion))
 				f.o.setf(ios::uppercase);
 			else
 				f.o.unsetf(ios::uppercase);
-			
+
 
 			if(f.f.precision != format::NO_PRECISION && ! precision_is_max_width)
 				f.o.precision(f.f.precision);
-			
+
 			if(precision_is_max_width && f.f.precision != format::NO_PRECISION)
 			{
 				ostringstream tmp;
 				tmp.copyfmt(f.o);
-				
+
 				//Since we're doing the truncation by hand, then there should be
 				//no width specification
 				tmp << setw(0) << c;
@@ -247,9 +247,9 @@ namespace tag
 
 			return f.o;
 		}
-		
+
 		//This parses a format tring and uses it to print a typelist. The typelist has to be
-		//accessed in reverse order, since the last element added to the typelist is the 
+		//accessed in reverse order, since the last element added to the typelist is the
 		//one at the start of the list. Since lists are produced with (Fmt, a, b, c), that means
 		//that c would be accessed first. To make it look like printf, a needs to be accessed first.
 		template<class C, class D, int i, int max> struct print_typelist
@@ -257,7 +257,7 @@ namespace tag
 			static void print(std::ostream& o, const std::string& fmt, int fpos, const T_list<C,D>& l)
 			{
 				unsigned int ppos;
-				
+
 				while(1)
 				{
 					ppos = fmt.find('%', fpos);
@@ -268,14 +268,14 @@ namespace tag
 						o <<  &fmt[fpos];
 						return;
 					}
-					
+
 					//else output the strung up to the specifier
 					o  << fmt.substr(fpos, ppos - fpos);
 
 					//Parse the format string
 					format f;
 					int pos = f.parse(fmt, ppos+1);
-					
+
 					if(f.flags & format::PERCENT)
 					{
 						o << '%';
@@ -303,7 +303,7 @@ namespace tag
 			static void print(std::ostream& o, const std::string& fmt, int fpos, const T_list<C,D>& l)
 			{
 				unsigned int ppos;
-				
+
 				while(1)
 				{
 					ppos = fmt.find('%', fpos);
@@ -314,14 +314,14 @@ namespace tag
 						o <<  &fmt[fpos];
 						return;
 					}
-					
+
 					//else output the strung up to the specifier
 					o  << fmt.substr(fpos, ppos - fpos);
 
 					//Parse the format string
 					format f;
 					int pos = f.parse(fmt, ppos+1);
-					
+
 					if(f.flags & format::PERCENT)
 					{
 						o << '%';
@@ -348,7 +348,7 @@ namespace tag
 
 	///@defgroup printf Typesafe, variadic printf
 	///This group provides a reimplementation of the C standard library
-	///printf family of functions in a typesafe manner, using the @ref T_list tuple type.
+	///printf family of functions in a typesafe manner, using the @ref tag::T_list tuple type.
 	///@ingroup stdpp
 
 	/**
@@ -362,30 +362,30 @@ namespace tag
 
 	 The format specifiers work much like the standard printf ones, but with some
 	 notable differences. The format is:
-	 
+
 	 @code
 	 %[flags][width][.[precision]]<conversion>
 	 @endcode
 
 	 <h5>Flags</h5>
-	
+
 	 Flags contains zero or more of:
 	 <table>
-	 <tr><td>#</td>     <td>   Alternate form: Include trailing zeros for float, use 0x or 0 prefix for 
+	 <tr><td>#</td>     <td>   Alternate form: Include trailing zeros for float, use 0x or 0 prefix for
 	                     hex and octal ints </td></tr>
 	 <tr><td>0</td>     <td>   Zero pad everything, including (oddly) strings. </td></tr>
 	 <tr><td>' '</td>   <td> Space. Does nothing, I haven't figured out how to do this one.  </td></tr>
 	 <tr><td>-</td>     <td>   Left justify. Overrides 0 </td></tr>
 	 <tr><td>+</td>     <td>   Always show sign for numbers </td></tr>
 	 </table>
-	
+
 	 <h5>Width</h5>
-	 The width is optional and must start with a non-zero digit. It seems to work 
+	 The width is optional and must start with a non-zero digit. It seems to work
 	 even with overloaded operator<<
 
 	 <h5>Precision</h5>
-	  @code	
-	  .[precision] 
+	  @code
+	  .[precision]
 	  @endcode
 
 	  This can mean one of two things:
@@ -393,10 +393,10 @@ namespace tag
 	  - The maximum width for "string" types. Truncation happens from the right.
 
 	  <h5>Conversion</h5>
-	  This is a single alphabetic character.  This is the largets departure 
+	  This is a single alphabetic character.  This is the largets departure
 	  from the C style printf. This flag affects the "type" of the datum being
 	  formatted. Type safety still applies. Uppercase and lowercase conversions
-	  behave in exactly the same way, except uppercase ones cause uppercased 
+	  behave in exactly the same way, except uppercase ones cause uppercased
 	  output (where applicable). If a float looks like 1E6 intead of 1e6
 	  <table>
 	  <tr><td>x</td>	<td>Make ints come out in hexadecimal</td></tr>
@@ -442,7 +442,7 @@ namespace tag
 	{
 		Internal::print_typelist<C, D, 0, T_list<C,D>::elements >::print(o, fmt, 0, l);
 	}
-	
+
 	///This prints to cout. See @ref vfPrintf for details.
 	///@ingroup printf
 	///@param fmt format string
@@ -456,14 +456,14 @@ namespace tag
 	///@ingroup printf
 	///@param fmt format string
 	///@param l typelist of arguments
-	///\return The resulting application of fmt to l, returned as a string 
+	///\return The resulting application of fmt to l, returned as a string
 	template<class C, class D> std::string vsPrintf(const std::string& fmt, const T_list<C,D>& l)
 	{
-		std::ostringstream o;	
+		std::ostringstream o;
 		vfPrintf(o, fmt, l);
 		return o.str();
 	}
-	
+
 	///List head for argument lists. This is a synonym for @ref TupleHead
 	///
 	/// Argument lists can be made by doing:

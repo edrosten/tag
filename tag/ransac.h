@@ -1,5 +1,5 @@
-#ifndef __RANSAC_H_
-#define __RANSAC_H_
+#ifndef TAG_RANSAC_H_
+#define TAG_RANSAC_H_
 
 #include <vector>
 #include <algorithm>

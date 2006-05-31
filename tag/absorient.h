@@ -1,5 +1,5 @@
-#ifndef __ABSORIENT_H_
-#define __ABSORIENT_H_
+#ifndef TAG_ABSORIENT_H_
+#define TAG_ABSORIENT_H_
 
 #include <vector>
 
@@ -45,4 +45,4 @@ TooN::Matrix<3> quaternionToMatrix( const TooN::Vector<4> & q );
 
 } // namespace tag
 
-#endif // __ABSORIENT_H_
+#endif // TAG_ABSORIENT_H_

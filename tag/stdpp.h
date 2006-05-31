@@ -1,5 +1,5 @@
-#ifndef __PRINT_H_
-#define __PRINT_H_
+#ifndef TAG_STDPP_H
+#define TAG_STDPP_H
 
 #include <iostream>
 
@@ -82,13 +82,13 @@ namespace Internal
 				o << c;
 				return *this;
 		}
-		
+
 		add_fill_bound& operator<<(const no_space_s&)
 		{
 			first=true;
 			return *this;
 		}
-		
+
 		add_fill_bound& operator<<(S& (*fptr)(S&) )
 		{
 				o << fptr;
@@ -111,7 +111,7 @@ namespace Internal
 		:add_fill_bound<S>(os)
 		{
 		}
-		
+
 		~like_print_bound()
 		{
 			add_fill_bound<S>::operator<<(std::endl);
@@ -172,7 +172,7 @@ template<class Char, class Traits> Internal::add_fill_bound<std::basic_ostream<C
 {
 		return Internal::add_fill_bound<std::basic_ostream<Char,Traits> >(o);
 }
- 
+
 template<class Char, class Traits> Internal::like_print_bound<std::basic_ostream<Char,Traits> > operator<<(std::basic_ostream<Char,Traits>& o, const Internal::like_print_s&)
 {
 		return Internal::like_print_bound<std::basic_ostream<Char,Traits> >(o);
