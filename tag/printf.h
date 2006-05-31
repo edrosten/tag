@@ -1,5 +1,5 @@
-#ifndef ER_UTIL_PRINTF_H
-#define ER_UTIL_PRINTF_H
+#ifndef TAG_PRINTF_H
+#define TAG_PRINTF_H
 
 #include <iostream>
 #include <iomanip>
