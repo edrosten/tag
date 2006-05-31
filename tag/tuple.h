@@ -1,5 +1,5 @@
-#ifndef ER_UTIL_TUPLE_H
-#define ER_UTIL_TUPLE_H
+#ifndef TAG_TUPLE_H
+#define TAG_TUPLE_H
 
 namespace tag
 {
