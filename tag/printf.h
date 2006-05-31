@@ -9,7 +9,7 @@
 
 #include <edutil/tuple.h>
 
-namespace EdUtil
+namespace tag
 {
 	#ifndef DOXYGEN_IGNORE_INTERNAL
 	namespace Internal
