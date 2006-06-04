@@ -14,7 +14,11 @@ namespace tag {
 
 /// The main function for pose estimation from 4 2D - 3D point correspondences.
 /// It implements the algorithm given by
-/// Input is a list of 3D positions and a list of 3D vectors describing the pixels on the image plane.
+/// This function assumes that the 4 points are in general position (not in a single plane) and
+/// can solve the problem for all cases, e.g. points do not have to lie in front of the camera etc.
+/// Input is a list of 3D positions and a list of 3D vectors describing the ray under which the transformed points are
+/// seen by the origin. It does not assume any special camera setup other than the origin being the center of the
+/// camera.
 /// Ouput is the SE3 describing the camera pose and a flag signaling if the result is valid.
 /// @param[in] points a vector containing 4 3D points
 /// @param[in] pixels a vector containing 4 2D pixels as 3D vectors to allow arbitrary image planes
@@ -22,6 +26,20 @@ namespace tag {
 /// @return SE3 describing the camera pose
 /// @ingroup fourpointpose
 TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid );
+
+/// A special case of the general @ref fourPointPose function which assumes that points are
+/// in front of a given camera plane but now may also lie in the same plane (but not all on one line).
+/// The frontal assumption is made for the data, but not encoded in any constraint. Care should be taken
+/// that the given 3D vectors for the directions are actually pointing towards the points, not away from them.
+/// In the general case, all points in a plane has two solutions, if we assume that all points are
+/// in front of the camera, there is only one solution. It also is slighlty more optimized, because
+/// it does not need to check as many cases.
+/// @param[in] points a vector containing 4 3D points
+/// @param[in] pixels a vector containing 4 2D pixels as 3D vectors to allow arbitrary image planes
+/// @param[out] valid output argument, it is set to true to signal a valid result and false otherwise
+/// @return SE3 describing the camera pose
+/// @ingroup fourpointpose
+TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid );
 
 /// A RANSAC estimator using the @ref fourPointPose function. The
 /// Correspondence datatype must provide a member position for the 3D point and

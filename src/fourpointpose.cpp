@@ -4,17 +4,21 @@
 #include <TooN/SVD.h>
 #include <TooN/helpers.h>
 
+#include <iostream>
+
 namespace tag {
 
-// simple helper function to compute larger of a quadratic equation x^2 + px + q = 0
+// simple helper function to compute the roots of a quadratic equation x^2 + px + q = 0
 // also returns if the result is real or not (in which case valid is set to false)
-static inline double quadraticRoots( double p, double q, bool & valid ){
+static inline bool quadraticRoots( double p, double q, TooN::Vector<2> & roots ){
     double det = p*p*0.25 - q;
     if( det < 0 ){
-        valid = false;
-        return 0;
+        TooN::Zero(roots);
+        return false;
     }
-    return -p*0.5 + sqrt(det);
+    det = sqrt(det);
+    roots = (TooN::make_Vector, -p*0.5 + det, -p*0.5 - det);
+    return true;
 }
 
 // helper function for @ref fourPointPose computing the coefficients of the A matrix
@@ -67,17 +71,19 @@ static TooN::Vector<3> getBCoeffs( int i, int j, int k, int l, const TooN::Vecto
     return coeff;
 }
 
+// this code is copied in the next function, modifications need to be made there too
 TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid ){
     TooN::Matrix<5> A;
     TooN::Vector<5> v4, v5;
     TooN::Matrix<7,3> B;
     TooN::Vector<3> bnull;
     TooN::Vector<5> t;
-    TooN::Vector<4> x;
     TooN::Matrix<3> vecsCamera, vecsWorld;
 
     TooN::Vector<6> distances;
     TooN::Vector<6> angles;
+
+    double orientationTest = ((points[1] - points[0]) ^ (points[2] - points[0])) * (points[3] - points[0]);
 
     // normalising scales for angle computation in next loop
     std::vector<TooN::Vector<3> > myPixels(4);
@@ -89,8 +95,6 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
     int count = 0;
     for( unsigned int i = 0; i < 3; i++)
         for( unsigned int j = i+1; j < 4; j++, count++){
-            if(i == j)
-                continue;
             TooN::Vector<3> diff = points[i] - points[j];
             distances[count] = diff * diff;
             angles[count] = 2* myPixels[i] * myPixels[j];
@@ -135,21 +139,169 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
         xx *= -1;
 
     valid = true;
-    x[0] = sqrt( xx );  // distance to point 0
-    x[1] = quadraticRoots( -x[0]*angles[0], xx - distances[0], valid );
-    x[2] = quadraticRoots( -x[0]*angles[1], xx - distances[1], valid );
-    x[3] = quadraticRoots( -x[0]*angles[2], xx - distances[2], valid );
-
+    std::vector<TooN::Vector<2> > length(4);
+    double x = sqrt( xx );
+    length[0] = (TooN::make_Vector, x, -x); // possible distances to point 0
+    valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1] );
+    valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2] );
+    valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3] );
     if( !valid )
         return TooN::SE3();
 
-    // pixel directions extended to the right distance
-    for(unsigned int i = 0; i < 4; i++){
-        myPixels[i] *= x[i];
+    // figure out the right lengths
+    // brute force through all combinations, with some optimizations to stop early, if a better hypothesis exists
+    std::vector<TooN::Vector<3> > testPoint(4);
+    double minError = 1e10;
+    int minIndex = -1;
+    for(unsigned int h = 0; h < 16; h++){
+        // first going through all possibilities where the point is in front of the camera
+        // then switch to the other ones.
+        testPoint[0] = myPixels[0] * length[0][!!(h&8)];
+        testPoint[1] = myPixels[1] * length[1][!!(h&1)] * (h&8?-1:1);
+        testPoint[2] = myPixels[2] * length[2][!!(h&2)] * (h&8?-1:1);
+        testPoint[3] = myPixels[3] * length[3][!!(h&4)] * (h&8?-1:1);
+        double error = 0;
+        int count = 3; // skip the first 3 distances because they will not produce any error
+        for( unsigned int i = 1; i < 3; i++)
+            for( unsigned int j = i+1; j < 4; j++, count++){
+                TooN::Vector<3> diff = testPoint[i] - testPoint[j];
+                error += fabs(diff * diff - distances[count]);
+            }
+        if( minError > error ){
+            double myOrientationTest = ((testPoint[1] - testPoint[0]) ^ (testPoint[2] - testPoint[0])) * (testPoint[3] - testPoint[0]);
+            if(myOrientationTest * orientationTest > 0){
+                minError = error;
+                minIndex = h;
+            }
+        }
+    }
+    if(minIndex == -1){
+        valid = false;
+        return TooN::SE3();
     }
 
+    // pixel directions extended to the right distance
+    myPixels[0] *= length[0][!!(minIndex&8)];
+    myPixels[1] *= length[1][!!(minIndex&1)] * (minIndex&8?-1:1);
+    myPixels[2] *= length[2][!!(minIndex&2)] * (minIndex&8?-1:1);
+    myPixels[3] *= length[3][!!(minIndex&4)] * (minIndex&8?-1:1);
+
     // absolute orientation
-    return computeAbsoluteOrientation(points, pixels);
+    return computeAbsoluteOrientation(points, myPixels);
+}
+
+// just a copy of the above code with modifications to the case search
+// could be refactored, but that breaks the nice algorithmic structure
+TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid ){
+    TooN::Matrix<5> A;
+    TooN::Vector<5> v4, v5;
+    TooN::Matrix<7,3> B;
+    TooN::Vector<3> bnull;
+    TooN::Vector<5> t;
+    TooN::Matrix<3> vecsCamera, vecsWorld;
+
+    TooN::Vector<6> distances;
+    TooN::Vector<6> angles;
+
+    // normalising scales for angle computation in next loop
+    std::vector<TooN::Vector<3> > myPixels(4);
+    for(unsigned int i = 0; i < 4; i++){
+        myPixels[i] = pixels[i];
+        TooN::normalize(myPixels[i]);
+    }
+
+    int count = 0;
+    for( unsigned int i = 0; i < 3; i++)
+        for( unsigned int j = i+1; j < 4; j++, count++){
+            TooN::Vector<3> diff = points[i] - points[j];
+            distances[count] = diff * diff;
+            angles[count] = 2* myPixels[i] * myPixels[j];
+        }
+
+    TooN::Zero(A);
+    A.slice<0,0,1,5>() = getACoeffs(angles[0], angles[1], angles[3], distances[0], distances[1], distances[3]).as_row();
+    A.slice<1,0,1,5>() = getACoeffs(angles[0], angles[2], angles[4], distances[0], distances[2], distances[4]).as_row();
+    A.slice<2,0,1,5>() = getACoeffs(angles[1], angles[2], angles[5], distances[1], distances[2], distances[5]).as_row();
+    TooN::SVD<5> svdA(A);
+
+    v4.as_row() = svdA.get_VT().slice<3,0,1,5>();
+    v5.as_row() = svdA.get_VT().slice<4,0,1,5>();
+
+    B.slice<0,0,1,3>() = getBCoeffs(4,2,3,3, v4, v5).as_row();
+    B.slice<1,0,1,3>() = getBCoeffs(4,1,3,2, v4, v5).as_row();
+    B.slice<2,0,1,3>() = getBCoeffs(4,0,3,1, v4, v5).as_row();
+    B.slice<3,0,1,3>() = getBCoeffs(4,0,2,2, v4, v5).as_row();
+    B.slice<4,0,1,3>() = getBCoeffs(3,1,2,2, v4, v5).as_row();
+    B.slice<5,0,1,3>() = getBCoeffs(3,0,2,1, v4, v5).as_row();
+    B.slice<6,0,1,3>() = getBCoeffs(2,0,1,1, v4, v5).as_row();
+
+    TooN::SVD<7,3> svdB(B);
+    bnull.as_row() = svdB.get_VT().slice<2,0,1,3>();
+
+    double lambda, roh;
+    if( bnull[1] != 0 ){          // lambda * roh != 0 => both are != 0
+        double ratio = (bnull[0]/ bnull[1] + bnull[1] / bnull[2]) * 0.5;
+        roh = 1.0 / (v4[0] * ratio + v5[0]);
+        lambda = ratio * roh;
+    } else if( bnull[2] != 0 ) { // roh != 0 => lambda == 0
+        lambda = 0;
+        roh = 1/v5[0];
+    } else {                     // lambda != 0 and roh == 0
+        roh = 0;
+        lambda = 1/v4[0];
+    }
+
+    t = v4 * lambda + v5 * roh;
+    double xx = (t[1]/t[0] + t[2]/t[1] + t[3]/t[2] + t[4]/t[3]) / 4;
+    if( xx < 0)
+        xx *= -1;
+
+    valid = true;
+    std::vector<TooN::Vector<2> > length(4);
+    double x = sqrt( xx );
+    valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1] );
+    valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2] );
+    valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3] );
+    if( !valid )
+        return TooN::SE3();
+
+    // figure out the right lengths
+    // brute force through all combinations, with some optimizations to stop early, if a better hypothesis exists
+    std::vector<TooN::Vector<3> > testPoint(4);
+    double minError = 1e10;
+    int minIndex = -1;
+    // we assume now that the point is in front of the camera and therefore the solution is the one with
+    // positive x
+    testPoint[0] = myPixels[0] * x;
+    for(unsigned int h = 0; h < 8; h++){
+        testPoint[1] = myPixels[1] * length[1][!!(h&1)];
+        testPoint[2] = myPixels[2] * length[2][!!(h&2)];
+        testPoint[3] = myPixels[3] * length[3][!!(h&4)];
+        double error = 0;
+        int count = 3; // skip the first 3 distances because they will not produce any error
+        for( unsigned int i = 1; i < 3; i++)
+            for( unsigned int j = i+1; j < 4; j++, count++){
+                TooN::Vector<3> diff = testPoint[i] - testPoint[j];
+                error += fabs(diff * diff - distances[count]);
+            }
+        if( minError > error ){
+            minError = error;
+            minIndex = h;
+        }
+    }
+    if(minIndex == -1){
+        valid = false;
+        return TooN::SE3();
+    }
+
+    // pixel directions extended to the right distance
+    myPixels[0] = testPoint[0];
+    myPixels[1] *= length[1][!!(minIndex&1)];
+    myPixels[2] *= length[2][!!(minIndex&2)];
+    myPixels[3] *= length[3][!!(minIndex&4)];
+
+    // absolute orientation
+    return computeAbsoluteOrientation(points, myPixels);
 }
 
 }
