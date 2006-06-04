@@ -41,6 +41,10 @@ public:
     inline TooN::Vector<M_DIMENSION> & getMeasurement( const State & state ){
         return measurement;
     }
+
+    inline void setMeasurement( const TooN::SE3 & increment ){
+        measurement = increment.ln();
+    }
 };
 
 /// An absolute pose measurement in world coordinates. This is transformed
