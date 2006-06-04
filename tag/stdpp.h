@@ -9,9 +9,15 @@ namespace tag {
 /// This group contains enhancements to make the std library more useable
 
 /**
-@defgroup print stream simplifications
-The comma operator for streams is defined to allow a simple statement similar to print in Python
-or other languages. The stream object and any values to be printed are written as a comma separated
+@defgroup printgroup stream simplifications
+This group contains two sets of enhancements for using the output streams in the standard library.
+
+The first is a set of additional modifiers for use with the standard << operator. See @ref add_fill ,
+@ref no_space and @ref print for more details.
+
+The second set introduces a new syntax using the comma operator for streams.
+It creates simple statements similar to print in Python or other languages.
+The stream object and any values to be printed are written as a comma separated
 list. Between the values printed, the stream's fill character is output to delimit values. Some examples:
 @code
 cout, 12, \"hello\", 13, endl;
@@ -35,26 +41,20 @@ template <class T> struct NotFirst {
     T & data;
 };
 
-template <class T, class O>
-inline NotFirst<O> operator,(O  & stream, const T & data ){
+template <class T, class Char, class Traits>
+inline NotFirst<std::basic_ostream<Char,Traits> > operator,(std::basic_ostream<Char,Traits>  & stream, const T & data ){
     stream << data;
-    return NotFirst<O>(stream);
+    return NotFirst<std::basic_ostream<Char,Traits> >(stream);
 }
 
-template <class T, class O>
-inline NotFirst<O> operator,(NotFirst<O> nf, const T & data ){
+template <class T, class Char, class Traits>
+inline NotFirst<std::basic_ostream<Char,Traits> > operator,(NotFirst<std::basic_ostream<Char,Traits> > nf, const T & data ){
     nf.data << nf.data.fill() << data;
     return nf;
 }
 
-template <class O>
-inline O & operator,(O  & stream, O & (*modifier)(O &)){
-    stream << modifier;
-    return stream;
-}
-
-template <class O>
-inline O & operator,(NotFirst<O> nf, O & (*modifier)(O &)){
+template <class Char, class Traits>
+inline std::basic_ostream<Char,Traits> & operator,(NotFirst<std::basic_ostream<Char,Traits> > nf, std::basic_ostream<Char,Traits> & (*modifier)(std::basic_ostream<Char,Traits> &)){
     nf.data << modifier;
     return nf.data;
 }
@@ -133,7 +133,7 @@ This will print:
 1 2 3
 5 4
 @endcode
-@ingroup print
+@ingroup printgroup
 */
 static struct Internal::add_fill_s add_fill;
 
@@ -148,7 +148,7 @@ Will print:
 1 2 3
 hello
 @endcode
-@ingroup print
+@ingroup printgroup
 */
 static struct Internal::like_print_s print;
 
@@ -162,7 +162,7 @@ will print:
 @code
 0 12 3
 @endcode
-@ingroup print
+@ingroup printgroup
 */
 static struct Internal::no_space_s no_space;
 
