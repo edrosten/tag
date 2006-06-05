@@ -482,7 +482,7 @@ namespace tag
 ///@param A the format string
 ///@param ... the arguments
 ///@ingroup printf
-#define Printf(A, ...) vPrintf(A, (EdUtil::Fmt,## __VA_ARGS__))
+#define Printf(A, ...) vPrintf(A, (tag::Fmt,## __VA_ARGS__))
 
 ///This is the equivalent to the C-style fprintf: it provides a variadic
 ///interface and prints to give ostream. See @ref vfPrintf for details.
@@ -490,7 +490,7 @@ namespace tag
 ///@param A the ostream to write to
 ///@param B the format string
 ///@param ... the arguments
-#define fPrintf(A,B, ...) vfPrintf(A,B, (EdUtil::Fmt,## __VA_ARGS__))
+#define fPrintf(A,B, ...) vfPrintf(A,B, (tag::Fmt,## __VA_ARGS__))
 
 ///This is the equivalent to the C-style sprintf: it provides a variadic
 ///interface returns the string. See @ref vfPrintf for details.
@@ -498,5 +498,5 @@ namespace tag
 ///@param ... the arguments
 ///@return The retulting application of fmt to the arguments
 ///@ingroup printf
-#define sPrintf(A, ...) vsPrintf(A, (EdUtil::Fmt,## __VA_ARGS__))
+#define sPrintf(A, ...) vsPrintf(A, (tag::Fmt,## __VA_ARGS__))
 #endif
