@@ -90,7 +90,7 @@ public:
     void predict(double dt){
         TooN::Matrix<State::STATE_DIMENSION> A = model.getJacobian( state, dt );
         model.updateState( state, dt );
-        state.covariance = A * state.covariance * A.T() + model.getNoiseCovariance( dt );
+        state.covariance = TooN::transformCovariance(A, state.covariance) + model.getNoiseCovariance( dt );
         TooN::Symmetrize(state.covariance);
     }
 
@@ -99,7 +99,7 @@ public:
     template<class Measurement> void filter(Measurement & m){
         TooN::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> H = m.getMeasurementJacobian( state );
         TooN::Matrix<Measurement::M_DIMENSION> R = m.getMeasurementCovariance( state );
-        TooN::Matrix<Measurement::M_DIMENSION> I = H * state.covariance * H.T() + R;
+        TooN::Matrix<Measurement::M_DIMENSION> I = TooN::transformCovariance(H, state.covariance) + R;
         TooN::LU<Measurement::M_DIMENSION> lu(I);
         TooN::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> K = state.covariance * H.T() * lu.get_inverse();
         TooN::Vector<Measurement::M_DIMENSION> innovation = m.getInnovation( state );
