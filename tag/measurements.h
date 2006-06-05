@@ -38,7 +38,7 @@ public:
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getMeasurement( const State & state ){
+    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
         return measurement;
     }
 
@@ -59,7 +59,7 @@ public:
     TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> jacobian;
     TooN::SE3 measurement;
 
-    AbsolutePose(void){
+    WorldPose(void){
         TooN::Identity(covariance);
         TooN::Zero(jacobian);
         TooN::Identity(jacobian.template slice<0,0,6,6>());
@@ -74,7 +74,7 @@ public:
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getMeasurement( const State & state ){
+    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
         return (measurement * state.pose.inverse()).ln();
     }
 };
@@ -107,7 +107,7 @@ public:
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getMeasurement( const State & state ){
+    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
         return (state.pose * position - state.pose.get_translation());
     }
 
@@ -150,7 +150,7 @@ public:
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> getMeasurement( const State & state ){
+    inline TooN::Vector<M_DIMENSION> getInnovation( const State & state ){
         // angular velocity
         /// @todo think about the -gyro and either document or remove
         return  (-gyro - state.angularVelocity);
@@ -186,9 +186,9 @@ public:
         TooN::Zero(result);
         // direction jacobian
         TooN::Vector<M_DIMENSION> local = state.pose.get_rotation() * reference;
-        result.template slice<0,3,3,1>() = SO3::generator_field(0, local ).as_col();
-        result.template slice<0,4,3,1>() = SO3::generator_field(1, local ).as_col();
-        result.template slice<0,5,3,1>() = SO3::generator_field(2, local ).as_col();
+        result.template slice<0,3,3,1>() = TooN::SO3::generator_field(0, local ).as_col();
+        result.template slice<0,4,3,1>() = TooN::SO3::generator_field(1, local ).as_col();
+        result.template slice<0,5,3,1>() = TooN::SO3::generator_field(2, local ).as_col();
         return result;
     }
 
@@ -196,7 +196,7 @@ public:
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getMeasurement( const State & state ){
+    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
         return (measurement - (state.pose.get_rotation() * reference));
     }
 

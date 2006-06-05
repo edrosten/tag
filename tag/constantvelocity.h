@@ -22,27 +22,28 @@ public:
     }
 
     inline void reset(void){
-        position = SE3();
-        Zero(angularVelocity);
-        Zero(velocity);
-        Identity(covariance);
+        pose = TooN::SE3();
+        TooN::Zero(angularVelocity);
+        TooN::Zero(velocity);
+        TooN::Identity(covariance);
     }
 
     inline void resetVelocity(void){
-        Zero(angularVelocity);
-        Zero(velocity);
+        TooN::Zero(angularVelocity);
+        TooN::Zero(velocity);
     }
 
     static const int STATE_DIMENSION = 12;
-    SE3 pose;
-    Vector<3> angularVelocity;
-    Vector<3> velocity;
-    Matrix<STATE_DIMENSION> covariance;
+    TooN::SE3 pose;
+    TooN::Vector<3> angularVelocity;
+    TooN::Vector<3> velocity;
+    TooN::Matrix<STATE_DIMENSION> covariance;
 };
 
 /// operator to print out instances of State in a useable manner.
 /// @ingroup constantvelocitygroup
-inline std::ostream & operator<< (std::ostream & os , const State & st){
+template <class O>
+inline O & operator<< (O & os , const State & st){
     os << st.pose.ln() << st.velocity << st.angularVelocity << st.pose.inverse().get_translation();
     return os;
 }
@@ -52,40 +53,40 @@ inline std::ostream & operator<< (std::ostream & os , const State & st){
 /// @ingroup constantvelocitygroup
 class Model {
 public:
-    Vector<State::STATE_DIMENSION> sigma;
+    TooN::Vector<State::STATE_DIMENSION> sigma;
     // dampening of velocity
     double damp;
 
     Model(void){
-        Zero(sigma);
+        TooN::Zero(sigma);
         damp = 1;
     }
 
     // Jacobian has pos, rot, vel, angularVel in this order
-    Matrix<State::STATE_DIMENSION> getJacobian(const State & state, double dt){
-            Matrix<State::STATE_DIMENSION> result;
-            Identity(result);
-            Identity(result.slice<0,6,6,6>(), dt);
+    TooN::Matrix<State::STATE_DIMENSION> getJacobian(const State & state, double dt){
+            TooN::Matrix<State::STATE_DIMENSION> result;
+            TooN::Identity(result);
+            TooN::Identity(result.slice<0,6,6,6>(), dt);
             return result;
     }
 
     void updateState( State & state, const double dt ){
         // full velocity vector
-        Vector<6> vel;
+        TooN::Vector<6> vel;
         vel.slice<0,3>() = state.velocity;
         vel.slice<3,3>() = state.angularVelocity;
 
         // update translational components
-        state.pose = SE3::exp(vel * dt) * state.pose;
+        state.pose = TooN::SE3::exp(vel * dt) * state.pose;
         // dampen velocitys
         double attenuation = pow(damp, dt);
         state.velocity *= attenuation;
         state.angularVelocity *= attenuation;
     }
 
-    Matrix<State::STATE_DIMENSION> getNoiseCovariance( double dt ){
-        Matrix<State::STATE_DIMENSION> result;
-        Zero(result);
+    TooN::Matrix<State::STATE_DIMENSION> getNoiseCovariance( double dt ){
+        TooN::Matrix<State::STATE_DIMENSION> result;
+        TooN::Zero(result);
         double dt2 = dt * dt * 0.5;
         double dt3 = dt * dt * dt * 0.3333333333333;
         for(unsigned int i = 0; i < 6; i++){
@@ -96,8 +97,8 @@ public:
         return result;
     }
 
-    void updateFromMeasurement( State & state, const Vector<State::STATE_DIMENSION> & innovation ){
-        state.pose = SE3::exp(innovation.slice<0,6>()) * state.pose;
+    void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
+        state.pose = TooN::SE3::exp(innovation.slice<0,6>()) * state.pose;
         state.velocity = state.velocity + innovation.slice<6,3>();
         state.angularVelocity = state.angularVelocity + innovation.slice<9,3>();
     }

@@ -82,28 +82,28 @@ class KalmanFilter{
 public:
 
     KalmanFilter(){
-        Toon::Identity(identity);
+        TooN::Identity(identity);
     }
 
     /// predicts the state by applying the process model over the time interval dt
     /// @param[in] dt time interval
     void predict(double dt){
-        Toon::Matrix<State::STATE_DIMENSION> A = model.getJacobian( state, dt );
+        TooN::Matrix<State::STATE_DIMENSION> A = model.getJacobian( state, dt );
         model.updateState( state, dt );
         state.covariance = A * state.covariance * A.T() + model.getNoiseCovariance( dt );
-        Toon::Symmetrize(state.covariance);
+        TooN::Symmetrize(state.covariance);
     }
 
     /// incorporates a measurement
     /// @param[in] m the measurement to add to the filter state
     template<class Measurement> void filter(Measurement & m){
-        Toon::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> H = m.getMeasurementJacobian( state );
-        Toon::Matrix<Measurement::M_DIMENSION> R = m.getMeasurementCovariance( state );
-        Toon::Matrix<Measurement::M_DIMENSION> I = H * state.covariance * H.T() + R;
+        TooN::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> H = m.getMeasurementJacobian( state );
+        TooN::Matrix<Measurement::M_DIMENSION> R = m.getMeasurementCovariance( state );
+        TooN::Matrix<Measurement::M_DIMENSION> I = H * state.covariance * H.T() + R;
         TooN::LU<Measurement::M_DIMENSION> lu(I);
-        Toon::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> K = state.covariance * H.T() * lu.get_inverse();
-        Toon::Vector<Measurement::M_DIMENSION> innovation = m.getInnovation( state );
-        Toon::Vector<State::STATE_DIMENSION> stateInnovation = K * innovation;
+        TooN::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> K = state.covariance * H.T() * lu.get_inverse();
+        TooN::Vector<Measurement::M_DIMENSION> innovation = m.getInnovation( state );
+        TooN::Vector<State::STATE_DIMENSION> stateInnovation = K * innovation;
         model.updateFromMeasurement( state, stateInnovation );
         state.covariance = (identity - K * H) * state.covariance;
         Symmetrize( state.covariance );
