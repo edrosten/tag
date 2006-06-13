@@ -61,7 +61,7 @@ namespace tag {
 template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
 									Trans& best, std::vector<bool>& inlier)
 {
-    std::vector<bool> thisInlier(observations.size(),best);
+    std::vector<bool> thisInlier(observations.size());
     size_t bestScore = 0;
     std::vector<size_t> sample_index(sample_size);
     vector<Obs> sample(sample_size);
@@ -69,16 +69,16 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 	randomTuple(sample_index, observations.size());
 	for (int i=0;i<sample_size; i++)
 	    sample[i] = observations[sample_index[i]];
-	Trans thisT;
+	Trans thisT(best);
 	thisT.estimate(sample.begin(), sample.end());
 	size_t score = 0;
 	for (size_t i=0; i<observations.size(); i++) {
 	    const Obs& o = observations[i];
 	    if (thisT.isInlier(o, tolerance)) {
-		inlier[i] = true;
+		thisInlier[i] = true;
 		score++;
 	    } else
-		inlier[i] = false;
+		thisInlier[i] = false;
 	}
 	if (score > bestScore) {
 	    bestScore = score;
