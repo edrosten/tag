@@ -1,266 +1,241 @@
 #ifndef TAG_RANSAC_ESTIMATORS_H
 #define TAG_RANSAC_ESTIMATORS_H
 
+#include <vector>
+#include <cassert>
+
 #include <TooN/TooN.h>
+#include <TooN/helpers.h>
+#include <TooN/Cholesky.h>
+#include <TooN/wls.h>
+#include <TooN/LU.h>
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
 
 namespace tag {
 
-/// RANSAC estimator to compute an affine transformation between a set of 2D-2D correspondences.
-/// The Correspondence datatype has to implement the following interface:
+    template <class T> inline const Vector<2>& first_point(const T& t) { return t.first; }
+    template <class T> inline const Vector<2>& second_point(const T& t) { return t.second; }
+    template <class T> inline double noise(const T& t) { return 1.0; }
+    
+
+namespace essential_matrix {
+
+    // For degenerate case
+    template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<3>& H)
+    {
+	assert(std::distance(begin,end) >= 4);
+
+	TooN::WLS<8> wls;
+	for (It it=begin; it!=end; it++) {
+	    const Vector<2>& a = first_point(*it);
+	    const Vector<2>& b = first_point(*it);
+	    const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
+				       {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
+	    wls.add_df(b[0], Vector<8>(rows[0]));
+	    wls.add_df(b[1], Vector<8>(rows[1]));
+	}
+	wls.compute();
+	TooN::Vector<8> h = wls.get_mu();
+	H[0] = h.template slice<0,3>();
+	H[1] = h.template slice<3,3>();
+	H[2][0] = h[6];
+	H[2][1] = h[7];
+	H[2][2] = 1;
+    }
+
+    
+    template <class M> inline int getValidPair(const TooN::Matrix<3>& R1, const TooN::Matrix<3>& R2, const TooN::Vector<2>& e, double z1, const M& m)
+    {
+	TooN::Vector<2> dm = m.b-e;
+	TooN::Vector<3> ha = TooN::unproject(m.a);
+	TooN::Vector<3> inf1 = R1*ha;
+	TooN::Vector<3> inf2 = R2*ha;
+	double zp1 = inf1[2];
+	double zp2 = inf2[2];
+	TooN::Vector<2> pinf1 = project(inf1);
+	TooN::Vector<2> pinf2 = project(inf2);
+	if (zp1*dm*(pinf1 - e) >= 0) {
+	    // R1
+	    if (zp1 < 0)
+		return z1 <= 0 ? 0 : 1;
+	    // check for sign match
+	    return  ((pinf1-m.b)*dm*z1 >= 0) ? 0 : 1;
+	} else {
+	    //R2
+	    if (zp2 < 0) 
+		return z1 <= 0 ? 2 : 3;
+	    return ((pinf2-m.b)*dm*z1 >= 0) ? 2 : 3;
+	}
+    }
+
+    template <int N, class Accessor> double determinant(const TooN::FixedMatrix<N,N,Accessor>& M)
+    {
+	TooN::LU<N> lu(M);
+	double det = 1;
+	for (int i=0; i<N; i++)
+	    det *= lu.get_lu()[i][i];
+	return det;
+    }
+    
+/// RANSAC estimator to compute the essential matrix from a set of 2D-2D correspondences
+/// The observations passed (via iterators) to the estimate method must allow:
 /// @code
-/// struct Correspondence {
-///   TooN::Vector<2> a;
-///   TooN::Vector<2> b;
-/// };
+/// TooN::Vector<2> a = first_point(*it); // default value is "(*it).first"
+/// TooN::Vector<2> b = second_point(*it); // default value is "(*it).second"
+/// double R = noise(*it); // default value is "1.0"
 /// @endcode
 /// The resulting transformation will map from a -> b.
 /// @ingroup ransac
-template <class Correspondence>
+
+    struct EssentialMatrix {
+	TooN::Matrix<3> E;
+	template <class It> bool estimate(It begin, It end) {
+	    TooN::Matrix<9> M = zeros<9,9>();
+	    for (It it=begin; it!= end; ++it) {
+		const TooN::Vector<2>& a = first_point(*it);
+		const TooN::Vector<2>& b = second_point(*it);
+		const double factor = 1.0/noise(*it);
+		const double m[9] = {b[0]*a[0], b[0]*a[1], b[1]*a[0], b[1]*a[1], b[0], b[1], a[0], a[1], 1};
+		for (int j=0; j<9; j++) {
+		    for (int k=j; k<9; k++) {
+			M[j][k] += m[j]*m[k] * factor;
+		    }
+		}
+	    }
+	    for (int j=0; j<9;j++)
+		for (int k=j; k<9; k++)
+		    M[k][j] = M[j][k];
+	    TooN::Matrix<4> M11 = M.template slice<0,0,4,4>();
+	    TooN::Matrix<4,5> M12 = M.template slice<0,4,4,5>();
+	    TooN::Matrix<5> M22 = M.template slice<4,4,5,5>();
+	    TooN::Cholesky<5> chol(M22);
+	    if (chol.get_rank() < 5) {
+		if (chol.get_rank() < 3)
+		    return false;
+		TooN::Matrix<3> R;
+		// Translation is zero (choose t = [0,0,1])
+		essential_matrix::getProjectiveHomography(begin, end, R);
+		TooN::SO3::coerce(R);
+		E[0] = -R[1];
+		E[1] = R[0];
+		E[2][0] = E[2][1] = E[2][2] = 0;
+		return true;
+	    } 
+	    TooN::Matrix<5,4> K = chol.inverse_times(M12.T());
+	    TooN::Matrix<4> Q = M11 - M12*K;
+	    TooN::SymEigen<4> eigen(Q);
+	    TooN::Vector<4> e1 = eigen.get_evectors()[0];
+	    TooN::Vector<5> e2 = -(K * e1);
+	    E[0][0] = e1[0];
+	    E[0][1] = e1[1];
+	    E[1][0] = e1[2];
+	    E[1][1] = e1[3];
+	    E[0][2] = e2[0];
+	    E[1][2] = e2[1];
+	    E[2] = e2.template slice<2,3>();
+	    
+	    TooN::SVD<3> svdE(E);
+	    E = svdE.get_U()*TooN::diagmult(makeVector(1,1,0),svdE.get_VT());
+	    return true;	    
+	}
+	
+	template <class Match> inline bool isInlier(const Match& m, double r) const {
+	    TooN::Vector<3> line = E.template slice<0,0,3,2>()*first_point(m) + E.T()[2];
+	    double dot = line.template slice<0,2>() * second_point(m) + line[2];
+	    return (dot*dot <= (line[0]*line[0] + line[1]*line[1]) * r*r * noise(m));
+	}
+	
+	/// Decompose the essential matrix into four possible SE3s
+	/// @param[in] begin beginning iterator for observations
+	/// @param[in] end ending iterator for observations
+	/// @param[out] group where to store the membership info (0,1,2, or 3) for each observation
+	/// @return four pairs of the form {number of votes, SE3}
+	template <class It> std::vector<std::pair<size_t, TooN::SE3> > decompose(It begin, It end, std::vector<int>& group)
+	{
+	    static const double vals[9]={0,-1,0,1,0,0,0,0,1};
+	    static const TooN::Matrix<3> Rz(vals);
+
+	    const size_t N = std::distance(begin,end);
+	    assert(group.size() >= N);
+	    
+	    TooN::SVD<3> svdE(E);
+	    TooN::Matrix<3> R1 = svdE.get_U()*Rz.T()*svdE.get_VT();
+	    TooN::Matrix<3> R2 = svdE.get_U()*Rz*svdE.get_VT();
+	    if (essential_matrix::determinant(R1) < 0) {
+		R1 = -1*R1;
+		R2 = -1*R2;
+	    }
+	    TooN::Vector<3> t1 = svdE.get_U().T()[2];
+	    TooN::Vector<3> t2 = -t1;
+	    TooN::Vector<2> epipole = project(t1); // which is the same as project(t2)
+	    std::vector<std::pair<size_t, TooN::SE3> > result(4,std::make_pair(0,TooN::SE3()));
+	    int i=0;
+	    for (It it = begin; it!=end; ++it, ++i) {
+		int index = getValidPair(R1, R2, epipole, t1[2], *it);
+		result[index].first++;	
+		group[i] = index;
+	    }
+	    result[0].second.get_rotation() = result[1].second.get_rotation() = R1;
+	    result[2].second.get_rotation() = result[3].second.get_rotation() = R2;
+	    result[0].second.get_translation() = result[2].second.get_translation() = t1;
+	    result[1].second.get_translation() = result[3].second.get_translation() = t2;
+	    return result;
+	}
+
+    };
+} // close namespace essential_matrix
+
+ using essential_matrix::EssentialMatrix;
+
+/// RANSAC estimator to compute an affine homography from a set of 2D-2D correspondences
+/// The observations passed (via iterators) to the estimate method must allow:
+/// @code
+/// TooN::Vector<2> a = first_point(*it); // default value is "(*it).first"
+/// TooN::Vector<2> b = second_point(*it); // default value is "(*it).second"
+/// double R = noise(*it); // default value is "1.0"
+/// @endcode
+/// The resulting transformation will map from a -> b.
+/// @ingroup ransac
+
 struct AffineHomography {
-    /// the linear part of the resulting affine transformation
+    /// the linear part of the affine transformation
     TooN::Matrix<2> A;
-    /// the translation part of the resulting affine transformation
+    /// the translation part of the affine transformation
     TooN::Vector<2> t;
 
-    AffineHomography() { A[0][0] = A[0][1] = A[1][0] = A[1][1] = t[0] = t[1] = 0; }
+    AffineHomography() : A(TooN::zeros<2,2>()), t(TooN::zeros<2>()) {}
 
-    void estimate(const std::vector<Correspondence>& matches) {
-        TooN::Matrix<> Ad(matches.size(), 3);
-        TooN::Vector<> bx(matches.size()), by(matches.size());
-        assert(matches.size() >= 3);
-        for (unsigned int i=0; i<matches.size(); i++) {
-            const Correspondence& m = matches[i];
-            Ad[i].template slice<0,2>() =  m.a;
-            Ad[i][2] = 1;
-            bx[i] = m.b[0];
-            by[i] = m.b[1];
+    template <class It> void estimate(It begin, It end) {
+	TooN::WLS<3> wls_x, wls_y;
+	wls_x.clear();
+	wls_y.clear();
+	size_t i=0;
+        for (It it = begin; it!= end; ++it, ++i) {	    
+	    const TooN::Vector<2>& a = first_point(matches[i]);
+	    const TooN::Vector<2>& b = second_point(matches[i]);
+	    const double weight = 1.0 / noise(matches[i]);
+	    wls_x.add_df(b[0], TooN::unproject(a), weight);
+	    wls_y.add_df(b[1], TooN::unproject(a), weight);
         }
-        //TooN::Matrix<3> ATA = Ad.T()*Ad;
-        TooN::SVD<> svd(Ad);
-        TooN::Vector<3> coefsX = svd.backsub(bx);
-        TooN::Vector<3> coefsY = svd.backsub(by);
-        A[0][0] = coefsX[0];
-        A[0][1] = coefsX[1];
-        t[0] = coefsX[2];
-        A[1][0] = coefsY[0];
-        A[1][1] = coefsY[1];
-        t[1] = coefsY[2];
+	wls_x.compute();
+	wls_y.compute();
+	TooN::Vector<3> Atx = wls_x.get_mu();
+	TooN::Vector<3> Aty = wls_y.get_mu();
+	A[0] = Atx.template slice<0,2>();
+	A[1] = Aty.template slice<0,2>();
+	t[0] = Atx[2];
+	t[1] = Aty[2];
     }
 
-    inline double getSqError(const Correspondence& m) const {
-        TooN::Vector<2> disp = A*m.a + t - m.b;
-        return disp*disp;
+    template <class M> inline bool isInlier(const M& m, double r) const {
+	const TooN::Vector<2>& a = first_point(m);
+	const TooN::Vector<2>& b = second_point(m);
+	const TooN::Vector<2> disp = A*a + t - b;
+	return (disp*disp) <= r*r * noise(m);
     }
 };
 
-/// RANSAC estimator to compute the fundamental matrix between two views based on 2D-2D correspondences.
-/// The correspondences are coordinates in camera frame (after undistortion etc.)
-/// The Correspondence datatype has to implement the following interface:
-/// @code
-/// struct Correspondence {
-///   TooN::Vector<2> a;
-///   TooN::Vector<2> b;
-/// };
-/// @endcode
-/// @ingroup ransac
-template <class Correspondence>
-struct FundamentalMatrix {
-    TooN::Matrix<3> F;
-    TooN::Matrix<3> T;
-    TooN::Vector<9> diag;
-
-    void setScale(double scale, bool translate=true) {
-        T[0][0] = T[1][1] = 1/scale;
-        T[0][1] = T[1][0] = T[2][0] = T[2][1] = 0;
-        T[0][2] = translate ? -0.5 : 0;
-        T[1][2] = translate ? -0.5 : 0;
-        T[2][2] = 1;
-    }
-
-    FundamentalMatrix() {}
-
-    void estimate(const std::vector<Correspondence>& matches) {
-        TooN::Matrix<> A(std::max(matches.size(),(unsigned)9),9);
-        for (unsigned int i=0; i<matches.size(); i++) {
-            TooN::Vector<3> a,b;
-            a.template slice<0,2>() = matches[i].a;  a[2] = 1;
-            b.template slice<0,2>() = matches[i].b;  b[2] = 1;
-            a = T*a;
-            b = T*b;
-            A[i][0] = a[0]*b[0];
-            A[i][1] = a[0]*b[1];
-            A[i][2] = a[0];
-            A[i][3] = a[1]*b[0];
-            A[i][4] = a[1]*b[1];
-            A[i][5] = a[1];
-            A[i][6] = b[0];
-            A[i][7] = b[1];
-            A[i][8] = -1;
-        }
-        for (unsigned int i=matches.size(); i<9; i++) {
-            for (int j=0; j<9; j++)
-                A[i][j] = 0;
-        }
-        TooN::SVD<> svdA(A);
-        diag = svdA.get_diagonal();
-        TooN::Vector<9> f = svdA.get_VT()[8];
-        for (int i=0; i<9; i++)
-        F[i/3][i%3] = f[i];
-        TooN::SVD<3> svdF(F);
-        TooN::Vector<3> fdiag = svdF.get_diagonal();
-        TooN::Matrix<3> DVT = svdF.get_VT();
-        fdiag[2] = 0;
-        for (int i=0; i<3; i++)
-        DVT[i] *= fdiag[i]/fdiag[0];
-        F = T.T() * svdF.get_U()*DVT * T;
-    }
-
-    inline double getSqError(const Correspondence& m) const {
-        TooN::Vector<3> u;
-        u[0] = m.b[0];
-        u[1] = m.b[1];
-        u[2] = 1;
-        TooN::Vector<3> line = F*u;
-        double dot = line[0]*m.a[0] + line[1]*m.a[1] + line[2];
-        double a2 = line[0]*line[0];
-        double b2 = line[1]*line[1];
-        return (dot*dot)*1/(a2+b2);
-    }
-};
-
-/// RANSAC estimator to compute ???
-/// The Correspondence datatype has to implement the following interface:
-/// @code
-/// struct Correspondence {
-///   TooN::Vector<2> a;
-///   TooN::Vector<2> b;
-/// };
-/// @endcode
-/// @ingroup ransac
-template <class Correspondence>
-struct DifferentialEssentialMatrix {
-    TooN::Matrix<3> s;
-    TooN::Vector<3> v,w;
-    TooN::Vector<9> diag;
-
-    DifferentialEssentialMatrix() {}
-
-    void estimate(const std::vector<Correspondence>& matches) {
-        TooN::Matrix<> A(std::max(matches.size(),(unsigned)9),9);
-        for (unsigned int i=0; i<matches.size(); i++) {
-            TooN::Vector<2> q=matches[i].a, u=matches[i].b-matches[i].a;
-            A[i][0] = -u[1];
-            A[i][1] = u[0];
-            A[i][2] = u[1]*q[0]-u[0]*q[1];
-            A[i][3] = q[0]*q[0];
-            A[i][4] = 2*q[0]*q[1];
-            A[i][5] = 2*q[0];
-            A[i][6] = q[1]*q[1];
-            A[i][7] = 2*q[1];
-            A[i][8] = 1;
-        }
-        for (unsigned int i=matches.size(); i<9; i++) {
-            for (int j=0; j<9; j++)
-                A[i][j] = 0;
-        }
-        TooN::SVD<> svdA(A);
-        diag = svdA.get_diagonal();
-        TooN::Vector<9> e = svdA.get_VT()[8];
-        // renormalize ?
-        e *= 1.0/sqrt(e.template slice<0,3>() * e.template slice<0,3>());
-        // Velocity
-        v = e.template slice<0,3>();
-        // Symmetric TooN::Matrix s
-        s[0][0]=e[3];
-        s[0][1]=s[1][0]=e[4];
-        s[0][2]=s[2][0]=e[5];
-        s[1][1]=e[6];
-        s[1][2]=s[2][1]=e[7];
-        s[2][2]=e[8];
-        TooN::SymEigen<3> eigen(s);
-        // We want e1 >= e2 >= e3, e1 >= 0, e3 <= 0
-        TooN::Vector<3> lambda = eigen.get_evalues();
-        lambda[0] = std::max(0.0,lambda[0]);
-        lambda[2] = std::min(0.0,lambda[2]);
-        // Project to special symmetric TooN::Matrix
-        TooN::Vector<3> sigma = (TooN::make_Vector, 2*lambda[0] + lambda[1] - lambda[2],
-                        lambda[0] + 2*lambda[1] + lambda[2],
-                        -lambda[0] + lambda[1] + 2*lambda[2]);
-        sigma /= 3;
-        s = eigen.get_evectors().T() * diagmult(sigma,eigen.get_evectors());
-        // recover w
-        double lam = sigma[0] - sigma[2];
-        double theta = acos(-sigma[1]/lam);
-        TooN::Matrix<3> Ry1, Ry2, Rz;
-        rotationY(theta/2 - M_PI/2, Ry1);
-        rotationY(theta, Ry2);
-        zero(Rz);
-        Rz[0][1] = -1;
-        Rz[1][0] = 1;
-        Rz[2][2] = 1;
-        TooN::Vector<3> diagLambda = (TooN::make_Vector,lam, lam,0);
-        TooN::Vector<3> diag1 = (TooN::make_Vector,1,1,0);
-        TooN::Matrix<3> V = eigen.get_evectors().T() * Ry1.T();
-        TooN::Matrix<3> U = -1* V * Ry2;
-        TooN::Vector<3> vhat[4] = { uncross(V*Rz*diagmult(diag1,V.T())),
-                    uncross(V*Rz.T()*diagmult(diag1,V.T())),
-                    uncross(U*Rz*diagmult(diag1,U.T())),
-                    uncross(U*Rz.T()*diagmult(diag1,U.T())) };
-        double dots[4];
-        for (int k=0; k<4; k++)
-        dots[k] = vhat[k]*v;
-        int maxdot = std::max_element(dots, dots+4)-dots;
-        switch (maxdot) {
-        case 0: w = uncross(U*Rz*diagmult(diagLambda, U.T())); break;
-        case 1: w = uncross(U*Rz.T()*diagmult(diagLambda, U.T())); break;
-        case 2: w = uncross(V*Rz*diagmult(diagLambda, V.T())); break;
-        case 3: w = uncross(V*Rz.T()*diagmult(diagLambda, V.T())); break;
-        }
-    }
-
-    inline double getSqError(const Correspondence& m) const {
-        TooN::Vector<3> q = (TooN::make_Vector, m.a[0], m.a[1], 1);
-        TooN::Vector<3> u = (TooN::make_Vector, m.b[0]-m.a[0], m.b[1]-m.a[1], 0);
-        TooN::Vector<3> top = v^q;
-        TooN::Vector<3> bottom = s*q;
-        return u*top + q*bottom;
-    }
-
-    TooN::Vector<3> recoverAngularVelocity() {
-        TooN::SymEigen<3> eigen(s);
-        TooN::Vector<3> sigma = eigen.get_evalues();
-        double lambda = sigma[0] - sigma[2];
-        double theta = acos(-sigma[1]/lambda);
-        TooN::Matrix<3> Ry1, Ry2, Rz;
-        rotationY(theta/2 - M_PI/2, Ry1);
-        rotationY(theta, Ry2);
-        zero(Rz);
-        Rz[0][1] = -1;
-        Rz[1][0] = 1;
-        Rz[2][2] = 1;
-        TooN::Vector<3> diagLambda = (TooN::make_Vector, lambda, lambda,0);
-        TooN::Vector<3> diag1 = (TooN::make_Vector,1,1,0);
-        TooN::Matrix<3> V = eigen.get_evectors().T() * Ry1.T();
-        TooN::Matrix<3> U = -1* V * Ry2;
-        TooN::Vector<3> vhat[4] = { uncross(V*Rz*diagmult(diag1,V.T())),
-                    uncross(V*Rz.T()*diagmult(diag1,V.T())),
-                    uncross(U*Rz*diagmult(diag1,U.T())),
-                    uncross(U*Rz.T()*diagmult(diag1,U.T())) };
-        double dots[4];
-        for (int k=0; k<4; k++)
-        dots[k] = vhat[k]*v;
-        int maxdot = std::max_element(dots, dots+4)-dots;
-        switch (maxdot) {
-        case 0: w = uncross(U*Rz*diagmult(diagLambda, U.T())); break;
-        case 1: w = uncross(U*Rz.T()*diagmult(diagLambda, U.T())); break;
-        case 2: w = uncross(V*Rz*diagmult(diagLambda, V.T())); break;
-        case 3: w = uncross(V*Rz.T()*diagmult(diagLambda, V.T())); break;
-        }
-        return w;
-    }
-};
 
 } // namespace tag
 

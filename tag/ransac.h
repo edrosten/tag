@@ -12,207 +12,246 @@ namespace tag {
 /// The functions are both templated on the correspondence data type and
 /// the estimator for the transformation.
 
-template <class T>
-unsigned int getSample(const std::vector<T>& cdf, const T& p){
-    return std::lower_bound(cdf.begin(), cdf.end(), p) - cdf.begin();
-}
+ template <class T> void randomTuple(const std::vector<T>& cdf, std::vector<unsigned int>& t, T maxp) {
+     for (size_t i=0; i<t.size(); i++) {
+     try_again:
+	 double x = drand48()* maxp;
+	 size_t r = std::min(cdf.size()-1, (size_t)(std::lower_bound(cdf.begin(), cdf.end(), (T)x) - cdf.begin()));
+	 for (size_t j=0; j<i; j++)
+	     if (r == t[j])
+		 goto try_again;
+	 t[i] = r;
+     }
+ }
+ 
+ template <class T> void randomTuple(T& t, unsigned int bound)
+ {
+     for (size_t i=0; i<t.size(); i++) {
+     try_again:
+	 size_t r = (size_t)(drand48() * bound);
+	 for (size_t j=0; j<i; j++)
+	     if (r == t[j])
+		 goto try_again;
+	 t[i] = r;
+     }
+ }
+ 
 
-inline void randomTuple(std::vector<unsigned int>& t, unsigned int bound){
-    for (unsigned int i=0; i<t.size(); i++) {
-        try_again:
-        unsigned int r = rand()%bound;
-        for (unsigned int j=0; j<i; j++)
-            if (r == t[j])
-                goto try_again;
-        t[i] = r;
-    }
-}
-
-template <class T>
-void randomTuple(const std::vector<T>& cdf, std::vector<unsigned int>& t, T maxp){
-    for (unsigned int i=0; i<t.size(); i++) {
-        try_again:
-        double x = double(rand()*maxp)/RAND_MAX;
-        unsigned int r = std::min((unsigned int)cdf.size()-1, getSample(cdf,(T)x));
-        for (unsigned int j=0; j<i; j++)
-            if (r == t[j])
-                goto try_again;
-        t[i] = r;
-    }
-}
-
-/// basic RANSAC implementation. The function is templated on the correspondence data type
+/// basic RANSAC implementation. The function is templated on the observation data type
 /// and the transformation data type which must conform to the following interface:
 /// @code
 /// class Estimator {
-///     void estimate(const std::vector<Correspondence>& matches);
-///     double getSqError(const Correspondence& m);
+///     Estimator();
+///     // Estimate from a sequence of observations
+///     template <class It> bool estimate(It begin, It End); 
+///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
+///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
 /// };
 /// @endcode
 /// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
-/// @param[in] matches a vector of matches of type Correspondence
-/// @param[in] dist threshold distance for inliers, the square of dist ist compared with Estimator::getSqError
-/// @param[in] sampleSize the number of correspondences for a single hypothesis
-/// @param[in] tries the number of hypotheses to test
-/// @param[in] bestT the Estimator object used to compute the transformation
-/// @param[out] isInlier a vector of bools that is set to describe the inlier set of the winning hypothesis
+/// @param[in] observations a vector of observations (usually point matches)
+/// @param[in] sample_size the number of samples used estimate a transformation
+/// @param[in] tolerance the tolerance (passed with each observation) to the transformation to check for inliers
+/// @param[in] N the number of hypotheses to test
+/// @param[out] best the transformation hypothesis with the highest inlier count
+/// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
 /// @return the number of inliers for the winning hypothesis
 /// @ingroup ransac
-template <class Correspondence, class Transform>
-int findRANSACInliers(const std::vector<Correspondence>& matches, double dist, unsigned int sampleSize, unsigned int tries, Transform& bestT, std::vector<bool>& isInlier){
-    assert(isInlier.size() >= matches.size());
-    std::vector<bool> tInlier(isInlier.size());
-    Transform T = bestT;
-    unsigned int i;
-    unsigned int most = 0;
-    std::vector<unsigned int> index(sampleSize);
-    std::vector<Correspondence> sample(sampleSize);
-    for (i=0; i<tries; i++) {
-        randomTuple(index, matches.size());
-        for (unsigned int j=0; j<sampleSize; j++) {
-            sample[j] = matches[index[j]];
-        }
-        T.estimate(sample);
-        unsigned int votes = 0;
-        for (unsigned int p=0; p<matches.size() && most+p < matches.size()+votes; p++) {
-            double d2 = T.getSqError(matches[p]);
-            if (d2 < dist*dist) {
-                tInlier[p] = true;
-                votes++;
-            } else
-                tInlier[p] = false;
-        }
-        if (votes > most) {
-            most = votes;
-            isInlier = tInlier;
-            bestT = T;
-            if (most == matches.size())
-            break;
-        }
-    }
-    if (most > sampleSize) {
-        std::vector<Correspondence> sample(most);
-        unsigned int j=0;
-        for (i=0;i<matches.size();i++)
-            if (isInlier[i])
-        sample[j++] = matches[i];
-        //bestT.estimate(sample);
-    }
-    return most;
-}
 
-template <class Correspondence, class Transform, class Prob>
-int findRANSACInliersGuidedBFS(const std::vector<Correspondence>& matches, const Prob& prob, double dist, unsigned int sampleSize, unsigned int tries, unsigned int perPass, Transform& bestT, std::vector<bool>& isInlier)
+template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier)
 {
-    assert(isInlier.size() >= matches.size());
-    unsigned int i,j;
-    std::vector<double> cdf(matches.size());
-    double psum = 0;
-    for (i=0; i<matches.size(); i++) {
-        psum += prob(matches[i]);
-        cdf[i] = psum;
+    std::vector<bool> thisInlier(observations.size(),best);
+    size_t bestScore = 0;
+    std::vector<size_t> sample_index(sample_size);
+    vector<Obs> sample(sample_size);
+    while (N--) {
+	randomTuple(sample_index, observations.size());
+	for (int i=0;i<sample_size; i++)
+	    sample[i] = observations[sample_index[i]];
+	Trans thisT;
+	thisT.estimate(sample.begin(), sample.end());
+	size_t score = 0;
+	for (size_t i=0; i<observations.size(); i++) {
+	    const Obs& o = observations[i];
+	    if (thisT.isInlier(o, tolerance)) {
+		inlier[i] = true;
+		score++;
+	    } else
+		inlier[i] = false;
+	}
+	if (score > bestScore) {
+	    bestScore = score;
+	    inlier = thisInlier;
+	    best = thisT;
+	}
     }
-    std::vector<Transform> T(tries,bestT);
-    std::vector<std::pair<int, unsigned int> > score(tries);
-    std::vector<Correspondence> sample(sampleSize);
-    for (i=0; i<tries; i++) {
-        std::vector<unsigned int> index(sampleSize);
-        randomTuple(cdf, index, psum);
-        for (j=0; j<sampleSize; j++)
-        sample[j] = matches[index[j]];
-        T[i].estimate(sample);
-        score[i].first = 0;
-        score[i].second = i;
-    }
-    unsigned int curr = 0;
-    double distSq = dist*dist;
-    int toCut = 1;
-    while (curr < matches.size()) {
-        if (matches.size() - curr < perPass)
-        perPass = matches.size() - curr;
-        for (i=0; i<score.size(); i++) {
-            const Transform& t = T[score[i].second];
-            for (unsigned int p=0; p<perPass; p++) {
-                double d2 = t.getSqError(matches[curr+p]);
-                if (d2 < distSq)
-                    score[i].first++;
-            }
-        }
-        curr += perPass;
-        int cutoff = (score.size()*2)/3;//tries-((toCut*tries)>>passes);
-        toCut *= 2;
-        if (cutoff > 1) {
-            nth_element(score.begin(), score.begin()+cutoff, score.end(), std::greater<std::pair<int, unsigned int> >());
-            score.resize(cutoff);
-        } else
-            break;
-    }
-    bestT = T[max_element(score.begin(), score.end())->second];
-    int count = 0;
-    for (i=0; i<matches.size(); i++) {
-        double d2 = bestT.getSqError(matches[i]);
-        if (d2 < distSq) {
-            isInlier[i] = true;
-            count++;
-        } else
-            isInlier[i] = false;
-    }
-    return count;
+    return bestScore;
 }
+ 
 
-template <class Correspondence, class Transform>
-int findRANSACInliersBFS(const std::vector<Correspondence>& matches, double dist, unsigned int sampleSize, unsigned int tries, unsigned int perPass, Transform& bestT, std::vector<bool>& isInlier) {
-    assert(isInlier.size() >= matches.size());
-    unsigned int i,j;
-    std::vector<Transform> T(tries,bestT);
-    std::vector<std::pair<int, unsigned int> > score(tries);
-    std::vector<Correspondence> sample(sampleSize);
-    for (i=0; i<tries; i++) {
-        std::vector<unsigned int> index(sampleSize);
-        randomTuple(index, matches.size());
-        for (j=0; j<sampleSize; j++)
-            sample[j] = matches[index[j]];
-        T[i].estimate(sample);
-        score[i].first = 0;
-        score[i].second = i;
+ inline double getShrinkRatio(unsigned int H, unsigned int N, unsigned int B)
+ {
+     return pow(double(H), -double(B)/N);
+ }
+
+/// Guided breadth-first RANSAC implementation. The function is templated on the observation data type,
+/// the probability density for observation correctness, the tolerance for inliers,
+/// and the transformation data type which must conform to the following interface:
+/// @code
+/// class Estimator {
+///     Estimator();
+///     // Estimate from a sequence of observations
+///     template <class It> bool estimate(It begin, It End); 
+///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
+///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
+/// };
+/// @endcode
+/// All hypotheses are generated first, and preemptively discarded as more observations are examined.
+/// The sample sets for hypotheses are drawn probabilistically using the specified probability density.
+/// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
+/// @param[in] observations a vector of observations (usually point matches)
+/// @param[in] prob the probability predicate applied (as a function object) to each observation to compute its prior probability of being correct
+/// @param[in] sample_size the number of samples used estimate a transformation
+/// @param[in] tolerance the tolerance (passed with each observation) to the transformation to check for inliers
+/// @param[in] N the number of hypotheses to test
+/// @param[in] block_size the number of hypotheses to test in a block (between culling hypotheses)
+/// @param[out] best the transformation hypothesis with the highest inlier count
+/// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
+/// @return the number of inliers for the winning hypothesis
+/// @ingroup ransac
+
+
+     template <class Obs, class Trans, class Tol, class Prob> 
+	size_t find_RANSAC_inliers_guided_breadth_first(const std::vector<Obs>& observations, const Prob& prob, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
+							Trans& best, std::vector<bool>& inlier)
+    {
+	std::vector<Trans> hypotheses(N,best);
+	std::vector<std::pair<int,size_t> > score(N);
+	std::vector<size_t> sample_index(sample_size);    
+	std::vector<Obs> sample(sample_size); 
+	std::vector<double> cdf(matches.size());
+	cdf[0] = prob(observations[0]);
+	for (i=1; i<observations.size(); ++i)
+	    cdf[i] = cdf[i-1] + prob(matches[i]);
+	const double psum = cdf.back();
+
+	for (size_t i=0; i<hypotheses.size(); i++) {
+	    do {
+		randomTuple(cdf, sample_index, psum);
+		for (int s=0; s<sample_size; ++s)
+		    sample[s] = observations[sample_index[s]];
+	    }
+	    while (!hypotheses[i].estimate(sample.begin(), sample.end()));
+	    score[i] = std::make_pair(0,i);
+	}
+	size_t m = 0;
+	const double factor = getShrinkRatio(N, observations.size(), block_size);
+	while (m < observations.size()) {
+	    size_t end = std::min(observations.size(), m+block_size);
+	    for (size_t i=0; i<score.size(); i++) {
+		const Trans& thisT = hypotheses[score[i].second];
+		size_t s = 0;
+		for (size_t j=m; j!=end; j++) {
+		    if (thisT.isInlier(observations[j], tolerance))
+			++s;
+		}
+		score[i].first += s;
+	    }
+	    unsigned int cutoff = (unsigned int)(score.size() * factor);
+	    if (cutoff == 0)
+		break;
+	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, greater<std::pair<int,size_t> >());
+	    score.resize(cutoff);
+	    m = end;
+	}
+	size_t best_index = std::max_element(score.begin(), score.end())->second;
+	best = hypotheses[best_index];
+	size_t count = 0;
+	inlier.resize(observations.size());
+	for (size_t i=0; i<observations.size(); i++) {
+	    if (best.isInlier(observations[i], tolerance)) {
+		inlier[i] = true;
+		++count;
+	    } else
+		inlier[i] = false;
+	}
+	return count;
     }
-    unsigned int curr = 0;
-    double distSq = dist*dist;
-    int toCut = 1;
-    unsigned int passes = tries/perPass + 1;
-    while (curr < matches.size()) {
-        if (matches.size() - curr < perPass)
-            perPass = matches.size() - curr;
-        for (i=0; i<score.size(); i++) {
-            unsigned int t = score[i].second;
-            for (unsigned int p=0; p<perPass; p++) {
-                double d2 = T[t].getSqError(matches[curr+p]);
-                if (d2 < distSq)
-                    score[i].first++;
-            }
-        }
-        curr += perPass;
-        int cutoff = tries-((toCut*tries)>>passes);
-        toCut *= 2;
-        if (cutoff > 1) {
-            nth_element(score.begin(), score.begin()+cutoff, score.end(), std::greater<std::pair<int, unsigned int> >());
-            score.resize(cutoff);
-        } else
-            break;
+
+/// Breadth-first RANSAC implementation. The function is templated on the observation data type, the tolerance for inliers,
+/// and the transformation data type which must conform to the following interface:
+/// @code
+/// class Estimator {
+///     Estimator();
+///     // Estimate from a sequence of observations
+///     template <class It> bool estimate(It begin, It End); 
+///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
+///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
+/// };
+/// @endcode
+/// All hypotheses are generated first, and preemptively discarded as more observations are examined.
+/// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
+/// @param[in] observations a vector of observations (usually point matches)
+/// @param[in] sample_size the number of samples used estimate a transformation
+/// @param[in] tolerance the tolerance (passed with each observation) to the transformation to check for inliers
+/// @param[in] N the number of hypotheses to test
+/// @param[in] block_size the number of hypotheses to test in a block (between culling hypotheses)
+/// @param[out] best the transformation hypothesis with the highest inlier count
+/// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
+/// @return the number of inliers for the winning hypothesis
+/// @ingroup ransac
+
+
+    template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers_breadth_first(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
+											  Trans& best, std::vector<bool>& inlier)
+    {
+	std::vector<Trans> hypotheses(N,best);
+	std::vector<std::pair<int,size_t> > score(N);
+	std::vector<size_t> sample_index(sample_size);    
+	std::vector<Obs> sample(sample_size); 
+	for (size_t i=0; i<hypotheses.size(); i++) {
+	    do {
+		randomTuple(sample_index, observations.size());
+		for (int s=0; s<sample_size; ++s)
+		    sample[s] = observations[sample_index[s]];
+	    }
+	    while (!hypotheses[i].estimate(sample.begin(), sample.end()));
+	    score[i] = std::make_pair(0,i);
+	}
+	size_t m = 0;
+	const double factor = getShrinkRatio(N, observations.size(), block_size);
+	while (m < observations.size()) {
+	    size_t end = std::min(observations.size(), m+block_size);
+	    for (size_t i=0; i<score.size(); i++) {
+		const Trans& thisT = hypotheses[score[i].second];
+		size_t s = 0;
+		for (size_t j=m; j!=end; j++) {
+		    if (thisT.isInlier(observations[j], tolerance))
+			++s;
+		}
+		score[i].first += s;
+	    }
+	    unsigned int cutoff = (unsigned int)(score.size() * factor);
+	    if (cutoff == 0)
+		break;
+	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, greater<std::pair<int,size_t> >());
+	    score.resize(cutoff);
+	    m = end;
+	}
+	size_t best_index = std::max_element(score.begin(), score.end())->second;
+	best = hypotheses[best_index];
+	size_t count = 0;
+	inlier.resize(observations.size());
+	for (size_t i=0; i<observations.size(); i++) {
+	    if (best.isInlier(observations[i], tolerance)) {
+		inlier[i] = true;
+		++count;
+	    } else
+		inlier[i] = false;
+	}
+	return count;
     }
-    int bestIndex = max_element(score.begin(), score.end())-score.begin();
-    bestT = T[score[bestIndex].second];
-    int count = 0;
-    for (i=0; i<matches.size(); i++) {
-        double d2 = bestT.getSqError(matches[i]);
-        if (d2 < distSq) {
-            isInlier[i] = true;
-            count++;
-        } else
-            isInlier[i] = false;
-    }
-    return count;
-}
 
 
 /// helper function for use with ransac functions. It removes elements
