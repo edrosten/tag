@@ -52,31 +52,37 @@ TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points,
 /// @endcode
 /// @ingroup fourpointpose
 /// @ingroup ransac
-template <class Correspondence, int ImagePlaneZ = 1>
+template <int ImagePlaneZ = 1>
 struct Point4SE3Estimation {
     TooN::SE3 T;
     bool valid;
 
-    Point4SE3Estimation() : valid(false) {  }
+    inline Point4SE3Estimation() : valid(false) {  }
 
-    void estimate(const std::vector<Correspondence> & matches) {
-        assert(matches.size() >= 4);
+    template<class It> inline bool estimate(It begin, It end) {
+        assert(end - begin >= 4);
         valid = true;
 
         std::vector<TooN::Vector<3> > points(4);
         std::vector<TooN::Vector<3> > pixels(4);
-        for(unsigned int i = 0; i < 4; i ++){
-            pixels[i] = unproject(matches[i].pixel);
+        unsigned int i = 0;
+        for(It match = begin; match != end; match++, i++){
+            pixels[i] = unproject(match->pixel);
             pixels[i][2] *= ImagePlaneZ;
-            points[i] = matches[i].position;
+            points[i] = match->position;
         }
-        T = fourPointPose( points, pixels, valid );
+        T = fourPointPoseFromCamera( points, pixels, valid );
+        return valid;
     }
 
-    double getSqError(const Correspondence& m) const {
+    template<class Obs, class Tol> inline bool isInlier( const Obs& obs, const Tol& tolerance ) const {
+        return getSqError(obs) < tolerance;
+    }
+
+    template<class Obs> inline double getSqError(const Obs & obs) const {
         if(valid){
-            TooN::Vector<3> pos = T * m.position;
-            TooN::Vector<2> diff = project(pos) - m.pixel / ImagePlaneZ;
+            TooN::Vector<3> pos = T * obs.position;
+            TooN::Vector<2> diff = project(pos) - obs.pixel / ImagePlaneZ;
             double disp = diff*diff;
             return disp;
         }

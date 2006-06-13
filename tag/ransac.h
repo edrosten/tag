@@ -23,7 +23,7 @@ namespace tag {
 	 t[i] = r;
      }
  }
- 
+
  template <class T> void randomTuple(T& t, unsigned int bound)
  {
      for (size_t i=0; i<t.size(); i++) {
@@ -35,7 +35,7 @@ namespace tag {
 	 t[i] = r;
      }
  }
- 
+
 
 /// basic RANSAC implementation. The function is templated on the observation data type
 /// and the transformation data type which must conform to the following interface:
@@ -43,7 +43,7 @@ namespace tag {
 /// class Estimator {
 ///     Estimator();
 ///     // Estimate from a sequence of observations
-///     template <class It> bool estimate(It begin, It End); 
+///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
 /// };
@@ -64,7 +64,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
     std::vector<bool> thisInlier(observations.size());
     size_t bestScore = 0;
     std::vector<size_t> sample_index(sample_size);
-    vector<Obs> sample(sample_size);
+    std::vector<Obs> sample(sample_size);
     while (N--) {
 	randomTuple(sample_index, observations.size());
 	for (int i=0;i<sample_size; i++)
@@ -88,7 +88,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
     }
     return bestScore;
 }
- 
+
 
  inline double getShrinkRatio(unsigned int H, unsigned int N, unsigned int B)
  {
@@ -102,7 +102,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 /// class Estimator {
 ///     Estimator();
 ///     // Estimate from a sequence of observations
-///     template <class It> bool estimate(It begin, It End); 
+///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
 /// };
@@ -122,14 +122,14 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 /// @ingroup ransac
 
 
-     template <class Obs, class Trans, class Tol, class Prob> 
+     template <class Obs, class Trans, class Tol, class Prob>
 	size_t find_RANSAC_inliers_guided_breadth_first(const std::vector<Obs>& observations, const Prob& prob, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
 							Trans& best, std::vector<bool>& inlier)
     {
 	std::vector<Trans> hypotheses(N,best);
 	std::vector<std::pair<int,size_t> > score(N);
-	std::vector<size_t> sample_index(sample_size);    
-	std::vector<Obs> sample(sample_size); 
+	std::vector<size_t> sample_index(sample_size);
+	std::vector<Obs> sample(sample_size);
 	std::vector<double> cdf(observations.size());
 	cdf[0] = prob(observations[0]);
 	for (size_t i=1; i<observations.size(); ++i)
@@ -161,7 +161,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 	    unsigned int cutoff = (unsigned int)(score.size() * factor);
 	    if (cutoff == 0)
 		break;
-	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, greater<std::pair<int,size_t> >());
+	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, std::greater<std::pair<int,size_t> >());
 	    score.resize(cutoff);
 	    m = end;
 	}
@@ -185,7 +185,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 /// class Estimator {
 ///     Estimator();
 ///     // Estimate from a sequence of observations
-///     template <class It> bool estimate(It begin, It End); 
+///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
 /// };
@@ -208,8 +208,8 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
     {
 	std::vector<Trans> hypotheses(N,best);
 	std::vector<std::pair<int,size_t> > score(N);
-	std::vector<size_t> sample_index(sample_size);    
-	std::vector<Obs> sample(sample_size); 
+	std::vector<size_t> sample_index(sample_size);
+	std::vector<Obs> sample(sample_size);
 	for (size_t i=0; i<hypotheses.size(); i++) {
 	    do {
 		randomTuple(sample_index, observations.size());
@@ -235,7 +235,7 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 	    unsigned int cutoff = (unsigned int)(score.size() * factor);
 	    if (cutoff == 0)
 		break;
-	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, greater<std::pair<int,size_t> >());
+	    std::nth_element(score.begin(), score.end(), score.begin()+cutoff, std::greater<std::pair<int,size_t> >());
 	    score.resize(cutoff);
 	    m = end;
 	}

@@ -106,7 +106,7 @@ public:
         TooN::Vector<State::STATE_DIMENSION> stateInnovation = K * innovation;
         model.updateFromMeasurement( state, stateInnovation );
         state.covariance = (identity - K * H) * state.covariance;
-        Symmetrize( state.covariance );
+        TooN::Symmetrize( state.covariance );
     }
 
     /// identity matrix of the right size, used in the measurement equations
