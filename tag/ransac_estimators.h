@@ -11,11 +11,12 @@
 #include <TooN/LU.h>
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
+#include <TooN/se3.h>
 
 namespace tag {
 
-    template <class T> inline const Vector<2>& first_point(const T& t) { return t.first; }
-    template <class T> inline const Vector<2>& second_point(const T& t) { return t.second; }
+    template <class T> inline const typename T::first_type& first_point(const T& t) { return t.first; }
+    template <class T> inline const typename T::second_type& second_point(const T& t) { return t.second; }
     template <class T> inline double noise(const T& t) { return 1.0; }
     
 
@@ -28,12 +29,12 @@ namespace essential_matrix {
 
 	TooN::WLS<8> wls;
 	for (It it=begin; it!=end; it++) {
-	    const Vector<2>& a = first_point(*it);
-	    const Vector<2>& b = first_point(*it);
+	    const TooN::Vector<2>& a = first_point(*it);
+	    const TooN::Vector<2>& b = first_point(*it);
 	    const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
 				       {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
-	    wls.add_df(b[0], Vector<8>(rows[0]));
-	    wls.add_df(b[1], Vector<8>(rows[1]));
+	    wls.add_df(b[0], TooN::Vector<8>(rows[0]));
+	    wls.add_df(b[1], TooN::Vector<8>(rows[1]));
 	}
 	wls.compute();
 	TooN::Vector<8> h = wls.get_mu();
@@ -91,7 +92,7 @@ namespace essential_matrix {
     struct EssentialMatrix {
 	TooN::Matrix<3> E;
 	template <class It> bool estimate(It begin, It end) {
-	    TooN::Matrix<9> M = zeros<9,9>();
+	    TooN::Matrix<9> M = TooN::zeros<9,9>();
 	    for (It it=begin; it!= end; ++it) {
 		const TooN::Vector<2>& a = first_point(*it);
 		const TooN::Vector<2>& b = second_point(*it);
@@ -210,11 +211,10 @@ struct AffineHomography {
 	TooN::WLS<3> wls_x, wls_y;
 	wls_x.clear();
 	wls_y.clear();
-	size_t i=0;
-        for (It it = begin; it!= end; ++it, ++i) {	    
-	    const TooN::Vector<2>& a = first_point(matches[i]);
-	    const TooN::Vector<2>& b = second_point(matches[i]);
-	    const double weight = 1.0 / noise(matches[i]);
+        for (It it = begin; it!= end; ++it) {
+	    const TooN::Vector<2>& a = first_point(*it);
+	    const TooN::Vector<2>& b = second_point(*it);
+	    const double weight = 1.0 / noise(*it);
 	    wls_x.add_df(b[0], TooN::unproject(a), weight);
 	    wls_y.add_df(b[1], TooN::unproject(a), weight);
         }
