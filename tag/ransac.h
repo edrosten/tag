@@ -130,10 +130,10 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 	std::vector<std::pair<int,size_t> > score(N);
 	std::vector<size_t> sample_index(sample_size);    
 	std::vector<Obs> sample(sample_size); 
-	std::vector<double> cdf(matches.size());
+	std::vector<double> cdf(observations.size());
 	cdf[0] = prob(observations[0]);
-	for (i=1; i<observations.size(); ++i)
-	    cdf[i] = cdf[i-1] + prob(matches[i]);
+	for (size_t i=1; i<observations.size(); ++i)
+	    cdf[i] = cdf[i-1] + prob(observations[i]);
 	const double psum = cdf.back();
 
 	for (size_t i=0; i<hypotheses.size(); i++) {
