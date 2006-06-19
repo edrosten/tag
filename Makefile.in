@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 
-SOURCES = $(libtag_la_SOURCES)
+SOURCES = $(libtoontag_la_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -61,9 +61,9 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libtag_la_LIBADD =
-am_libtag_la_OBJECTS = absorient.lo fourpointpose.lo
-libtag_la_OBJECTS = $(am_libtag_la_OBJECTS)
+libtoontag_la_LIBADD =
+am_libtoontag_la_OBJECTS = absorient.lo fourpointpose.lo
+libtoontag_la_OBJECTS = $(am_libtoontag_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -75,8 +75,8 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libtag_la_SOURCES)
-DIST_SOURCES = $(libtag_la_SOURCES)
+SOURCES = $(libtoontag_la_SOURCES)
+DIST_SOURCES = $(libtoontag_la_SOURCES)
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(pkginclude_HEADERS)
 ETAGS = etags
@@ -190,8 +190,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
 # the library we want to create and its source files
-lib_LTLIBRARIES = libtag.la
-libtag_la_SOURCES = src/absorient.cpp src/fourpointpose.cpp
+lib_LTLIBRARIES = libtoontag.la
+libtoontag_la_SOURCES = src/absorient.cpp src/fourpointpose.cpp
 
 # the header files to be installed
 pkginclude_HEADERS = \
@@ -205,7 +205,8 @@ pkginclude_HEADERS = \
 	tag/ransac_estimators.h  \
 	tag/stdpp.h \
 	tag/printf.h \
-	tag/tuple.h
+	tag/tuple.h \
+	tag/fn.h
 
 all: all-am
 
@@ -271,8 +272,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libtag.la: $(libtag_la_OBJECTS) $(libtag_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(libtag_la_LDFLAGS) $(libtag_la_OBJECTS) $(libtag_la_LIBADD) $(LIBS)
+libtoontag.la: $(libtoontag_la_OBJECTS) $(libtoontag_la_DEPENDENCIES) 
+	$(CXXLINK) -rpath $(libdir) $(libtoontag_la_LDFLAGS) $(libtoontag_la_OBJECTS) $(libtoontag_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
