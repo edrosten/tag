@@ -5,6 +5,7 @@ libtoontag_la_SOURCES   = src/absorient.cpp src/fourpointpose.cpp
 # the header files to be installed
 pkginclude_HEADERS  = \
 	tag/absorient.h \
+	tag/array.h \
 	tag/fourpointpose.h \
 	tag/kalmanfilter.h \
 	tag/constantposition.h \
