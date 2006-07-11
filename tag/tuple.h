@@ -203,7 +203,7 @@ namespace tag
 
 ///This is a variadic ``function'' which creates and returns a tuple.
 ///@ingroup tuple
-#define make_tuple(...) ((TupleHead, ## __VA_ARGS__))
+#define make_tuple(...) ((tag::TupleHead, ## __VA_ARGS__))
 
 #endif
 
