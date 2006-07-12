@@ -2,6 +2,7 @@
 #define TAG_STDPP_H
 
 #include <iostream>
+#include <utility>
 
 namespace tag {
 
@@ -179,6 +180,45 @@ template<class Char, class Traits> Internal::like_print_bound<std::basic_ostream
 }
 
 #endif
+
+#ifndef DOXYGEN_IGNORE_INTERNAL
+namespace Internal
+{
+	template<class A, class B> struct refpair
+	{
+		A& a;
+		B& b;
+		refpair(A& aa, B& bb)
+		:a(aa),b(bb)
+		{}
+
+		void operator=(const std::pair<A,B>& p)
+		{
+			a=p.first;
+			b=p.second;
+		}
+	};
+}
+
+#endif
+
+/**
+Similar to <code>std::make_pair</code>, but for references. This can be used
+for multiple return values:
+@code
+float f;
+int i;
+rpair(f,i) = make_pair(2.2f, 1);
+@endcode
+@param aa first value
+@param bb second value
+**/
+template<class A, class B> Internal::refpair<A,B> rpair(A&aa, B&bb)
+{
+	return Internal::refpair<A,B>(aa, bb);
+}
+
+
 
 } // namespace tag
 
