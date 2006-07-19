@@ -16,7 +16,8 @@ pkginclude_HEADERS  = \
 	tag/stdpp.h \
 	tag/printf.h \
 	tag/tuple.h \
-	tag/fn.h
+	tag/fn.h \
+	tag/intersection.h
 
 docs:
 	doxygen Doxyfile
