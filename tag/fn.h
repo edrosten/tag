@@ -89,6 +89,53 @@ inline struct bind_t<G,F> bind( const G & g, const F & f ){
 ///@ingroup stdpp
 //@{
 
+namespace Internal {
+
+template <class T> struct make_const {
+    typedef const T type;
+};
+
+template <class T> struct make_const<T&> {
+    typedef const T & type;
+};
+
+template <class A, class B>
+struct forward_const {
+    typedef B value_type;
+    enum { CONST = 0 };
+};
+
+template <class A, class B>
+struct forward_const<const A, B> {
+    typedef typename make_const<B>::type value_type;
+    enum { CONST = 1 };
+};
+
+template <class A, class B>
+struct forward_const<A&, B> {
+    typedef B value_type;
+    enum { CONST = 2 };
+};
+
+template <class A, class B>
+struct forward_const<const A&, B> {
+    typedef typename make_const<B>::type value_type;
+    enum { CONST = 3 };
+};
+
+template <class A, class B>
+struct forward_const<A *, B> {
+    typedef B value_type;
+    enum { CONST = 4 };
+};
+
+template <class A, class B>
+struct forward_const<const A *, B> {
+    typedef typename make_const<B>::type value_type;
+    enum { CONST = 5 };
+};
+
+}
 
 /**
 An iterator wrapper that returns a member of a struct the wrapped iterator would point to.
@@ -101,31 +148,88 @@ cout << *ita; // prints the value of a
 @endcode
 */
 template <typename It, typename m>
-struct member_iterator_t : public It {
-    typedef typename std::iterator_traits<It>::value_type Value;
-    m Value::*data;
-    inline member_iterator_t( m Value::*d ) : data(d) {};
-    inline member_iterator_t( const It & it,  m Value::*d ) : data(d) { *this = it; };
+struct member_iterator_t {
+
+    typedef typename It::value_type ParentValue;
+
+    // iterator defines
+    typedef typename It::iterator_category iterator_category;
+    typedef m value_type;
+    typedef typename It::difference_type difference_type;
+    typedef typename Internal::forward_const<typename It::pointer, m *>::value_type pointer;
+    typedef typename Internal::forward_const<typename It::reference, m &>::value_type reference;
+
+    It iterator;
+    m ParentValue::*data;
+
+    inline member_iterator_t( m ParentValue::*d ) : data(d) {};
+    inline member_iterator_t( const It & it,  m ParentValue::*d ) : data(d) { iterator = it; };
+
     template <typename Other> inline member_iterator_t & operator=(const Other & other) {
-        It::operator=(other);
+        iterator = other;
         return *this;
     }
     inline member_iterator_t & operator=( const member_iterator_t & other){
         data = other.data;
-        It::operator=(other);
+        iterator = other.iterator;
         return *this;
     }
-    inline m & operator*(void){
-        return It::operator*().*data;
+
+    inline member_iterator_t::reference operator*(void) const {
+        return (*iterator).*data;
     }
-    inline m & operator->(void){
-        return It::operator->()->*data;
+    inline member_iterator_t::reference operator->(void) const {
+        return iterator->*data;
     }
-    inline const m & operator*(void) const {
-        return It::operator*().*data;
+    inline member_iterator_t::reference operator[](difference_type n) const {
+        return iterator[n].*data;
     }
-    inline const m & operator->(void) const {
-        return It::operator->()->*data;
+    inline member_iterator_t & operator++() {
+        ++iterator;
+        return *this;
+    }
+    inline member_iterator_t operator++(int) {
+        member_iterator_t tmp(*this);
+        iterator++;
+        return tmp;
+    }
+    inline member_iterator_t & operator--() {
+        --iterator;
+        return *this;
+    }
+    inline member_iterator_t operator--(int) {
+        member_iterator_t tmp(*this);
+        iterator--;
+        return tmp;
+    }
+    inline member_iterator_t & operator+=(difference_type n){
+        iterator+=n;
+        return *this;
+    }
+    inline member_iterator_t & operator-=(difference_type n){
+        iterator-=n;
+        return *this;
+    }
+    template <typename Other>
+    inline difference_type operator-(const Other & other) const {
+        return (iterator - other);
+    }
+    inline difference_type operator-(const member_iterator_t & other) const {
+        return (iterator - other.iterator);
+    }
+    template <typename Other>
+    inline bool operator==(const Other & other) const {
+        return (iterator == other);
+    }
+    inline bool operator==(const member_iterator_t & other) const {
+        return (iterator == other.iterator);
+    }
+    template <typename Other>
+    inline bool operator!=(const Other & other) const {
+        return (iterator != other);
+    }
+    inline bool operator!=(const member_iterator_t & other) const {
+        return (iterator != other.iterator);
     }
 };
 
@@ -134,9 +238,14 @@ helper function to simplify the use of @ref member_iterator_t wrapper. This is u
 member iterators as arguments.
 @arg it the iterator to wrap, the new member_iterator_t returned will point to the same position
 @arg d the member to wrap
+@code
+struct simple { int a; float b; };
+vector<simple> test;
+for_each(member_iterator(test.begin(), &simple::a), member_iterator(test.end(), &simple::a), ... );
+@endcode
 */
 template <typename It, typename m>
-inline struct member_iterator_t<It, m> member_iterator( const It & it, m std::iterator_traits<It>::value_type::*d ){
+inline struct member_iterator_t<It, m> member_iterator( const It & it, m It::value_type::*d ){
     return member_iterator_t<It, m>(it, d);
 }
 
