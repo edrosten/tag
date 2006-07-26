@@ -23,9 +23,11 @@ namespace tag {
 /// @param[in] points a vector containing 4 3D points
 /// @param[in] pixels a vector containing 4 2D pixels as 3D vectors to allow arbitrary image planes
 /// @param[out] valid output argument, it is set to true to signal a valid result and false otherwise
+/// @param[in] angularError maximal angular error that will be tolerated before no result can be computed. The default value
+///            corresponds to 90 deg VOW over 640 pixels.
 /// @return SE3 describing the camera pose
 /// @ingroup fourpointpose
-TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid );
+TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError = 0.14 );
 
 /// A special case of the general @ref fourPointPose function which assumes that points are
 /// in front of a given camera plane but now may also lie in the same plane (but not all on one line).
@@ -37,9 +39,11 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
 /// @param[in] points a vector containing 4 3D points
 /// @param[in] pixels a vector containing 4 2D pixels as 3D vectors to allow arbitrary image planes
 /// @param[out] valid output argument, it is set to true to signal a valid result and false otherwise
+/// @param[in] angularError maximal angular error that will be tolerated before no result can be computed. The default value
+///            corresponds to 90 deg VOW over 640 pixels.
 /// @return SE3 describing the camera pose
 /// @ingroup fourpointpose
-TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid );
+TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError = 0.14 );
 
 /// A RANSAC estimator using the @ref fourPointPose function. The
 /// Correspondence datatype must provide a member position for the 3D point and
@@ -56,8 +60,9 @@ template <int ImagePlaneZ = 1>
 struct Point4SE3Estimation {
     TooN::SE3 T;
     bool valid;
+    double angularError;
 
-    inline Point4SE3Estimation() : valid(false) {  }
+    inline Point4SE3Estimation(double ang = 0.14) : valid(false), angularError(ang) {  }
 
     template<class It> inline bool estimate(It begin, It end) {
         assert(end - begin >= 4);
@@ -71,7 +76,7 @@ struct Point4SE3Estimation {
             pixels[i][2] *= ImagePlaneZ;
             points[i] = match->position;
         }
-        T = fourPointPoseFromCamera( points, pixels, valid );
+        T = fourPointPoseFromCamera( points, pixels, valid, angularError );
         return valid;
     }
 

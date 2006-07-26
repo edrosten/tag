@@ -10,19 +10,24 @@ namespace tag {
 
 // simple helper function to compute the roots of a quadratic equation x^2 + px + q = 0
 // also returns if the result is real or not (in which case valid is set to false)
-static inline bool quadraticRoots( double p, double q, TooN::Vector<2> & roots ){
+static inline bool quadraticRoots( const double p, const double q, TooN::Vector<2> & roots, const double alpha, const double beta, const double angularError ){
     double det = p*p*0.25 - q;
     if( det < 0 ){
-        TooN::Zero(roots);
-        return false;
+        double diff = fabs(alpha) - fabs(beta);
+        if( diff > angularError ){
+            TooN::Zero(roots);
+            return false;
+        }
+        det = 0;
+    } else {
+        det = sqrt(det);
     }
-    det = sqrt(det);
     roots = (TooN::make_Vector, -p*0.5 + det, -p*0.5 - det);
     return true;
 }
 
 // helper function for @ref fourPointPose computing the coefficients of the A matrix
-TooN::Vector<5> getACoeffs(double c1, double c2, double c3, double d1, double d2, double d3){
+static inline TooN::Vector<5> getACoeffs(double c1, double c2, double c3, double d1, double d2, double d3){
     TooN::Vector<5> coeffs;
     // x^4 coefficient
     coeffs[4] = (c3*c3 - c1*c2*c3 - 4 + c1*c1 + c2*c2);
@@ -63,7 +68,7 @@ TooN::Vector<5> getACoeffs(double c1, double c2, double c3, double d1, double d2
 }
 
 // helper function for @ref fourPointPose computing the coefficients of the B matrix
-TooN::Vector<3> getBCoeffs( int i, int j, int k, int l, const TooN::Vector<5> & v4, const TooN::Vector<5> & v5 ){
+static inline TooN::Vector<3> getBCoeffs( int i, int j, int k, int l, const TooN::Vector<5> & v4, const TooN::Vector<5> & v5 ){
     TooN::Vector<3> coeff;
     coeff[0] = v4[i]*v4[j] - v4[k]*v4[l];
     coeff[1] = v4[i]*v5[j] + v5[i]*v4[j] - (v4[k]*v5[l] + v5[k]*v4[l]);
@@ -72,7 +77,7 @@ TooN::Vector<3> getBCoeffs( int i, int j, int k, int l, const TooN::Vector<5> & 
 }
 
 // contains the main computational part common to both of the high level functions
-static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std::vector<TooN::Vector<3> > & myPixels, TooN::Vector<6> & distances, std::vector<TooN::Vector<2> > & length){
+static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std::vector<TooN::Vector<3> > & myPixels, TooN::Vector<6> & distances, std::vector<TooN::Vector<2> > & length, const double angularError){
     TooN::Matrix<5> A;
     TooN::Vector<5> v4, v5;
     TooN::Matrix<7,3> B;
@@ -136,13 +141,13 @@ static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std:
     bool valid = true;
     double x = sqrt( xx );
     length[0] = (TooN::make_Vector, x, -x); // possible distances to point 0
-    valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1] );
-    valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2] );
-    valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3] );
+    valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1], std::acos(angles[0]/2), asin(sqrt(distances[0])/x), angularError );
+    valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2], std::acos(angles[1]/2), asin(sqrt(distances[1])/x), angularError );
+    valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3], std::acos(angles[2]/2), asin(sqrt(distances[2])/x), angularError );
     return valid;
 }
 
-TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid ){
+TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
     double orientationTest = ((points[1] - points[0]) ^ (points[2] - points[0])) * (points[3] - points[0]);
 
     // normalising scales for angle computation in next loop
@@ -153,7 +158,7 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
     // resulting possible distances
     std::vector<TooN::Vector<2> > length(4);
     TooN::Vector<6> distances;
-    valid = fourPointSolver( points, myPixels, distances, length);
+    valid = fourPointSolver( points, myPixels, distances, length, angularError);
     if( !valid )
         return TooN::SE3();
 
@@ -200,7 +205,7 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
 }
 
 // just a copy of the above code with modifications to the case search
-TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid ){
+TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
     // normalising scales for angle computation in next loop
     std::vector<TooN::Vector<3> > myPixels(4);
     for(unsigned int i = 0; i < 4; i++)
@@ -209,7 +214,7 @@ TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points,
     // resulting possible distances
     std::vector<TooN::Vector<2> > length(4);
     TooN::Vector<6> distances;
-    valid = fourPointSolver( points, myPixels, distances, length);
+    valid = fourPointSolver( points, myPixels, distances, length, angularError);
     if( !valid )
         return TooN::SE3();
 
