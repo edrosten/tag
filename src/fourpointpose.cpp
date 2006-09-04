@@ -8,11 +8,15 @@
 
 namespace tag {
 
-// simple helper function to compute the roots of a quadratic equation x^2 + px + q = 0
-// also returns if the result is real or not (in which case valid is set to false)
-static inline bool quadraticRoots( const double p, const double q, TooN::Vector<2> & roots, const double alpha, const double beta, const double angularError ){
+// simple helper function to get the two possible ray lengths given a known point, and the distance to the other point
+// does various checks to account for numerical inaccuracies
+static inline bool computeDistances( const double xx, const double x, const double angle, const double distance, const double angularError, TooN::Vector<2> & roots){
+    double p = -x*angle;
+    double q = xx - distance;
     double det = p*p*0.25 - q;
     if( det < 0 ){
+        double alpha = std::acos(0.5 * angle);
+        double beta = std::asin(sqrt(distance) / x);
         double diff = fabs(alpha) - fabs(beta);
         if( diff > angularError ){
             TooN::Zero(roots);
@@ -77,8 +81,6 @@ static inline TooN::Vector<3> getBCoeffs( int i, int j, int k, int l, const TooN
 }
 
 // contains the main computational part common to both of the high level functions
-template<class T>
-inline T ABS(T x){return (x>0?x:-x);}
 static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std::vector<TooN::Vector<3> > & myPixels, TooN::Vector<6> & distances, std::vector<TooN::Vector<2> > & length, const double angularError){
     TooN::Matrix<5> A;
     TooN::Vector<5> v4, v5;
@@ -142,25 +144,10 @@ static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std:
 
     bool valid = true;
     double x = sqrt( xx );
-	double x_inv = 1.0/x;
     length[0] = (TooN::make_Vector, x, -x); // possible distances to point 0
-    //std::cout << (angles[0]/2) << "   " << (sqrt(distances[0])/x) << std::endl;
-	if(  distances[0] > xx )
-       valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1], 0, 0, angularError );
-    else
-       valid &= quadraticRoots( -x*angles[0], xx - distances[0], length[1], std::acos(0.5*angles[0]), asin(sqrt(distances[0])*x_inv), angularError );
-
-	
-	if(  distances[1] > xx )
-       valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2], 0, 0, angularError );
-    else
-       valid &= quadraticRoots( -x*angles[1], xx - distances[1], length[2], std::acos(0.5*angles[1]), asin(sqrt(distances[1])*x_inv), angularError );
-
-	if(  distances[2] > xx )
-       valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3], 0, 0, angularError );
-    else
-       valid &= quadraticRoots( -x*angles[2], xx - distances[2], length[3], std::acos(0.5*angles[2]), asin(sqrt(distances[2])*x_inv), angularError );
-
+    valid &= computeDistances( xx, x, angles[0], distances[0], angularError, length[1]);
+    valid &= computeDistances( xx, x, angles[1], distances[1], angularError, length[2]);
+    valid &= computeDistances( xx, x, angles[2], distances[2], angularError, length[3]);
     return valid;
 }
 
