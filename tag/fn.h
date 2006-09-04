@@ -11,6 +11,14 @@ namespace tag {
 ///@ingroup stdpp
 //@{
 
+/// a missing type for passing in things by reference, should be in STL
+template <class Arg1, class Arg2, class Result>
+struct binary_function<Arg1, Arg2&, Result> {
+    typedef Arg1 first_argument_type;
+    typedef Arg2 second_argument_type;
+    typedef Result result_type;
+};
+
 template <typename A, typename m>
 struct mem_data_ref_t : std::unary_function<A &, m &> {
     m A::*data;
