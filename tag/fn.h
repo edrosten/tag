@@ -4,20 +4,24 @@
 #include <functional>
 #include <iterator>
 
-namespace tag {
-
-///@defgroup functional additional functors for <functional>
-///This group provides additional functors to complement the <functional> header of STL.
-///@ingroup stdpp
-//@{
-
+namespace std {
 /// a missing type for passing in things by reference, should be in STL
+/// needs to be in std namespace, because it is a specialization of
+/// binary_function defined in <functional>
 template <class Arg1, class Arg2, class Result>
 struct binary_function<Arg1, Arg2&, Result> {
     typedef Arg1 first_argument_type;
     typedef Arg2 second_argument_type;
     typedef Result result_type;
 };
+}
+
+namespace tag {
+
+///@defgroup functional additional functors for <functional>
+///This group provides additional functors to complement the <functional> header of STL.
+///@ingroup stdpp
+//@{
 
 template <typename A, typename m>
 struct mem_data_ref_t : std::unary_function<A &, m &> {
