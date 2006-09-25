@@ -286,7 +286,7 @@ namespace tag
 		V_list(const C& c, const D& d)
 		:val(c),next(d){}
 
-		template<class X> V_list<X, V_list<C, D> > operator,(X& c) 
+		template<class X> V_list<X, V_list<C, D> > operator,(const X& c) 
 		{
 			 return V_list<X, V_list<C, D> >(c, *this);
 		}
