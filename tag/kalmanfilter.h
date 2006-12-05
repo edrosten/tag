@@ -81,6 +81,9 @@ template<class State, class Model>
 class KalmanFilter{
 public:
 
+    typedef State state_type;
+    typedef Model model_type;
+
     KalmanFilter(){
         TooN::Identity(identity);
     }
