@@ -24,11 +24,11 @@ public:
 class Model {
 public:
     // return process model jacobian for a given state and time delta (typically A)
-    TooN::Matrix<State::STATE_DIMENSION> getJacobian(const State & state, double dt);
+    const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, double dt);
     // update the state for a given time delta (not all states are actually x = Ax, therefore this is a function)
     void updateState( State & state, const double dt );
     // return process noise matrix for given time delta (typically Q)
-    TooN::Matrix<State::STATE_DIMENSION> getNoiseCovariance( double dt );
+    const TooN::Matrix<State::STATE_DIMENSION> & getNoiseCovariance( double dt );
     // update the state from an innovation. the innovation was computed by the filter based on measurement etc.
     void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation );
 };
@@ -41,11 +41,11 @@ class Measurement {
 public:
     static const int M_DIMENSION =  ??;  // dimension of measurement
     // return measurement jacobian, from state -> measurement
-    Matrix<M_DIMENSION,State::STATE_DIMENSION> getMeasurementJacobian( const State & state );
+    const Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state );
     // return measurement noise covariance
-    Matrix<M_DIMENSION> getMeasurementCovariance( const State & state );
+    const Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state );
     // return the innovation, the difference between actual measurement and the measurement prediction based on the state
-    Vector<M_DIMENSION> getInnovation( const State & state );
+    const Vector<M_DIMENSION> & getInnovation( const State & state );
 };
 @endcode
 All of the member functions take the state as parameters, because the returned values are typically
@@ -71,6 +71,9 @@ while(true){
     filter.filter(m);
 }
 @endcode
+
+Note, that all the return values from the various classes are const references. This avoids any unnecessary copying of data.
+You can also return types that may be stored in const references, such as non-const references and return values.
 */
 
 /**
@@ -91,21 +94,20 @@ public:
     /// predicts the state by applying the process model over the time interval dt
     /// @param[in] dt time interval
     void predict(double dt){
-        TooN::Matrix<State::STATE_DIMENSION> A = model.getJacobian( state, dt );
         model.updateState( state, dt );
-        state.covariance = TooN::transformCovariance(A, state.covariance) + model.getNoiseCovariance( dt );
+        state.covariance = TooN::transformCovariance(model.getJacobian( state, dt ), state.covariance) + model.getNoiseCovariance( dt );
         TooN::Symmetrize(state.covariance);
     }
 
     /// incorporates a measurement
     /// @param[in] m the measurement to add to the filter state
     template<class Measurement> void filter(Measurement & m){
-        TooN::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> H = m.getMeasurementJacobian( state );
-        TooN::Matrix<Measurement::M_DIMENSION> R = m.getMeasurementCovariance( state );
+        const TooN::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> & H = m.getMeasurementJacobian( state );
+        const TooN::Matrix<Measurement::M_DIMENSION> & R = m.getMeasurementCovariance( state );
         TooN::Matrix<Measurement::M_DIMENSION> I = TooN::transformCovariance(H, state.covariance) + R;
         TooN::LU<Measurement::M_DIMENSION> lu(I);
         TooN::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> K = state.covariance * H.T() * lu.get_inverse();
-        TooN::Vector<Measurement::M_DIMENSION> innovation = m.getInnovation( state );
+        const TooN::Vector<Measurement::M_DIMENSION> & innovation = m.getInnovation( state );
         TooN::Vector<State::STATE_DIMENSION> stateInnovation = K * innovation;
         model.updateFromMeasurement( state, stateInnovation );
         state.covariance = (identity - K * H) * state.covariance;

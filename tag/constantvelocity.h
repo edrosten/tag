@@ -17,7 +17,7 @@ namespace ConstantVelocity {
 /// @ingroup constantvelocitygroup
 class State {
 public:
-    State(void){
+    inline State(void){
         reset();
     }
 
@@ -54,23 +54,30 @@ inline O & operator<< (O & os , const State & st){
 class Model {
 public:
     TooN::Vector<State::STATE_DIMENSION> sigma;
+    TooN::Matrix<State::STATE_DIMENSION> jacobian;
+    TooN::Matrix<State::STATE_DIMENSION> noise;
     // dampening of velocity
     double damp;
 
     Model(void){
         TooN::Zero(sigma);
         damp = 1;
+        TooN::Identity(jacobian);
+        TooN::Zero(noise);
     }
 
     // Jacobian has pos, rot, vel, angularVel in this order
-    TooN::Matrix<State::STATE_DIMENSION> getJacobian(const State & state, double dt){
-            TooN::Matrix<State::STATE_DIMENSION> result;
-            TooN::Identity(result);
-            TooN::Identity(result.slice<0,6,6,6>(), dt);
-            return result;
+    inline const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, const double dt) {
+            jacobian(0,6) = dt;
+            jacobian(1,7) = dt;
+            jacobian(2,8) = dt;
+            jacobian(3,9) = dt;
+            jacobian(4,10) = dt;
+            jacobian(5,11) = dt;
+            return jacobian;
     }
 
-    void updateState( State & state, const double dt ){
+    inline void updateState( State & state, const double dt ){
         // full velocity vector
         TooN::Vector<6> vel;
         vel.slice<0,3>() = state.velocity;
@@ -84,20 +91,18 @@ public:
         state.angularVelocity *= attenuation;
     }
 
-    TooN::Matrix<State::STATE_DIMENSION> getNoiseCovariance( double dt ){
-        TooN::Matrix<State::STATE_DIMENSION> result;
-        TooN::Zero(result);
-        double dt2 = dt * dt * 0.5;
-        double dt3 = dt * dt * dt * 0.3333333333333;
+    inline const TooN::Matrix<State::STATE_DIMENSION> & getNoiseCovariance( const double dt ){
+        const double dt2 = dt * dt * 0.5;
+        const double dt3 = dt * dt * dt * 0.3333333333333;
         for(unsigned int i = 0; i < 6; i++){
-            result(i,i) = dt * sigma[i] + dt3 * sigma[i+6];
-            result(i+6,i) = result(i,i+6) = dt2 * sigma[i+6];
-            result(i+6, i+6) = dt * sigma[i+6];
+            noise(i,i) = dt * sigma[i] + dt3 * sigma[i+6];
+            noise(i+6,i) = noise(i,i+6) = dt2 * sigma[i+6];
+            noise(i+6, i+6) = dt * sigma[i+6];
         }
-        return result;
+        return noise;
     }
 
-    void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
+    inline void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
         state.pose = TooN::SE3::exp(innovation.slice<0,6>()) * state.pose;
         state.velocity = state.velocity + innovation.slice<6,3>();
         state.angularVelocity = state.angularVelocity + innovation.slice<9,3>();
