@@ -187,13 +187,13 @@ struct member_iterator_t {
         return *this;
     }
 
-    inline member_iterator_t::reference operator*(void) const {
+    inline reference operator*(void) const {
         return (*iterator).*data;
     }
-    inline member_iterator_t::reference operator->(void) const {
+    inline reference operator->(void) const {
         return iterator->*data;
     }
-    inline member_iterator_t::reference operator[](difference_type n) const {
+    inline reference operator[](difference_type n) const {
         return iterator[n].*data;
     }
     inline member_iterator_t & operator++() {
