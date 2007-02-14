@@ -69,12 +69,13 @@ public:
         return jacobian;
     }
 
-    inline TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
-        /// @todo need to transform covariance, see Georg paper
-        return covariance;
+    inline const TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ) const {
+        TooN::Matrix<M_DIMENSION> localCovariance = covariance;
+        state.pose.adjoint(localCovariance);
+        return localCovariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
+    inline const TooN::Vector<M_DIMENSION> & getInnovation( const State & state ) const {
         return (measurement * state.pose.inverse()).ln();
     }
 };
@@ -98,17 +99,22 @@ public:
         TooN::Identity(jacobian.template slice<0,0,3,3>());
     }
 
-    inline TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
+    inline const TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ) const {
         return jacobian;
     }
 
-    inline TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
-        /// @todo need to transform covariance here!
-        return covariance;
+    inline const TooN::Matrix<M_DIMENSION> getMeasurementCovariance( const State & state ) const {
+        TooN::Matrix<2 * M_DIMENSION> localCovariance;
+        TooN::Zero(localCovariance);
+        localCovariance.template slice<0,0,3,3>() = covariance;
+        state.pose.adjoint(localCovariance);
+        return localCovariance.template slice<0,0,3,3>();
     }
 
-    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
-        return (state.pose * position - state.pose.get_translation());
+    inline const TooN::Vector<M_DIMENSION> getInnovation( const State & state ) const {
+        /// the negative vector corresponds to the left transformation to get from the current reference
+        /// frame to the new reference frame where position is the origin.
+        return -(state.pose * position);
     }
 
     inline void setCovariance( double sigma ){
@@ -116,7 +122,8 @@ public:
     }
 
     inline void setCovariance( const TooN::Vector<M_DIMENSION> & sigma ){
-        for(unsigned int i = 0; i < M_DIMENSION; i++){
+        TooN::Zero(covariance);
+        for(int i = 0; i < M_DIMENSION; ++i){
             covariance(i,i) = sigma[i];
         }
     }
