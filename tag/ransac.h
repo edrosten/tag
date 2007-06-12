@@ -89,6 +89,61 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
     return bestScore;
 }
 
+/// basic MSAC implementation. The function is templated on the observation data type
+/// and the transformation data type which must conform to the following interface:
+/// @code
+/// class Estimator {
+///     Estimator();
+///     // Estimate from a sequence of observations
+///     template <class It> bool estimate(It begin, It End);
+///     // return the score for the given observation
+///     template <class Obs, class Tol> double score(const Obs& obs) const;
+/// };
+/// @endcode
+/// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
+/// @param[in] observations a vector of observations (usually point matches)
+/// @param[in] sample_size the number of samples used estimate a transformation
+/// @param[in] tolerance the tolerance (passed with each observation) to the transformation to check for inliers
+/// @param[in] N the number of hypotheses to test
+/// @param[out] best the transformation hypothesis with the highest inlier count
+/// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
+/// @return the score of the winning hypothesis
+/// @ingroup ransac
+template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier)
+{
+    std::vector<bool> thisInlier(observations.size());
+    const double toleranceSquared = tolerance * tolerance;
+    double bestScore = observations.size() * toleranceSquared;
+
+    std::vector<size_t> sample_index(sample_size);
+    std::vector<Obs> sample(sample_size);
+    while (N--) {
+	randomTuple(sample_index, observations.size());
+	for (int i=0;i<sample_size; i++)
+	    sample[i] = observations[sample_index[i]];
+	Trans thisT(best);
+	thisT.estimate(sample.begin(), sample.end());
+	double score = 0;
+	for (size_t i=0; i<observations.size(); i++) {
+	    const Obs& o = observations[i];
+	    const double s = thisT.score(o);
+	    if (s < toleranceSquared) {
+		thisInlier[i] = true;
+		score += s;
+	    } else {
+		thisInlier[i] = false;
+		score += toleranceSquared;
+	    }
+	}
+	if (score < bestScore) {
+	    bestScore = score;
+	    inlier = thisInlier;
+	    best = thisT;
+	}
+    }
+    return bestScore;
+}
 
  inline double getShrinkRatio(unsigned int H, unsigned int N, unsigned int B)
  {

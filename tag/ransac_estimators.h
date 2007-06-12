@@ -2,6 +2,7 @@
 #define TAG_RANSAC_ESTIMATORS_H
 
 #include <vector>
+#include <algorithm>
 #include <cassert>
 
 #include <TooN/TooN.h>
@@ -137,7 +138,8 @@ namespace essential_matrix {
 	    E[2] = e2.template slice<2,3>();
 	    
 	    TooN::SVD<3> svdE(E);
-	    E = svdE.get_U()*TooN::diagmult(makeVector(1,1,0),svdE.get_VT());
+	    const TooN::Vector<3> temp = (TooN::make_Vector, 1, 1, 0);
+	    E = svdE.get_U()*TooN::diagmult(temp,svdE.get_VT());
 	    return true;	    
 	}
 	
@@ -228,14 +230,57 @@ struct AffineHomography {
 	t[1] = Aty[2];
     }
 
-    template <class M> inline bool isInlier(const M& m, double r) const {
+    template <class M> inline double score(const M& m) const {
 	const TooN::Vector<2>& a = first_point(m);
 	const TooN::Vector<2>& b = second_point(m);
 	const TooN::Vector<2> disp = A*a + t - b;
-	return (disp*disp) <= r*r * noise(m);
+	return (disp*disp);
+    }
+
+    template <class M> inline bool isInlier(const M& m, double r) const {
+	return this->score(m) <= r*r * noise(m);
     }
 };
 
+
+struct PlaneFromPoints {
+    /// the plane equation coefficients as homogeneous vector with unit normal, or (0,0,0,1)
+    TooN::Vector<4> plane;
+
+    PlaneFromPoints() : plane(TooN::zeros<4>()) {}
+
+    template <class It> void estimate(It begin, It end){
+	assert(std::distance(begin, end) >= 3);
+	if( std::distance(begin, end) == 3 ){  // fast special case
+	     const TooN::Vector<3> d1 = *(begin+1) - *begin;
+	     const TooN::Vector<3> d2 = *(begin+2) - *begin;
+	     plane.template slice<0,3>() = d1 ^ d2;
+	     TooN::normalize(plane.template slice<0,3>());
+	     plane[3] = -(*begin) * plane.template slice<0,3>();
+	} else {
+	     TooN::Matrix<> design(std::distance(begin, end), 4);
+	     for(It p = begin; p != end; ++p)
+		design[p-begin] = TooN::unproject(*p);
+             TooN::SVD<> s(design);
+	     plane = s.get_VT()[3];
+             const double d = sqrt(plane.template slice<0,3>() * plane.template slice<0,3>());
+	     if(d > 1e-10){
+		plane /= d;
+	     } else {
+		plane = (TooN::make_Vector, 0, 0, 0, 1);
+	     }
+	}
+    }
+
+    template <class M> inline double score(const M & m) const {
+	const double d = plane * TooN::unproject(m);
+	return d*d;
+    }
+
+    template <class M> inline bool isInlier(const M& m, double r) const {
+	return this->score(m) <= r*r * noise(m);
+    }
+};
 
 } // namespace tag
 
