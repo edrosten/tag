@@ -162,14 +162,14 @@ cout << *ita; // prints the value of a
 template <typename It, typename m>
 struct member_iterator_t {
 
-    typedef typename It::value_type ParentValue;
+    typedef typename std::iterator_traits<It>::value_type ParentValue;
 
     // iterator defines
-    typedef typename It::iterator_category iterator_category;
+    typedef typename std::iterator_traits<It>::iterator_category iterator_category;
     typedef m value_type;
-    typedef typename It::difference_type difference_type;
-    typedef typename Internal::forward_const<typename It::pointer, m *>::value_type pointer;
-    typedef typename Internal::forward_const<typename It::reference, m &>::value_type reference;
+    typedef typename std::iterator_traits<It>::difference_type difference_type;
+    typedef typename Internal::forward_const<typename std::iterator_traits<It>::pointer, m *>::value_type pointer;
+    typedef typename Internal::forward_const<typename std::iterator_traits<It>::reference, m &>::value_type reference;
 
     It iterator;
     m ParentValue::*data;
@@ -257,7 +257,7 @@ for_each(member_iterator(test.begin(), &simple::a), member_iterator(test.end(), 
 @endcode
 */
 template <typename It, typename m>
-inline struct member_iterator_t<It, m> member_iterator( const It & it, m It::value_type::*d ){
+inline struct member_iterator_t<It, m> member_iterator( const It & it, m std::iterator_traits<It>::value_type::*d ){
     return member_iterator_t<It, m>(it, d);
 }
 
