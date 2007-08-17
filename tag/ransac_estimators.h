@@ -13,13 +13,14 @@
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
 #include <TooN/se3.h>
+#include <TooN/wls_cholesky.h>
 
 namespace tag {
 
     template <class T> inline const typename T::first_type& first_point(const T& t) { return t.first; }
     template <class T> inline const typename T::second_type& second_point(const T& t) { return t.second; }
     template <class T> inline double noise(const T& t) { return 1.0; }
-    
+
 
 namespace essential_matrix {
 
@@ -28,10 +29,10 @@ namespace essential_matrix {
     {
 	assert(std::distance(begin,end) >= 4);
 
-	TooN::WLS<8> wls;
+	TooN::WLSCholesky<8> wls;
 	for (It it=begin; it!=end; it++) {
 	    const TooN::Vector<2>& a = first_point(*it);
-	    const TooN::Vector<2>& b = first_point(*it);
+	    const TooN::Vector<2>& b = second_point(*it);
 	    const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
 				       {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
 	    wls.add_df(b[0], TooN::Vector<8>(rows[0]));
@@ -46,7 +47,7 @@ namespace essential_matrix {
 	H[2][2] = 1;
     }
 
-    
+
     template <class M> inline int getValidPair(const TooN::Matrix<3>& R1, const TooN::Matrix<3>& R2, const TooN::Vector<2>& e, double z1, const M& m)
     {
 	TooN::Vector<2> dm = m.b-e;
@@ -65,7 +66,7 @@ namespace essential_matrix {
 	    return  ((pinf1-m.b)*dm*z1 >= 0) ? 0 : 1;
 	} else {
 	    //R2
-	    if (zp2 < 0) 
+	    if (zp2 < 0)
 		return z1 <= 0 ? 2 : 3;
 	    return ((pinf2-m.b)*dm*z1 >= 0) ? 2 : 3;
 	}
@@ -79,7 +80,7 @@ namespace essential_matrix {
 	    det *= lu.get_lu()[i][i];
 	return det;
     }
-    
+
 /// RANSAC estimator to compute the essential matrix from a set of 2D-2D correspondences
 /// The observations passed (via iterators) to the estimate method must allow:
 /// @code
@@ -123,7 +124,7 @@ namespace essential_matrix {
 		E[1] = R[0];
 		E[2][0] = E[2][1] = E[2][2] = 0;
 		return true;
-	    } 
+	    }
 	    TooN::Matrix<5,4> K = chol.inverse_times(M12.T());
 	    TooN::Matrix<4> Q = M11 - M12*K;
 	    TooN::SymEigen<4> eigen(Q);
@@ -136,19 +137,26 @@ namespace essential_matrix {
 	    E[0][2] = e2[0];
 	    E[1][2] = e2[1];
 	    E[2] = e2.template slice<2,3>();
-	    
+
 	    TooN::SVD<3> svdE(E);
 	    const TooN::Vector<3> temp = (TooN::make_Vector, 1, 1, 0);
 	    E = svdE.get_U()*TooN::diagmult(temp,svdE.get_VT());
-	    return true;	    
+	    return true;
 	}
-	
+
 	template <class Match> inline bool isInlier(const Match& m, double r) const {
 	    TooN::Vector<3> line = E.template slice<0,0,3,2>()*first_point(m) + E.T()[2];
 	    double dot = line.template slice<0,2>() * second_point(m) + line[2];
 	    return (dot*dot <= (line[0]*line[0] + line[1]*line[1]) * r*r * noise(m));
 	}
-	
+
+    template <class Match> inline double score(const Match& m) const {
+	    TooN::Vector<3> line = E.template slice<0,0,3,2>()*first_point(m) + E.T()[2];
+	    double dot = line.template slice<0,2>() * second_point(m) + line[2];
+	    return dot*dot / (line[0]*line[0] + line[1]*line[1]);
+    }
+
+
 	/// Decompose the essential matrix into four possible SE3s
 	/// @param[in] begin beginning iterator for observations
 	/// @param[in] end ending iterator for observations
@@ -161,7 +169,7 @@ namespace essential_matrix {
 
 	    const size_t N = std::distance(begin,end);
 	    assert(group.size() >= N);
-	    
+
 	    TooN::SVD<3> svdE(E);
 	    TooN::Matrix<3> R1 = svdE.get_U()*Rz.T()*svdE.get_VT();
 	    TooN::Matrix<3> R2 = svdE.get_U()*Rz*svdE.get_VT();
@@ -176,7 +184,7 @@ namespace essential_matrix {
 	    int i=0;
 	    for (It it = begin; it!=end; ++it, ++i) {
 		int index = getValidPair(R1, R2, epipole, t1[2], *it);
-		result[index].first++;	
+		result[index].first++;
 		group[i] = index;
 	    }
 	    result[0].second.get_rotation() = result[1].second.get_rotation() = R1;
@@ -191,6 +199,37 @@ namespace essential_matrix {
 
  using essential_matrix::EssentialMatrix;
 
+/// RANSAC estimator to compute an homography from a set of 2D-2D correspondences
+/// The observations passed (via iterators) to the estimate method must allow:
+/// @code
+/// TooN::Vector<2> a = first_point(*it); // default value is "(*it).first"
+/// TooN::Vector<2> b = second_point(*it); // default value is "(*it).second"
+/// double R = noise(*it); // default value is "1.0"
+/// @endcode
+/// The resulting transformation will map from a -> b.
+/// @ingroup ransac
+struct Homography {
+    /// homography
+    TooN::Matrix<3> H;
+
+    Homography() { TooN::Identity(H); }
+
+    template <class It> void estimate(It begin, It end) {
+        essential_matrix::getProjectiveHomography(begin, end, H);
+    }
+
+    template <class M> inline double score(const M& m) const {
+        TooN::Vector<3> a = TooN::unproject(first_point(m));
+        const TooN::Vector<2> & b = second_point(m);
+        const TooN::Vector<2> disp = TooN::project(H * a)  - b;
+        return (disp*disp);
+    }
+
+    template <class M> inline bool isInlier(const M& m, double r) const {
+        return this->score(m) <= r*r * noise(m);
+    }
+};
+
 /// RANSAC estimator to compute an affine homography from a set of 2D-2D correspondences
 /// The observations passed (via iterators) to the estimate method must allow:
 /// @code
@@ -200,7 +239,6 @@ namespace essential_matrix {
 /// @endcode
 /// The resulting transformation will map from a -> b.
 /// @ingroup ransac
-
 struct AffineHomography {
     /// the linear part of the affine transformation
     TooN::Matrix<2> A;
@@ -210,7 +248,7 @@ struct AffineHomography {
     AffineHomography() : A(TooN::zeros<2,2>()), t(TooN::zeros<2>()) {}
 
     template <class It> void estimate(It begin, It end) {
-	TooN::WLS<3> wls_x, wls_y;
+	TooN::WLSCholesky<3> wls_x, wls_y;
 	wls_x.clear();
 	wls_y.clear();
         for (It it = begin; it!= end; ++it) {
