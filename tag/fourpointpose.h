@@ -81,30 +81,22 @@ struct Point4SE3Estimation {
     }
 
     template<class Obs, class Tol> inline bool isInlier( const Obs& obs, const Tol& tolerance ) const {
-        return getSqError(obs) < tolerance;
+        return score(obs) < tolerance;
+    }
+
+    template<class Obs> inline double score(const Obs & obs) const {
+        if(valid){
+            TooN::Vector<3> pos = T * obs.position;
+            TooN::Vector<2> diff = project(pos) - obs.pixel / ImagePlaneZ;
+            double disp = diff*diff;
+            return disp;
+        }
+        return 100;
     }
 
     template<class Obs> inline double getSqError(const Obs & obs) const {
-        if(valid){
-            TooN::Vector<3> pos = T * obs.position;
-            TooN::Vector<2> diff = project(pos) - obs.pixel / ImagePlaneZ;
-            double disp = diff*diff;
-            return disp;
-        }
-        return 100;
+        return score(obs);
     }
-
-    template <class Obs> inline double score(const Obs & obs) const {
-        if(valid){
-            TooN::Vector<3> pos = T * obs.position;
-            TooN::Vector<2> diff = project(pos) - obs.pixel / ImagePlaneZ;
-            double disp = diff*diff;
-            return disp;
-        }
-        return 100;
-    }
-
-
 };
 
 } // namespace tag
