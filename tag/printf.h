@@ -300,7 +300,7 @@ namespace tag
 
 		template<class C, class D, int max> struct print_typelist<C, D, max, max>
 		{
-			static void print(std::ostream& o, const std::string& fmt, int fpos, const T_list<C,D>& l)
+			static void print(std::ostream& o, const std::string& fmt, int fpos, const T_list<C,D>&)
 			{
 				unsigned int ppos;
 
