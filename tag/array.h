@@ -78,7 +78,7 @@ template<class C, int I> class array
 
 		template<class D, class E> struct array_filler<D,E,-1>
 		{
-			static void fill(C* data, const T_list<D, E>& l){}
+			static void fill(C*, const T_list<D, E>&){}
 		};
 
 		template<class D, int i> struct sizetoolong

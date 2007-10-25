@@ -30,10 +30,10 @@
 # the same distribution terms that you use for the rest of that program.
 
 # A sed program that does not truncate output.
-SED="/usr/bin/sed"
+SED="/bin/sed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
-Xsed="/usr/bin/sed -e s/^X//"
+Xsed="/bin/sed -e s/^X//"
 
 # The HP-UX ksh and POSIX shell print the target directory to stdout
 # if CDPATH is set.
@@ -44,7 +44,7 @@ available_tags=" CXX F77"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host bosch:
+# Libtool was configured on host bigfrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -66,12 +66,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=i686-suse-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=i686-suse-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -82,10 +82,10 @@ AR="ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="gcc"
+LTCC="/n/projects/connectionist/bin/gcc"
 
 # A language-specific compiler.
-CC="gcc"
+CC="/n/projects/connectionist/bin/gcc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -94,13 +94,13 @@ with_gcc=yes
 EGREP="grep -E"
 
 # The linker used to build libraries.
-LD="/usr/i586-suse-linux/bin/ld"
+LD="/a/toaster-g2.lanl.gov/vol/projects/connectionist/i686-pc-linux-gnu/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/usr/bin/nm -B"
+NM="/n/projects/connectionist/bin/nm -B"
 
 # A symbol stripping program
 STRIP="strip"
@@ -322,10 +322,10 @@ variables_saved_for_relink="PATH  LD_RUN_PATH GCC_EXEC_PREFIX COMPILER_PATH LIBR
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../ /lib/i586-suse-linux/4.0.2/ /lib/ /usr/lib/i586-suse-linux/4.0.2/ /usr/lib/"
+sys_lib_search_path_spec=" /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/ /usr/lib/gcc/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/i686-pc-linux-gnu/4.1.0/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../i686-pc-linux-gnu/4.1.0/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../ /lib/i686-pc-linux-gnu/4.1.0/ /lib/ /usr/lib/i686-pc-linux-gnu/4.1.0/ /usr/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/X11R6/lib/Xaw95 /usr/X11R6/lib/Xaw3d /usr/X11R6/lib /usr/i486-linux/lib /usr/i486-linux-libc5/lib /usr/i486-linux-libc6/lib /usr/i486-linuxaout/lib /usr/i386-suse-linux/lib /usr/local/lib /usr/openwin/lib /opt/kde/lib /opt/kde2/lib /opt/kde3/lib /opt/gnome/lib /opt/gnome2/lib /usr/i486-linux-libc5/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib/qt-3.3/lib /usr/X11R6/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -6809,7 +6809,7 @@ build_old_libs=`case $build_libtool_libs in yes) $echo no;; *) $echo yes;; esac`
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host bosch:
+# Libtool was configured on host bigfrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -6831,12 +6831,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=i686-suse-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=i686-suse-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -6847,10 +6847,10 @@ AR="ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="gcc"
+LTCC="/n/projects/connectionist/bin/gcc"
 
 # A language-specific compiler.
-CC="g++"
+CC="/n/projects/connectionist/bin/g++"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -6859,13 +6859,13 @@ with_gcc=yes
 EGREP="grep -E"
 
 # The linker used to build libraries.
-LD="/usr/i586-suse-linux/bin/ld"
+LD="/a/toaster-g2.lanl.gov/vol/projects/connectionist/i686-pc-linux-gnu/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/usr/bin/nm -B"
+NM="/n/projects/connectionist/bin/nm -B"
 
 # A symbol stripping program
 STRIP="strip"
@@ -6988,11 +6988,11 @@ striplib="strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="/usr/lib/gcc/i586-suse-linux/4.0.2/../../../crti.o /usr/lib/gcc/i586-suse-linux/4.0.2/crtbeginS.o"
+predep_objects="/usr/lib/crti.o /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="/usr/lib/gcc/i586-suse-linux/4.0.2/crtendS.o /usr/lib/gcc/i586-suse-linux/4.0.2/../../../crtn.o"
+postdep_objects="/a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/crtendS.o /usr/lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7004,7 +7004,7 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/i586-suse-linux/4.0.2 -L/usr/lib/gcc/i586-suse-linux/4.0.2 -L/usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib -L/usr/lib/gcc/i586-suse-linux/4.0.2/../../.."
+compiler_lib_search_path="-L/a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0 -L/a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc -L/n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0 -L/a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib -L/n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib -L/a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../.. -L/n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../.."
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7084,10 +7084,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../ /lib/i586-suse-linux/4.0.2/ /lib/ /usr/lib/i586-suse-linux/4.0.2/ /usr/lib/"
+sys_lib_search_path_spec=" /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/ /usr/lib/gcc/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/i686-pc-linux-gnu/4.1.0/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../../i686-pc-linux-gnu/lib/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../i686-pc-linux-gnu/4.1.0/ /a/toaster-g2.lanl.gov/vol/projects/connectionist/bin/../lib/gcc/i686-pc-linux-gnu/4.1.0/../../../ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../i686-pc-linux-gnu/4.1.0/ /n/projects/connectionist/lib/gcc/i686-pc-linux-gnu/4.1.0/../../../ /lib/i686-pc-linux-gnu/4.1.0/ /lib/ /usr/lib/i686-pc-linux-gnu/4.1.0/ /usr/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/X11R6/lib/Xaw95 /usr/X11R6/lib/Xaw3d /usr/X11R6/lib /usr/i486-linux/lib /usr/i486-linux-libc5/lib /usr/i486-linux-libc6/lib /usr/i486-linuxaout/lib /usr/i386-suse-linux/lib /usr/local/lib /usr/openwin/lib /opt/kde/lib /opt/kde2/lib /opt/kde3/lib /opt/gnome/lib /opt/gnome2/lib /usr/i486-linux-libc5/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib/qt-3.3/lib /usr/X11R6/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7111,7 +7111,7 @@ include_expsyms=""
 
 # ### BEGIN LIBTOOL TAG CONFIG: F77
 
-# Libtool was configured on host bosch:
+# Libtool was configured on host bigfrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -7133,12 +7133,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=i686-suse-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=i686-suse-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -7149,10 +7149,10 @@ AR="ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="gcc"
+LTCC="/n/projects/connectionist/bin/gcc"
 
 # A language-specific compiler.
-CC="gfortran"
+CC="g77"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -7161,13 +7161,13 @@ with_gcc=yes
 EGREP="grep -E"
 
 # The linker used to build libraries.
-LD="/usr/i586-suse-linux/bin/ld"
+LD="/a/toaster-g2.lanl.gov/vol/projects/connectionist/i686-pc-linux-gnu/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/usr/bin/nm -B"
+NM="/n/projects/connectionist/bin/nm -B"
 
 # A symbol stripping program
 STRIP="strip"
@@ -7389,10 +7389,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../../i586-suse-linux/lib/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../i586-suse-linux/4.0.2/ /usr/lib/gcc/i586-suse-linux/4.0.2/../../../ /lib/i586-suse-linux/4.0.2/ /lib/ /usr/lib/i586-suse-linux/4.0.2/ /usr/lib/"
+sys_lib_search_path_spec=" /usr/lib/gcc/i386-redhat-linux/3.4.3/ /usr/lib/gcc/i386-redhat-linux/3.4.3/ /usr/lib/gcc/i386-redhat-linux/3.4.3/../../../../i386-redhat-linux/lib/i386-redhat-linux/3.4.3/ /usr/lib/gcc/i386-redhat-linux/3.4.3/../../../../i386-redhat-linux/lib/ /usr/lib/gcc/i386-redhat-linux/3.4.3/../../../i386-redhat-linux/3.4.3/ /usr/lib/gcc/i386-redhat-linux/3.4.3/../../../ /lib/i386-redhat-linux/3.4.3/ /lib/ /usr/lib/i386-redhat-linux/3.4.3/ /usr/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/X11R6/lib/Xaw95 /usr/X11R6/lib/Xaw3d /usr/X11R6/lib /usr/i486-linux/lib /usr/i486-linux-libc5/lib /usr/i486-linux-libc6/lib /usr/i486-linuxaout/lib /usr/i386-suse-linux/lib /usr/local/lib /usr/openwin/lib /opt/kde/lib /opt/kde2/lib /opt/kde3/lib /opt/gnome/lib /opt/gnome2/lib /usr/i486-linux-libc5/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib/qt-3.3/lib /usr/X11R6/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
