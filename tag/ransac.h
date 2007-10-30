@@ -12,7 +12,7 @@ namespace tag {
 /// The functions are both templated on the correspondence data type and
 /// the estimator for the transformation.
 
- template <class T> void randomTuple(const std::vector<T>& cdf, std::vector<unsigned int>& t, T maxp) {
+ template <class T, class I> void randomTuple(const std::vector<T>& cdf, std::vector<I>& t, T maxp) {
      for (size_t i=0; i<t.size(); i++) {
      try_again:
 	 double x = drand48()* maxp;
