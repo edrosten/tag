@@ -15,38 +15,11 @@
 #include <TooN/se3.h>
 #include <TooN/wls_cholesky.h>
 
+#include <tag/helpers.h>
+
 namespace tag {
 
-    template <class T> inline const typename T::first_type& first_point(const T& t) { return t.first; }
-    template <class T> inline const typename T::second_type& second_point(const T& t) { return t.second; }
-    template <class T> inline double noise(const T& t) { return 1.0; }
-
-
 namespace essential_matrix {
-
-    // For degenerate case
-    template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<3>& H)
-    {
-	assert(std::distance(begin,end) >= 4);
-
-	TooN::WLSCholesky<8> wls;
-	for (It it=begin; it!=end; it++) {
-	    const TooN::Vector<2>& a = first_point(*it);
-	    const TooN::Vector<2>& b = second_point(*it);
-	    const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
-				       {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
-	    wls.add_df(b[0], TooN::Vector<8>(rows[0]));
-	    wls.add_df(b[1], TooN::Vector<8>(rows[1]));
-	}
-	wls.compute();
-	TooN::Vector<8> h = wls.get_mu();
-	H[0] = h.template slice<0,3>();
-	H[1] = h.template slice<3,3>();
-	H[2][0] = h[6];
-	H[2][1] = h[7];
-	H[2][2] = 1;
-    }
-
 
     template <class M> inline int getValidPair(const TooN::Matrix<3>& R1, const TooN::Matrix<3>& R2, const TooN::Vector<2>& e, double z1, const M& m)
     {
@@ -92,6 +65,9 @@ namespace essential_matrix {
 /// @ingroup ransac
 
     struct EssentialMatrix {
+        /// minimal number of correspondences
+        static const int hypothesis_size = 8;
+
 	TooN::Matrix<3> E;
 	template <class It> bool estimate(It begin, It end) {
 	    TooN::Matrix<9> M = TooN::zeros<9,9>();
@@ -118,7 +94,7 @@ namespace essential_matrix {
 		    return false;
 		TooN::Matrix<3> R;
 		// Translation is zero (choose t = [0,0,1])
-		essential_matrix::getProjectiveHomography(begin, end, R);
+		tag::getProjectiveHomography(begin, end, R);
 		TooN::SO3::coerce(R);
 		E[0] = -R[1];
 		E[1] = R[0];
@@ -211,11 +187,13 @@ namespace essential_matrix {
 struct Homography {
     /// homography
     TooN::Matrix<3> H;
+    /// minimal number of correspondences
+    static const int hypothesis_size = 4;
 
     Homography() { TooN::Identity(H); }
 
     template <class It> void estimate(It begin, It end) {
-        essential_matrix::getProjectiveHomography(begin, end, H);
+        tag::getProjectiveHomography(begin, end, H);
     }
 
     template <class M> inline double score(const M& m) const {
@@ -244,6 +222,8 @@ struct AffineHomography {
     TooN::Matrix<2> A;
     /// the translation part of the affine transformation
     TooN::Vector<2> t;
+    /// minimal number of correspondences
+    static const int hypothesis_size = 3;
 
     AffineHomography() : A(TooN::zeros<2,2>()), t(TooN::zeros<2>()) {}
 
@@ -284,6 +264,8 @@ struct AffineHomography {
 struct PlaneFromPoints {
     /// the plane equation coefficients as homogeneous vector with unit normal, or (0,0,0,1)
     TooN::Vector<4> plane;
+    /// minimal number of correspondences
+    static const int hypothesis_size = 3;
 
     PlaneFromPoints() : plane(TooN::zeros<4>()) {}
 

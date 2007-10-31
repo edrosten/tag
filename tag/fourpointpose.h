@@ -58,14 +58,19 @@ TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points,
 /// @ingroup ransac
 template <int ImagePlaneZ = 1>
 struct Point4SE3Estimation {
+    /// SE3 describing the transformation from world to camera coordinate frame
     TooN::SE3 T;
+    /// was the estimation valid
     bool valid;
+    /// angular error to accept in the 4 point pose estimation
     double angularError;
+    /// minimal number of correspondences
+    static const int hypothesis_size = 4;
 
     inline Point4SE3Estimation(double ang = 0.14) : valid(false), angularError(ang) {  }
 
     template<class It> inline bool estimate(It begin, It end) {
-        assert(end - begin >= 4);
+        assert(std::distance(begin,end) >= 4);
         valid = true;
 
         std::vector<TooN::Vector<3> > points(4);

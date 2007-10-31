@@ -46,6 +46,8 @@ namespace tag {
 ///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
+///     // the number of observations to estimate one hypothesis
+///     static const int hypothesis_size = XXX;
 /// };
 /// @endcode
 /// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
@@ -58,8 +60,8 @@ namespace tag {
 /// @return the number of inliers for the winning hypothesis
 /// @ingroup ransac
 
-template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
-									Trans& best, std::vector<bool>& inlier)
+template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const std::vector<Obs>& observations, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier, int sample_size = Trans::hypothesis_size )
 {
     std::vector<bool> thisInlier(observations.size());
     size_t bestScore = 0;
@@ -89,6 +91,15 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
     return bestScore;
 }
 
+/// backwards compatibility interface to find_RANSAC_inliers
+/// @deprecated
+/// @ingroup ransac
+template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier)
+{
+    return find_RANSAC_inliers(observations, tolerance, N, best, inlier, sample_size);
+}
+
 /// basic MSAC implementation. The function is templated on the observation data type
 /// and the transformation data type which must conform to the following interface:
 /// @code
@@ -98,6 +109,8 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 ///     template <class It> bool estimate(It begin, It End);
 ///     // return the score for the given observation
 ///     template <class Obs, class Tol> double score(const Obs& obs) const;
+///     // the number of observations to estimate one hypothesis
+///     static const int hypothesis_size = XXX;
 /// };
 /// @endcode
 /// see the file @ref ransac_estimators.h for some Estimator classes for various transformations.
@@ -109,8 +122,8 @@ template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers(const st
 /// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
 /// @return the score of the winning hypothesis
 /// @ingroup ransac
-template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
-									Trans& best, std::vector<bool>& inlier)
+template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std::vector<Obs>& observations, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier, int sample_size = Trans::hypothesis_size)
 {
     std::vector<bool> thisInlier(observations.size());
     const double toleranceSquared = tolerance * tolerance;
@@ -145,10 +158,20 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
     return bestScore;
 }
 
- inline double getShrinkRatio(unsigned int H, unsigned int N, unsigned int B)
- {
+/// backwards compatibility interface to find_MSAC_inliers
+/// @deprecated
+/// @ingroup ransac
+template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N,
+									Trans& best, std::vector<bool>& inlier)
+{
+    return find_MSAC_inliers(observations, tolerance, N, best, inlier, sample_size);
+}
+
+
+inline double getShrinkRatio(unsigned int H, unsigned int N, unsigned int B)
+{
      return pow(double(H), -double(B)/N);
- }
+}
 
 /// Guided breadth-first RANSAC implementation. The function is templated on the observation data type,
 /// the probability density for observation correctness, the tolerance for inliers,
@@ -160,6 +183,8 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 ///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
+///     // the number of observations to estimate one hypothesis
+///     static const int hypothesis_size = XXX;
 /// };
 /// @endcode
 /// All hypotheses are generated first, and preemptively discarded as more observations are examined.
@@ -175,11 +200,9 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 /// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
 /// @return the number of inliers for the winning hypothesis
 /// @ingroup ransac
-
-
-     template <class Obs, class Trans, class Tol, class Prob>
-	size_t find_RANSAC_inliers_guided_breadth_first(const std::vector<Obs>& observations, const Prob& prob, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
-							Trans& best, std::vector<bool>& inlier)
+template <class Obs, class Trans, class Tol, class Prob>
+size_t find_RANSAC_inliers_guided_breadth_first(const std::vector<Obs>& observations, const Prob& prob, const Tol& tolerance, size_t N, size_t block_size,
+							Trans& best, std::vector<bool>& inlier, int sample_size = Trans::hypothesis_size)
     {
 	std::vector<Trans> hypotheses(N,best);
 	std::vector<std::pair<int,size_t> > score(N);
@@ -234,6 +257,16 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 	return count;
     }
 
+/// backwards compatibility interface to find_RANSAC_inliers_guided_breadth_first
+/// @deprecated
+/// @ingroup ransac
+template <class Obs, class Trans, class Tol, class Prob>
+size_t find_RANSAC_inliers_guided_breadth_first(const std::vector<Obs>& observations, const Prob& prob, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
+							Trans& best, std::vector<bool>& inlier)
+{
+    return find_RANSAC_inliers_guided_breadth_first(observations, prob, tolerance, N, block_size, best, inlier, sample_size);
+}
+
 /// Breadth-first RANSAC implementation. The function is templated on the observation data type, the tolerance for inliers,
 /// and the transformation data type which must conform to the following interface:
 /// @code
@@ -243,6 +276,8 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 ///     template <class It> bool estimate(It begin, It End);
 ///     // Check whether the given observation is an inlier for this estimate (with specified tolerance)
 ///     template <class Obs, class Tol> bool isInlier(const Obs& obs, const Tol& tolerance) const;
+///     // the number of observations to estimate one hypothesis
+///     static const int hypothesis_size = XXX;
 /// };
 /// @endcode
 /// All hypotheses are generated first, and preemptively discarded as more observations are examined.
@@ -256,10 +291,8 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 /// @param[out] inlier a vector of bools that describes the inlier set of the winning hypothesis
 /// @return the number of inliers for the winning hypothesis
 /// @ingroup ransac
-
-
-    template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers_breadth_first(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
-											  Trans& best, std::vector<bool>& inlier)
+template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers_breadth_first(const std::vector<Obs>& observations, const Tol& tolerance, size_t N, size_t block_size,
+											  Trans& best, std::vector<bool>& inlier, int sample_size = Trans::hypothesis_size)
     {
 	std::vector<Trans> hypotheses(N,best);
 	std::vector<std::pair<int,size_t> > score(N);
@@ -308,6 +341,14 @@ template <class Obs, class Trans, class Tol> double find_MSAC_inliers(const std:
 	return count;
     }
 
+/// backwards compatibility interface to find_RANSAC_inliers_breadth_first
+/// @deprecated
+/// @ingroup ransac
+template <class Obs, class Trans, class Tol> size_t find_RANSAC_inliers_breadth_first(const std::vector<Obs>& observations, int sample_size, const Tol& tolerance, size_t N, size_t block_size,
+											  Trans& best, std::vector<bool>& inlier)
+{
+    return find_RANSAC_inliers_breadth_first(observations, tolerance, N, block_size, best, inlier, sample_size);
+}
 
 /// helper function for use with ransac functions. It removes elements
 /// of an input vector based on another vector which is interpreted as
