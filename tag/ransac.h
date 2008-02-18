@@ -367,7 +367,7 @@ void remove_if_false(std::vector<T>& v, const std::vector<U>& flag) {
         if (flag[i])
             v[j++] = v[i];
     }
-    v.resize(j);
+    v.erase(v.begin() + j, v.end());
 }
 
 } // namespace tag
