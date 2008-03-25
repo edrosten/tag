@@ -8,8 +8,6 @@ namespace tag
 	// Typesafe, varadic arguments are provided by a typelist
 	//
 
-	template<class C, class D> class T_list;
-
 	#ifndef  DOXYGEN_IGNORE_INTERNAL
 	namespace Internal
 	{
@@ -19,20 +17,20 @@ namespace tag
 
 		//Index the list, retrieving the value and the type
 		//with a good optimizer, this should be constant time at run-time.
-		template<class C, class D, int i> struct index_l
+		template<template<class,class> class List, class C, class D, int i> struct index_l
 		{
-			typedef typename index_l<typename D::val_type, typename D::next_type, i-1>::val_type val_type;	
+			typedef typename index_l<List, typename D::val_type, typename D::next_type, i-1>::val_type val_type;	
 
-			static const val_type& value(const T_list<C,D>& l)
+			static const val_type& value(const List<C,D>& l)
 			{	
-				return index_l<typename D::val_type, typename D::next_type, i-1>::value(l.next);
+				return index_l<List, typename D::val_type, typename D::next_type, i-1>::value(l.next);
 			}
 		};
 
-		template<class C, class D> struct index_l<C,D,0>
+		template<template<class,class> class List, class C, class D> struct index_l<List, C,D,0>
 		{
 			typedef C val_type;
-			static const val_type& value(const T_list<C,D>& l)
+			static const val_type& value(const List<C,D>& l)
 			{
 				return l.val;
 			}
@@ -56,18 +54,18 @@ namespace tag
 		};
 	
 
-		template<class C, class D, int i> struct T_index_forward
+		template<template<class,class> class List, class C, class D, int i> struct T_index_forward
 		{
 			enum
 			{
 				len = length<C,D>::len
 			};
 
-			typedef typename index_l<C,D,len-i-1>::val_type val_type;
+			typedef typename index_l<List, C,D,len-i-1>::val_type val_type;
 
-			static const val_type& value(const T_list<C,D>& l)
+			static const val_type& value(const List<C,D>& l)
 			{	
-				return index_l<C, D, len-i-1>::value(l);
+				return index_l<List, C, D, len-i-1>::value(l);
 			}
 		};
 	}
@@ -246,16 +244,16 @@ namespace tag
 
 		///Index the list in logical order and return the value. Index 0 is the first element added to 
 		///the list (the one closest to @ref T_ListEnd)
-		template<int i> const typename Internal::T_index_forward<C,D,i>::val_type& index() const
+		template<int i> const typename Internal::T_index_forward<tag::T_list, C,D,i>::val_type& index() const
 		{
-			return Internal::T_index_forward<C,D,i>::value(*this);
+			return Internal::T_index_forward<tag::T_list, C,D,i>::value(*this);
 		}
 
 		///Index the list in logical order and return the type. Index 0 is the first element added to 
 		///the list (the one closest to @ref T_ListEnd)
 		template<int i> class index_type
 		{	
-			typedef typename Internal::T_index_forward<C,D,i>::val_type type;
+			typedef typename Internal::T_index_forward<tag::T_list, C,D,i>::val_type type;
 		};
 
 		enum
@@ -290,6 +288,23 @@ namespace tag
 		{
 			 return V_list<X, V_list<C, D> >(c, *this);
 		}
+		
+		template<int i> const typename Internal::T_index_forward<tag::V_list, C,D,i>::val_type& index() const
+		{
+			return Internal::T_index_forward<tag::V_list, C,D,i>::value(*this);
+		}
+
+		template<int i> class index_type
+		{	
+			typedef typename Internal::T_index_forward<tag::V_list, C,D,i>::val_type type;
+		};
+
+		enum
+		{
+			///The number of elements in the list.
+			elements = (Internal::length<C,D>::len)
+		};
+		
 		#endif
 	};
 
@@ -336,7 +351,23 @@ namespace tag
 				 return R_list<X, R_list<C, D> >(c, *this);
 			}
 
-				
+			template<int i> const typename Internal::T_index_forward<tag::R_list, C,D,i>::val_type& index() const
+			{
+				return Internal::T_index_forward<tag::R_list, C,D,i>::value(*this);
+			}
+
+			template<int i> class index_type
+			{	
+				typedef typename Internal::T_index_forward<tag::R_list, C,D,i>::val_type type;
+			};
+
+			enum
+			{
+				///The number of elements in the list.
+				elements = (Internal::length<C,D>::len)
+			};
+		
+	
 			template<class X, class Y> friend class R_list;
 			void operator=(const equivalent_V_list& vlist)
 			{
