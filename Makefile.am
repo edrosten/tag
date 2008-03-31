@@ -1,9 +1,12 @@
 # the library we want to create and its source files
+
 lib_LTLIBRARIES     = libtoontag.la
-libtoontag_la_SOURCES   = src/absorient.cpp src/fourpointpose.cpp
+libtoontag_la_SOURCES   = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp src/fourpointpose.cpp  
 
 # the header files to be installed
 pkginclude_HEADERS  = \
+	tag/quartic.h \
+	tag/threepointpose.h \
 	tag/absorient.h \
 	tag/array.h \
 	tag/fourpointpose.h \
