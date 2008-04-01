@@ -1,4 +1,4 @@
-#include <util/quartic.h>
+#include <tag/quartic.h>
 
 #include <cmath>
 #include <cassert>
@@ -44,35 +44,56 @@ int find_quartic_real_roots(double B, double C, double D, double E, double r[])
     static const double third = 1.0/3.0;
     double alpha = C - 0.375 * B * B;
     double half_B = 0.5 * B;
-    double beta = half_B *(half_B*half_B - C) + D;
+    double beta = half_B *(half_B*half_B - C) + D;  
     double q_B = 0.25 * B;
-    double gamma = q_B * (q_B *(C - 3 * q_B * q_B) - D) + E;
+    double four_gamma = B * (q_B *(C - 3 * q_B * q_B) - D) + 4*E;
+    
+    if (beta*beta < 1e-18) {
+	double disc = alpha*alpha - four_gamma;
+	if (disc < 0)
+	    return 0;
+	double root_disc = sqrt(disc);
+	{
+	    double disc2 = -alpha + root_disc;
+	    if (disc2 < 0)
+		return 0;
+	    double root_disc2 = sqrt(0.5 * disc2);
+	    r[0] = -q_B - root_disc2;
+	    r[1] = -q_B + root_disc2;
+	}
+	{
+	    double disc2 = -alpha - root_disc;
+	    if (disc2 < 0)
+		return 2;
+	    double root_disc2 = sqrt(0.5 * disc2);
+	    r[2] = -q_B - root_disc2;
+	    r[3] = -q_B + root_disc2;
+	}
+	return 4;
+    }
+
     double third_alpha = alpha * third;
-    double P = -alpha * third_alpha * 0.25 - gamma;
-    double Q = third_alpha * (-third_alpha * third_alpha * 0.25 + gamma) - beta*beta*0.125;
+    double P = -0.25*(alpha * third_alpha + four_gamma);
+    double Q = third_alpha * (0.25*(four_gamma - third_alpha * third_alpha)) - beta*beta*0.125;
 
     double dcr[3];
-    int ndcr = depressed_cubic_real_roots(P,Q, dcr);
-    double y = dcr[ndcr-1] - third * 2.5 * alpha;
-
-    double disc2 = alpha + 2*y;
-    
+    int ndcr = depressed_cubic_real_roots(P,Q, dcr);    
+    double disc2 = 2*(dcr[ndcr-1] - third_alpha);
     double W = sqrt(disc2);
 
     double disc_base = 2*alpha + disc2; //3*alpha + 2*y;
     double disc_add = 2*beta / W;
-    double x_base = -0.25 * B;
 
     int count = 0;
     if (disc_base + disc_add <= 0) {
 	double sr = sqrt(-disc_base-disc_add);
-	r[count++] = x_base + 0.5 * (W - sr);
-	r[count++] = x_base + 0.5 * (W + sr);
+	r[count++] = -q_B + 0.5 * (W - sr);
+	r[count++] = -q_B + 0.5 * (W + sr);
     }
     if (disc_base - disc_add <= 0) {
 	double sr = sqrt(-disc_base + disc_add);
-	r[count++] = x_base - 0.5 * (W + sr);	
-	r[count++] = x_base - 0.5 * (W - sr);
+	r[count++] = -q_B - 0.5 * (W + sr);	
+	r[count++] = -q_B - 0.5 * (W - sr);
     }
     return count;
 }
