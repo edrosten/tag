@@ -302,7 +302,7 @@ namespace tag
 		{
 			static void print(std::ostream& o, const std::string& fmt, int fpos, const T_list<C,D>&)
 			{
-				unsigned int ppos;
+				size_t ppos;
 
 				while(1)
 				{
