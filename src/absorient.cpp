@@ -22,7 +22,7 @@ TooN::Matrix<3> quaternionToMatrix( const TooN::Vector<4> & q ){
 }
 
 TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
-    const unsigned int N = a.size();
+    const size_t N = a.size();
     // compute cross correlations
     const int x = 0, y = 1, z = 2;
     TooN::Matrix<3> s;
@@ -59,7 +59,7 @@ TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std
 
 TooN::SE3 computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
     //std::assert(a.size() == b.size());
-    const unsigned int N = a.size();
+    const size_t N = a.size();
 
     TooN::Vector<3> ma, mb;
     TooN::Zero(ma);
@@ -110,7 +110,7 @@ TooN::SO3 computeOrientationFitting( const std::vector<TooN::Vector<3> > & a, co
 #endif
 
 TooN::SO3 computeMeanOrientation( const std::vector<TooN::SO3> & r){
-    const unsigned int N = r.size();
+    const size_t N = r.size();
     std::vector<TooN::SO3> rt(N);
     TooN::SO3 base = r.front();
     TooN::SO3 baseInv = base.inverse();

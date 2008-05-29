@@ -5,6 +5,15 @@
 #include <algorithm>
 using namespace std;
 
+#ifdef WIN32
+
+// Visual Studio 2005 does not yet define the C99 cbrt function
+inline double cbrt( double x ){
+    return pow(fabs(x), 1.0/3.0) * (x>=0 ? 1 : -1);
+}
+
+#endif
+
 int depressed_cubic_real_roots(double P, double Q, double r[])
 {
     static const double third = 1.0/3.0;
