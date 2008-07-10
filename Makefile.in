@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# the library we want to create and its source files
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -56,7 +58,8 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtoontag_la_LIBADD =
-am_libtoontag_la_OBJECTS = absorient.lo fourpointpose.lo
+am_libtoontag_la_OBJECTS = quartic.lo threepointpose.lo absorient.lo \
+	fourpointpose.lo
 libtoontag_la_OBJECTS = $(am_libtoontag_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -193,13 +196,13 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-# the library we want to create and its source files
 lib_LTLIBRARIES = libtoontag.la
-libtoontag_la_SOURCES = src/absorient.cpp src/fourpointpose.cpp
+libtoontag_la_SOURCES = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp src/fourpointpose.cpp  
 
 # the header files to be installed
 pkginclude_HEADERS = \
+	tag/quartic.h \
+	tag/threepointpose.h \
 	tag/absorient.h \
 	tag/array.h \
 	tag/fourpointpose.h \
@@ -292,6 +295,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/absorient.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fourpointpose.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quartic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threepointpose.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -313,6 +318,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+quartic.lo: src/quartic.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quartic.lo -MD -MP -MF $(DEPDIR)/quartic.Tpo -c -o quartic.lo `test -f 'src/quartic.cpp' || echo '$(srcdir)/'`src/quartic.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/quartic.Tpo $(DEPDIR)/quartic.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/quartic.cpp' object='quartic.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quartic.lo `test -f 'src/quartic.cpp' || echo '$(srcdir)/'`src/quartic.cpp
+
+threepointpose.lo: src/threepointpose.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threepointpose.lo -MD -MP -MF $(DEPDIR)/threepointpose.Tpo -c -o threepointpose.lo `test -f 'src/threepointpose.cpp' || echo '$(srcdir)/'`src/threepointpose.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/threepointpose.Tpo $(DEPDIR)/threepointpose.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/threepointpose.cpp' object='threepointpose.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threepointpose.lo `test -f 'src/threepointpose.cpp' || echo '$(srcdir)/'`src/threepointpose.cpp
 
 absorient.lo: src/absorient.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT absorient.lo -MD -MP -MF $(DEPDIR)/absorient.Tpo -c -o absorient.lo `test -f 'src/absorient.cpp' || echo '$(srcdir)/'`src/absorient.cpp
