@@ -1,7 +1,8 @@
 # the library we want to create and its source files
 
 lib_LTLIBRARIES     = libtoontag.la
-libtoontag_la_SOURCES   = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp src/fourpointpose.cpp  
+libtoontag_la_SOURCES   = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp \
+                          src/fourpointpose.cpp  src/handeye.cpp
 
 # the header files to be installed
 pkginclude_HEADERS  = \
@@ -22,7 +23,8 @@ pkginclude_HEADERS  = \
 	tag/fn.h \
 	tag/intersection.h \
 	tag/helpers.h \
-	tag/unscented.h
+	tag/unscented.h \
+	tag/handeye.h
 
 docs:
 	doxygen Doxyfile
