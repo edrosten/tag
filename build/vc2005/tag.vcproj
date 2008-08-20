@@ -161,6 +161,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\handeye.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\quartic.cpp"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			</File>
 			<File
 				RelativePath="..\..\tag\fourpointpose.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tag\handeye.h"
 				>
 			</File>
 			<File
