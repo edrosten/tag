@@ -94,9 +94,9 @@ public:
     /// predicts the state by applying the process model over the time interval dt
     /// @param[in] dt time interval
     void predict(double dt){
-        model.updateState( state, dt );
         state.covariance = TooN::transformCovariance(model.getJacobian( state, dt ), state.covariance) + model.getNoiseCovariance( dt );
         TooN::Symmetrize(state.covariance);
+        model.updateState( state, dt );
     }
 
     /// incorporates a measurement

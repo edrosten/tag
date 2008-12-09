@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include <TooN/SymEigen.h>
+#include <TooN/helpers.h>
 
 namespace tag {
 
@@ -55,6 +56,28 @@ TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std
     TooN::SO3 result;
     result = quaternionToMatrix(evec);
     return result;
+}
+
+// computes the orientation from (e1,e2,e3) -> (a,(a^b)^a,a^b), which means that b the second vector is in the a, b plane
+static inline TooN::SO3 canonicalOrientation( const TooN::Vector<3> & a, const TooN::Vector<3> & b ){
+    TooN::Matrix<3> result;
+    result.T()[0] = a;
+    result.T()[2] = a ^ b;
+    TooN::normalize(result.T()[0]);
+    TooN::normalize(result.T()[2]);
+    result.T()[1] = result.T()[2] ^ result.T()[0];
+    return TooN::SO3(result);
+}
+
+TooN::SO3 computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 ){
+    TooN::SO3 r1 = canonicalOrientation( a1, a2 );
+    TooN::SO3 r2 = canonicalOrientation( b1, b2 );
+    const TooN::SO3 rAB = r2 * r1.inverse();
+    r1 = canonicalOrientation( a2, a1 );
+    r2 = canonicalOrientation( b2, b1 );
+    const TooN::SO3 rBA = r2 * r1.inverse();
+    const TooN::SO3 diff = rBA * rAB.inverse();
+    return TooN::SO3::exp(diff.ln() * 0.5) * rAB;
 }
 
 TooN::SE3 computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){

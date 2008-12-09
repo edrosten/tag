@@ -21,6 +21,16 @@ namespace tag {
 /// @ingroup absorient
 TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b );
 
+/// directly computes a rotation between two pairs of rays in space maximizing b * T a
+/// its about 8x faster then using the general computeOrientation for 2 correspondences.
+/// @param[in] a1 first input vector
+/// @param[in] b1 first output vector
+/// @param[in] a2 second input vector
+/// @param[in] b2 second output vector
+/// @return TooN::SO3 containing the rotation such that b = T a
+/// @ingroup absorient
+TooN::SO3 computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 );
+
 /// computes the rigid transformation between two corresponding point sets after Horn
 /// The result is an SE3 that maps points from vector a to points from vector b : b[i] = SE3 * a[i]
 /// @param[in] a vector of 3D points

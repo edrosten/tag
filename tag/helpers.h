@@ -37,8 +37,8 @@ template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<
         const TooN::Vector<2>& b = second_point(*it);
         const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
                         {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
-        wls.add_df(b[0], TooN::Vector<8>(rows[0]));
-        wls.add_df(b[1], TooN::Vector<8>(rows[1]));
+        wls.add_df(b[0], TooN::Vector<8>(rows[0]), noise(*it));
+        wls.add_df(b[1], TooN::Vector<8>(rows[1]), noise(*it));
     }
     wls.compute();
     TooN::Vector<8> h = wls.get_mu();
