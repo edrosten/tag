@@ -16,6 +16,7 @@
 #include <TooN/wls_cholesky.h>
 
 #include <tag/helpers.h>
+#include <tag/absorient.h>
 
 namespace tag {
 
@@ -260,6 +261,42 @@ struct AffineHomography {
     }
 };
 
+/// RANSAC estimator to compute a camera rotation between two sets of rays:
+/// The rays are specified as 2D vectors on the camera plane. The minimal
+/// set are two corresponding pairs of rays.
+/// @code
+/// TooN::Vector<2> a = first_point(*it); // default value is "(*it).first"
+/// TooN::Vector<2> b = second_point(*it); // default value is "(*it).second"
+/// double R = noise(*it); // default value is "1.0"
+/// @endcode
+/// The resulting transformation will map from a -> b.
+/// @ingroup ransac
+struct CameraRotation {
+    /// homography
+    TooN::SO3 rotation;
+    /// minimal number of correspondences
+    static const int hypothesis_size = 2;
+
+    template <class It> void estimate(It begin, It end) {
+        assert(std::distance(begin, end) == hypothesis_size);
+        if(TooN::norm_sq(first_point(begin[0])) == first_point(begin[0]) * first_point(begin[1]) ||
+           TooN::norm_sq(second_point(begin[0])) == second_point(begin[0]) * second_point(begin[1]))
+           return;
+        rotation = tag::computeOrientation(TooN::unproject(first_point(begin[0])),
+                                      TooN::unproject(second_point(begin[0])),
+                                      TooN::unproject(first_point(begin[1])),
+                                      TooN::unproject(second_point(begin[1])));
+    }
+
+    template <class M> inline double score(const M& m) const {
+        const TooN::Vector<2> disp = TooN::project(rotation * TooN::unproject(first_point(m))) - second_point(m);
+        return (disp*disp);
+    }
+
+    template <class M> inline bool isInlier(const M& m, double r) const {
+        return this->score(m) <= r*r * noise(m);
+    }
+};
 
 struct PlaneFromPoints {
     /// the plane equation coefficients as homogeneous vector with unit normal, or (0,0,0,1)
