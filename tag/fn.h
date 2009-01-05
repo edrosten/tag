@@ -193,6 +193,15 @@ struct member_iterator_t {
     inline reference operator->(void) const {
         return iterator->*data;
     }
+
+    inline reference operator*(void) {
+        return (*iterator).*data;
+    }
+    inline reference operator->(void) {
+        return iterator->*data;
+    }
+
+
     inline reference operator[](difference_type n) const {
         return iterator[n].*data;
     }
@@ -248,7 +257,7 @@ struct member_iterator_t {
 /**
 helper function to simplify the use of @ref member_iterator_t wrapper. This is useful for passing
 member iterators as arguments.
-@arg it the iterator to wrap, the new member_iterator_t returned will point to the same position
+@arg it the const iterator to wrap, the new member_iterator_t returned will point to the same position
 @arg d the member to wrap
 @code
 struct simple { int a; float b; };
@@ -257,9 +266,27 @@ for_each(member_iterator(test.begin(), &simple::a), member_iterator(test.end(), 
 @endcode
 */
 template <typename It, typename m>
-inline struct member_iterator_t<It, m> member_iterator( const It & it, m std::iterator_traits<It>::value_type::*d ){
+inline struct member_iterator_t<It, m> member_const_iterator( const It & it, m std::iterator_traits<It>::value_type::*d ){
     return member_iterator_t<It, m>(it, d);
 }
+
+/*
+helper function to simplify the use of @ref member_iterator_t wrapper. This is useful for passing
+member iterators as arguments.
+@arg it the iterator to wrap, the new member_iterator_t returned will point to the same position
+@arg d the member to wrap
+@code
+struct simple { int a; float b; };
+vector<simple> test;
+fill(member_iterator(test.begin(), &simple::a), member_iterator(test.end(), &simple::a), 0 );
+@endcode
+*/
+
+template <typename It, typename m>
+inline struct member_iterator_t<It, m> member_iterator(It it, m std::iterator_traits<It>::value_type::*d ){
+    return member_iterator_t<It, m>(it, d);
+}
+
 
 //@}
 

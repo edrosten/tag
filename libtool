@@ -44,7 +44,7 @@ available_tags=" CXX F77"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host bigfrog.lanl.gov:
+# Libtool was configured on host mesofrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -66,12 +66,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -85,7 +85,7 @@ AR_FLAGS="cru"
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-I /usr/local/include -L /usr/local/include"
 
 # A language-specific compiler.
 CC="gcc"
@@ -97,7 +97,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -147,7 +147,7 @@ pic_flag=" -fPIC -DPIC"
 pic_mode=default
 
 # What is the maximum length of a command?
-max_cmd_len=98304
+max_cmd_len=1572864
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"
@@ -325,10 +325,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.1.2 /usr/lib64 /lib64"
+sys_lib_search_path_spec="/usr/lib/gcc/i686-pc-linux-gnu/4.3.2 /usr/lib /lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib64/R/lib /usr/lib/cernlib/2006-g77/lib /usr/lib64/cernlib/2006-g77/lib /usr/lib/cernlib/2006/lib /usr/lib64/cernlib/2006/lib /packages/lib/intel/fce/lib /usr/lib/mysql /usr/lib64/mysql /usr/lib/octave-3.0.1 /usr/lib64/octave-3.0.1 /usr/lib/qt-3.3/lib /usr/lib64/qt-3.3/lib /usr/lib64/qt4/lib64 /usr/lib/wine/ /usr/local/lib64 /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/libfakeroot /lib /usr/lib /usr/local/lib /opt/qt/lib /usr/i486-linux-libc5/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -6812,7 +6812,7 @@ build_old_libs=`case $build_libtool_libs in yes) $echo no;; *) $echo yes;; esac`
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host bigfrog.lanl.gov:
+# Libtool was configured on host mesofrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -6834,12 +6834,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -6853,7 +6853,7 @@ AR_FLAGS="cru"
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-I /usr/local/include -L /usr/local/include"
 
 # A language-specific compiler.
 CC="g++"
@@ -6865,7 +6865,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -6915,7 +6915,7 @@ pic_flag=" -fPIC -DPIC"
 pic_mode=default
 
 # What is the maximum length of a command?
-max_cmd_len=98304
+max_cmd_len=1572864
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"
@@ -6994,11 +6994,11 @@ striplib="strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.1.2/crtbeginS.o"
+predep_objects="/usr/lib/gcc/i686-pc-linux-gnu/4.3.2/../../../crti.o /usr/lib/gcc/i686-pc-linux-gnu/4.3.2/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="/usr/lib/gcc/x86_64-redhat-linux/4.1.2/crtendS.o /usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64/crtn.o"
+postdep_objects="/usr/lib/gcc/i686-pc-linux-gnu/4.3.2/crtendS.o /usr/lib/gcc/i686-pc-linux-gnu/4.3.2/../../../crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7010,7 +7010,7 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64"
+compiler_lib_search_path="-L/usr/lib/gcc/i686-pc-linux-gnu/4.3.2 -L/usr/lib/gcc/i686-pc-linux-gnu/4.3.2 -L/usr/lib/gcc/i686-pc-linux-gnu/4.3.2/../../.."
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7090,10 +7090,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.1.2 /usr/lib64 /lib64"
+sys_lib_search_path_spec="/usr/lib/gcc/i686-pc-linux-gnu/4.3.2 /usr/lib /lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib64/R/lib /usr/lib/cernlib/2006-g77/lib /usr/lib64/cernlib/2006-g77/lib /usr/lib/cernlib/2006/lib /usr/lib64/cernlib/2006/lib /packages/lib/intel/fce/lib /usr/lib/mysql /usr/lib64/mysql /usr/lib/octave-3.0.1 /usr/lib64/octave-3.0.1 /usr/lib/qt-3.3/lib /usr/lib64/qt-3.3/lib /usr/lib64/qt4/lib64 /usr/lib/wine/ /usr/local/lib64 /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/libfakeroot /lib /usr/lib /usr/local/lib /opt/qt/lib /usr/i486-linux-libc5/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7117,7 +7117,7 @@ include_expsyms=""
 
 # ### BEGIN LIBTOOL TAG CONFIG: F77
 
-# Libtool was configured on host bigfrog.lanl.gov:
+# Libtool was configured on host mesofrog:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -7139,12 +7139,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux
+host=i686-pc-linux
 host_os=linux
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux
+build=i686-pc-linux
 build_os=linux
 
 # An echo program that does not interpret backslashes.
@@ -7158,10 +7158,10 @@ AR_FLAGS="cru"
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-I /usr/local/include -L /usr/local/include"
 
 # A language-specific compiler.
-CC="g77"
+CC="gfortran"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -7170,7 +7170,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -7220,7 +7220,7 @@ pic_flag=" -fPIC"
 pic_mode=default
 
 # What is the maximum length of a command?
-max_cmd_len=98304
+max_cmd_len=1572864
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"
@@ -7398,10 +7398,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.1.2 /usr/lib64 /lib64"
+sys_lib_search_path_spec="/usr/lib/gcc/i686-pc-linux-gnu/4.3.2 /usr/lib /lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/R/lib /usr/lib64/R/lib /usr/lib/cernlib/2006-g77/lib /usr/lib64/cernlib/2006-g77/lib /usr/lib/cernlib/2006/lib /usr/lib64/cernlib/2006/lib /packages/lib/intel/fce/lib /usr/lib/mysql /usr/lib64/mysql /usr/lib/octave-3.0.1 /usr/lib64/octave-3.0.1 /usr/lib/qt-3.3/lib /usr/lib64/qt-3.3/lib /usr/lib64/qt4/lib64 /usr/lib/wine/ /usr/local/lib64 /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/libfakeroot /lib /usr/lib /usr/local/lib /opt/qt/lib /usr/i486-linux-libc5/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
