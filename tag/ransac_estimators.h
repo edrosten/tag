@@ -24,8 +24,8 @@ namespace essential_matrix {
 
     template <class M> inline int getValidPair(const TooN::Matrix<3>& R1, const TooN::Matrix<3>& R2, const TooN::Vector<2>& e, double z1, const M& m)
     {
-	TooN::Vector<2> dm = m.b-e;
-	TooN::Vector<3> ha = TooN::unproject(m.a);
+	TooN::Vector<2> dm = second_point(m)-e;
+	TooN::Vector<3> ha = TooN::unproject(first_point(m));
 	TooN::Vector<3> inf1 = R1*ha;
 	TooN::Vector<3> inf2 = R2*ha;
 	double zp1 = inf1[2];
@@ -37,12 +37,12 @@ namespace essential_matrix {
 	    if (zp1 < 0)
 		return z1 <= 0 ? 0 : 1;
 	    // check for sign match
-	    return  ((pinf1-m.b)*dm*z1 >= 0) ? 0 : 1;
+	    return  ((pinf1-second_point(m))*dm*z1 >= 0) ? 0 : 1;
 	} else {
 	    //R2
 	    if (zp2 < 0)
 		return z1 <= 0 ? 2 : 3;
-	    return ((pinf2-m.b)*dm*z1 >= 0) ? 2 : 3;
+	    return ((pinf2-second_point(m))*dm*z1 >= 0) ? 2 : 3;
 	}
     }
 
