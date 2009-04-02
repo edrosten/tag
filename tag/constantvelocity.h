@@ -21,14 +21,14 @@ public:
         reset();
     }
 
-    inline void reset(void){
+    void reset(void){
         pose = TooN::SE3();
         TooN::Zero(angularVelocity);
         TooN::Zero(velocity);
         TooN::Identity(covariance);
     }
 
-    inline void resetVelocity(void){
+    void resetVelocity(void){
         TooN::Zero(angularVelocity);
         TooN::Zero(velocity);
     }
@@ -67,7 +67,7 @@ public:
     }
 
     // Jacobian has pos, rot, vel, angularVel in this order
-    inline const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, const double dt) {
+    const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, const double dt) {
             jacobian(0,6) = dt;
             jacobian(1,7) = dt;
             jacobian(2,8) = dt;
@@ -77,7 +77,7 @@ public:
             return jacobian;
     }
 
-    inline void updateState( State & state, const double dt ){
+    void updateState( State & state, const double dt ){
         // full velocity vector
         TooN::Vector<6> vel;
         vel.slice<0,3>() = state.velocity;
@@ -91,7 +91,7 @@ public:
         state.angularVelocity *= attenuation;
     }
 
-    inline const TooN::Matrix<State::STATE_DIMENSION> & getNoiseCovariance( const double dt ){
+    const TooN::Matrix<State::STATE_DIMENSION> & getNoiseCovariance( const double dt ){
         const double dt2 = dt * dt * 0.5;
         const double dt3 = dt * dt * dt * 0.3333333333333;
         for(unsigned int i = 0; i < 6; i++){
@@ -102,7 +102,7 @@ public:
         return noise;
     }
 
-    inline void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
+    void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
         state.pose = TooN::SE3::exp(innovation.slice<0,6>()) * state.pose;
         state.velocity = state.velocity + innovation.slice<6,3>();
         state.angularVelocity = state.angularVelocity + innovation.slice<9,3>();
