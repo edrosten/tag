@@ -62,9 +62,8 @@ static inline TooN::SO3<>  canonicalOrientation( const TooN::Vector<3> & a, cons
     TooN::Matrix<3> result;
     result.T()[0] = a;
     result.T()[2] = a ^ b;
-    result.T()[0] = TooN::unit(result.T()[0]);
-    result.T()[2] = TooN::unit(result.T()[2]);
     result.T()[1] = result.T()[2] ^ result.T()[0];
+    // normalization happens in SO3 constructor as part of coerce anyway
     return TooN::SO3<> (result);
 }
 
