@@ -14,6 +14,6 @@
 /// @param[out] poses the vector onto which any valid poses are appended
 /// @return the number of  poses appended to the vector
 
-int three_point_pose(const TooN::Vector<3> x[], const TooN::Vector<2> z[], std::vector<TooN::SE3>& poses);
+int three_point_pose(const TooN::Vector<3> x[], const TooN::Vector<2> z[], std::vector<TooN::SE3<> >& poses);
 
 #endif

@@ -8,7 +8,7 @@
 
 namespace tag {
 
-/// @defgroup fourpointpose Pose estimation from 4 2D-3D point correspondences
+/// @defgroup fourpointpose DEPRECATED Pose estimation from 4 2D-3D point correspondences - use 3 point instead
 /// This group contains a function and a related RANSAC estimator to compute
 /// a camera pose from 4 2D-3D point correspondences.
 

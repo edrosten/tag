@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES     = libtoontag.la
 libtoontag_la_SOURCES   = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp \
-                          src/fourpointpose.cpp  src/handeye.cpp
+                          src/handeye.cpp
 
 # the header files to be installed
 pkginclude_HEADERS  = \
@@ -10,7 +10,6 @@ pkginclude_HEADERS  = \
 	tag/threepointpose.h \
 	tag/absorient.h \
 	tag/array.h \
-	tag/fourpointpose.h \
 	tag/kalmanfilter.h \
 	tag/constantposition.h \
 	tag/constantvelocity.h \

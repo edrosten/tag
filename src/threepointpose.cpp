@@ -9,7 +9,7 @@ using namespace std;
 
 inline double square(double x) { return x*x; }
 
-SE3 three_point_absolute_orientation(const Vector<3> x[], const Vector<3> y[])
+SE3<> three_point_absolute_orientation(const Vector<3> x[], const Vector<3> y[])
 {
     Matrix<3> D, D1;
     
@@ -22,14 +22,14 @@ SE3 three_point_absolute_orientation(const Vector<3> x[], const Vector<3> y[])
     D1[2] = D1[1] ^ D1[0];
     
     
-    SO3 so3(gaussian_elimination(D, D1).T());
+    SO3<> so3(gaussian_elimination(D, D1).T());
     
     Vector<3> T = y[0] - so3 * x[0];
 
-    return SE3(so3, T);
+    return SE3<>(so3, T);
 }
 
-int three_point_pose(const Vector<3> xi[], const Vector<2> zi[], vector<SE3>& poses)
+int three_point_pose(const Vector<3> xi[], const Vector<2> zi[], vector<SE3<> >& poses)
 {    
     double ab_sq = norm_sq(xi[1] - xi[0]);
     double ac_sq = norm_sq(xi[2] - xi[0]);

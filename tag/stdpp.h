@@ -37,27 +37,47 @@ treated specially and produce a fill character before their position (if they ar
 
 #ifndef DOXYGEN_IGNORE_INTERNAL
 
+static struct noendl_s {} noendl;
+
 template <class T> struct NotFirst {
-    inline NotFirst(T & d) : data(d) {};
+    inline NotFirst(T & d) : data(d), last(true) {}
+    inline ~NotFirst() { if(last) data << std::endl; }
     T & data;
+    bool last;
+    
+    template <class S>
+    inline NotFirst<T> & operator,( const S & arg ){
+        data << data.fill() << arg;
+        return *this;
+    }
+
+    inline T & operator,(T & (*modifier)(T &)){
+        data << modifier;
+        last = false;
+        return data;
+    }
+
+    inline NotFirst<T> & operator,( noendl_s & arg ){
+        last = false;
+        return *this;
+    }
 };
 
-template <class T, class Char, class Traits>
-inline NotFirst<std::basic_ostream<Char,Traits> > operator,(std::basic_ostream<Char,Traits>  & stream, const T & data ){
-    stream << data;
+template <class T, class Char, class Traits> 
+inline NotFirst<std::basic_ostream<Char,Traits> > operator,(std::basic_ostream<Char,Traits>  & stream, const T & arg ){
+    stream << arg;
     return NotFirst<std::basic_ostream<Char,Traits> >(stream);
 }
 
-template <class T, class Char, class Traits>
-inline NotFirst<std::basic_ostream<Char,Traits> > operator,(NotFirst<std::basic_ostream<Char,Traits> > nf, const T & data ){
-    nf.data << nf.data.fill() << data;
-    return nf;
+template <class Char, class Traits>
+inline std::basic_ostream<Char,Traits> & operator,(std::basic_ostream<Char,Traits>  & stream, std::basic_ostream<Char,Traits> & (*modifier)(std::basic_ostream<Char,Traits> &)){
+    stream << modifier;
+    return stream;
 }
 
 template <class Char, class Traits>
-inline std::basic_ostream<Char,Traits> & operator,(NotFirst<std::basic_ostream<Char,Traits> > nf, std::basic_ostream<Char,Traits> & (*modifier)(std::basic_ostream<Char,Traits> &)){
-    nf.data << modifier;
-    return nf.data;
+inline std::basic_ostream<Char,Traits> & operator,(std::basic_ostream<Char,Traits>  & stream, noendl_s & arg ){
+    return stream;
 }
 
 namespace Internal

@@ -59,7 +59,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtoontag_la_LIBADD =
 am_libtoontag_la_OBJECTS = quartic.lo threepointpose.lo absorient.lo \
-	fourpointpose.lo handeye.lo
+	handeye.lo
 libtoontag_la_OBJECTS = $(am_libtoontag_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -198,7 +198,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libtoontag.la
 libtoontag_la_SOURCES = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp \
-                          src/fourpointpose.cpp  src/handeye.cpp
+                          src/handeye.cpp
 
 
 # the header files to be installed
@@ -207,7 +207,6 @@ pkginclude_HEADERS = \
 	tag/threepointpose.h \
 	tag/absorient.h \
 	tag/array.h \
-	tag/fourpointpose.h \
 	tag/kalmanfilter.h \
 	tag/constantposition.h \
 	tag/constantvelocity.h \
@@ -297,7 +296,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/absorient.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fourpointpose.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handeye.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quartic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threepointpose.Plo@am__quote@
@@ -343,13 +341,6 @@ absorient.lo: src/absorient.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/absorient.cpp' object='absorient.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o absorient.lo `test -f 'src/absorient.cpp' || echo '$(srcdir)/'`src/absorient.cpp
-
-fourpointpose.lo: src/fourpointpose.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fourpointpose.lo -MD -MP -MF $(DEPDIR)/fourpointpose.Tpo -c -o fourpointpose.lo `test -f 'src/fourpointpose.cpp' || echo '$(srcdir)/'`src/fourpointpose.cpp
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/fourpointpose.Tpo $(DEPDIR)/fourpointpose.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/fourpointpose.cpp' object='fourpointpose.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fourpointpose.lo `test -f 'src/fourpointpose.cpp' || echo '$(srcdir)/'`src/fourpointpose.cpp
 
 handeye.lo: src/handeye.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT handeye.lo -MD -MP -MF $(DEPDIR)/handeye.Tpo -c -o handeye.lo `test -f 'src/handeye.cpp' || echo '$(srcdir)/'`src/handeye.cpp

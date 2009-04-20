@@ -19,7 +19,7 @@ namespace tag {
 /// @param[in] b vector of 3D points
 /// @return TooN::SO3 containing the rotation such that b = T a
 /// @ingroup absorient
-TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b );
+TooN::SO3<> computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b );
 
 /// directly computes a rotation between two pairs of rays in space maximizing b * T a
 /// its about 8x faster then using the general computeOrientation for 2 correspondences.
@@ -29,7 +29,7 @@ TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std
 /// @param[in] b2 second output vector
 /// @return TooN::SO3 containing the rotation such that b = T a
 /// @ingroup absorient
-TooN::SO3 computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 );
+TooN::SO3<> computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 );
 
 /// computes the rigid transformation between two corresponding point sets after Horn
 /// The result is an SE3 that maps points from vector a to points from vector b : b[i] = SE3 * a[i]
@@ -37,13 +37,13 @@ TooN::SO3 computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> 
 /// @param[in] b vector of 3D points
 /// @return TooN::SE3 containing the transformation such that b = T a
 /// @ingroup absorient
-TooN::SE3 computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b);
+TooN::SE3<> computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b);
 
 /// computes the mean rotation of a set of rotations. This is the rotation R such that R^{-1} * R_i is minimal for all R_i.
 /// @param[in] r a vector of rotations
 /// @return TooN::SO3 mean rotation of all input rotations
 /// @ingroup absorient
-TooN::SO3 computeMeanOrientation( const std::vector<TooN::SO3> & r);
+TooN::SO3<> computeMeanOrientation( const std::vector<TooN::SO3<> > & r);
 
 /// computes a rotation matrix corresponding to a unit quaternion. The quaternion
 /// is in the format (q0,qx,qy,qz) to fit the absolute orientation algorithm. This

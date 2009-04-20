@@ -22,12 +22,11 @@ TooN::Matrix<3> quaternionToMatrix( const TooN::Vector<4> & q ){
     return result;
 }
 
-TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
+TooN::SO3<>  computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
     const size_t N = a.size();
     // compute cross correlations
     const int x = 0, y = 1, z = 2;
-    TooN::Matrix<3> s;
-    TooN::Zero(s);
+    TooN::Matrix<3> s = TooN::Zero;
     for( unsigned int i = 0; i < N; i++){
         s += a[i].as_col() * b[i].as_row();
     }
@@ -53,40 +52,38 @@ TooN::SO3 computeOrientation( const std::vector<TooN::Vector<3> > & a, const std
         if( evals[i] > evals[index] )
             index = i;
     TooN::Vector<4> evec = ev.get_evectors()[index];
-    TooN::SO3 result;
+    TooN::SO3<>  result;
     result = quaternionToMatrix(evec);
     return result;
 }
 
 // computes the orientation from (e1,e2,e3) -> (a,(a^b)^a,a^b), which means that b the second vector is in the a, b plane
-static inline TooN::SO3 canonicalOrientation( const TooN::Vector<3> & a, const TooN::Vector<3> & b ){
+static inline TooN::SO3<>  canonicalOrientation( const TooN::Vector<3> & a, const TooN::Vector<3> & b ){
     TooN::Matrix<3> result;
     result.T()[0] = a;
     result.T()[2] = a ^ b;
-    TooN::normalize(result.T()[0]);
-    TooN::normalize(result.T()[2]);
+    result.T()[0] = TooN::unit(result.T()[0]);
+    result.T()[2] = TooN::unit(result.T()[2]);
     result.T()[1] = result.T()[2] ^ result.T()[0];
-    return TooN::SO3(result);
+    return TooN::SO3<> (result);
 }
 
-TooN::SO3 computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 ){
-    TooN::SO3 r1 = canonicalOrientation( a1, a2 );
-    TooN::SO3 r2 = canonicalOrientation( b1, b2 );
-    const TooN::SO3 rAB = r2 * r1.inverse();
+TooN::SO3<>  computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 ){
+    TooN::SO3<>  r1 = canonicalOrientation( a1, a2 );
+    TooN::SO3<>  r2 = canonicalOrientation( b1, b2 );
+    const TooN::SO3<>  rAB = r2 * r1.inverse();
     r1 = canonicalOrientation( a2, a1 );
     r2 = canonicalOrientation( b2, b1 );
-    const TooN::SO3 rBA = r2 * r1.inverse();
-    const TooN::SO3 diff = rBA * rAB.inverse();
-    return TooN::SO3::exp(diff.ln() * 0.5) * rAB;
+    const TooN::SO3<>  rBA = r2 * r1.inverse();
+    const TooN::SO3<>  diff = rBA * rAB.inverse();
+    return TooN::SO3<> ::exp(diff.ln() * 0.5) * rAB;
 }
 
-TooN::SE3 computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
-    //std::assert(a.size() == b.size());
+TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
+    // std::assert(a.size() <= b.size());
     const size_t N = a.size();
 
-    TooN::Vector<3> ma, mb;
-    TooN::Zero(ma);
-    TooN::Zero(mb);
+    TooN::Vector<3> ma = TooN::Zero, mb = TooN::Zero;
 
     // compute centroids
     for(unsigned int i = 0; i < N; i++){
@@ -104,55 +101,32 @@ TooN::SE3 computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, c
     }
 
     // put resulting transformation together
-    TooN::SE3 result;
+    TooN::SE3<>  result;
     result.get_rotation() = computeOrientation( ap, bp );
     result.get_translation() = mb - result.get_rotation() * ma;
     return result;
 }
 
-#if 0
-// what is this actually doing? should give the same result as computeOrientation
-TooN::SO3 computeOrientationFitting( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
-    const unsigned int N = a.size();
-    // compute cross correlations
-    TooN::Matrix<3> m;
-    TooN::Zero(m);
-    for( unsigned int i = 0; i < N; i++){
-        m += a[i].as_col() * b[i].as_row();
-    }
-
-    // compute square root of s
-    TooN::Matrix<3> s = m.T() * m;
-    TooN::SymEigen<3> ev(s);
-    for( unsigned int i = 0; i < 3; i++)
-        ev.get_evalues()[i] = sqrt(ev.get_evalues()[i]);
-
-    TooN::SO3 result(ev.backsub(m.T()));
-    return result;
-}
-#endif
-
-TooN::SO3 computeMeanOrientation( const std::vector<TooN::SO3> & r){
+TooN::SO3<>  computeMeanOrientation( const std::vector<TooN::SO3<> > & r){
     const size_t N = r.size();
-    std::vector<TooN::SO3> rt(N);
-    TooN::SO3 base = r.front();
-    TooN::SO3 baseInv = base.inverse();
-    TooN::Vector<3> center;
-    Zero(center);
+    std::vector<TooN::SO3<> > rt(N);
+    TooN::SO3<>  base = r.front();
+    TooN::SO3<>  baseInv = base.inverse();
+    TooN::Vector<3> center = TooN::Zero;
     for(unsigned int i = 0; i < N; i++){
         rt[i] = r[i] * baseInv;
         center += rt[i].ln();
     }
     center /= N;
-    TooN::SO3 mean = TooN::SO3::exp(center);
+    TooN::SO3<> mean(center);
     do {
-        Zero(center);
+        center = TooN::Zero;
         for(unsigned int i = 0; i < N; i++){
-            TooN::SO3 diff = rt[i] * mean.inverse();
+            TooN::SO3<>  diff = rt[i] * mean.inverse();
             center += diff.ln();
         }
         center /= N;
-        mean = TooN::SO3::exp(center) * mean;
+        mean = TooN::SO3<>::exp(center) * mean;
     } while(center * center > 1e-12);
 
     return mean * base;
