@@ -2,6 +2,8 @@
 
 using namespace TooN;
 
+namespace tag {
+
 void build_matrix(const Vector<9>& X, const Vector<9>& Y, const Vector<9>& Z, const Vector<9>& W, Matrix<10,20>& R)
 {
      const double t1 = X[0]*X[0];
@@ -740,4 +742,6 @@ Z[4];
       R[9][18] = t3289;
       R[9][19] = -t3154*W[4]+t3152*W[5]-t3164*W[7]+t3162*W[8]-t3146*W[8]+t3144*
 W[7];
+}
+
 }
