@@ -2,7 +2,6 @@
 #define TAG_HELPERS_H
 
 #include <TooN/se3.h>
-#include <TooN/wls_cholesky.h>
 
 namespace tag {
 
@@ -28,6 +27,8 @@ template <class T> inline double noise(const T& t) { return 1.0; }
 /// @param end iterator to the end of the sequence (after the last element)
 /// @param[out] H resulting homography
 /// @ingroup helpersgroup
+
+#if 0
 template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<3>& H){
     assert(std::distance(begin,end) >= 4);
 
@@ -49,6 +50,7 @@ template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<
     H[2][2] = 1;
 }
 
+
 /// return version of the 2D homography estimation between two sets of correspondences.
 /// The observations passed (via iterators) to the estimate method must allow:
 /// @code
@@ -67,6 +69,8 @@ template <class It> TooN::Matrix<3> getProjectiveHomography(It begin, It end){
     getProjectiveHomography(begin, end, H);
     return H;
 }
+
+#endif
 
 /// creates a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
 /// @param vec the 3 vector input
@@ -94,8 +98,8 @@ template<class V> inline TooN::Matrix<3> getCrossProductMatrix( const V & vec ){
 /// @param transform the transformation as SE3
 /// @param[out] E the 3x3 matrix set to the essential matrix
 /// @ingroup helpersgroup
-template<class M> inline void getEssentialMatrix(const TooN::SE3 & transform , M & E){
-    assert(E.num_cols() == 3 && E.num_rows() == 3);
+template<class M> inline void getEssentialMatrix(const TooN::SE3<> & transform , M & E){
+    //assert(E.num_cols() == 3 && E.num_rows() == 3);
     const TooN::Vector<3> & t = transform.get_translation();
     const TooN::Matrix<3> & r = transform.get_rotation().get_matrix();
     E[0] = t[1] * r[2] - t[2] * r[1];
@@ -107,7 +111,7 @@ template<class M> inline void getEssentialMatrix(const TooN::SE3 & transform , M
 /// @param transform the transformation as SE3
 /// @return the 3x3 matrix set to the essential matrix
 /// @ingroup helpersgroup
-inline TooN::Matrix<3> getEssentialMatrix(const TooN::SE3 & transform ){
+inline TooN::Matrix<3> getEssentialMatrix(const TooN::SE3<> & transform ){
     TooN::Matrix<3> E;
     getEssentialMatrix(transform, E);
     return E;
