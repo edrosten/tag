@@ -2,6 +2,7 @@
 #define TAG_HELPERS_H
 
 #include <TooN/se3.h>
+#include <TooN/wls.h>
 
 namespace tag {
 
@@ -28,18 +29,17 @@ template <class T> inline double noise(const T& t) { return 1.0; }
 /// @param[out] H resulting homography
 /// @ingroup helpersgroup
 
-#if 0
 template <class It> void getProjectiveHomography(It begin, It end, TooN::Matrix<3>& H){
     assert(std::distance(begin,end) >= 4);
 
-    TooN::WLSCholesky<8> wls;
+    TooN::WLS<8> wls;
     for (It it=begin; it!=end; it++) {
         const TooN::Vector<2>& a = first_point(*it);
         const TooN::Vector<2>& b = second_point(*it);
-        const double rows[2][8] = {{a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]},
-                        {0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]}};
-        wls.add_df(b[0], TooN::Vector<8>(rows[0]), noise(*it));
-        wls.add_df(b[1], TooN::Vector<8>(rows[1]), noise(*it));
+        const TooN::Vector<8> J1 = TooN::makeVector(a[0], a[1], 1, 0, 0, 0, -b[0]*a[0], -b[0]*a[1]);
+        const TooN::Vector<8> J2 = TooN::makeVector(0, 0, 0, a[0], a[1], 1, -b[1]*a[0], -b[1]*a[1]);
+        wls.add_mJ(b[0], J1, noise(*it));
+        wls.add_mJ(b[1], J2, noise(*it));
     }
     wls.compute();
     TooN::Vector<8> h = wls.get_mu();
@@ -69,8 +69,6 @@ template <class It> TooN::Matrix<3> getProjectiveHomography(It begin, It end){
     getProjectiveHomography(begin, end, H);
     return H;
 }
-
-#endif
 
 /// creates a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
 /// @param vec the 3 vector input
