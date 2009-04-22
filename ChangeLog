@@ -1,0 +1,637 @@
+==========================================
+Repository tagged as SNAPSHOT_20090420
+==========================================
+
+Mon 20 Apr, 2009 11:02:35 author: gerhard (Concatenated 2 entries at 1s)
+    File: libtool (Rev. 1.14)
+    File: src/absorient.cpp (Rev. 1.4)
+    File: src/handeye.cpp (Rev. 1.2)
+    File: src/threepointpose.cpp (Rev. 1.2)
+    File: tag/absorient.h (Rev. 1.4)
+    File: tag/fourpointpose.h (Rev. 1.9)
+    File: tag/handeye.h (Rev. 1.2)
+    File: tag/stdpp.h (Rev. 1.7)
+    File: tag/threepointpose.h (Rev. 1.2)
+    File: Makefile.am (Rev. 1.11)
+    File: Makefile.in (Rev. 1.11)
+
+made tag work with TooN2, deprecated four point pose - use three point instread, much better
+
+--------------
+==========================================
+Repository tagged as BEFORE_TOON2
+==========================================
+
+Thu  2 Apr, 2009 15:20:14 author: gerhard
+    File: tag/constantvelocity.h (Rev. 1.4)
+
+minimal cleanup
+
+--------------
+
+Wed  1 Apr, 2009 17:33:36 author: gerhard
+    File: build/vc2008/tag.sln (Rev. 1.1)
+    File: build/vc2008/tag.vcproj (Rev. 1.1)
+
+added VC2008 project files
+
+--------------
+
+Thu 29 Jan, 2009 08:00:59 author: gerhard
+    File: tag/ransac_estimators.h (Rev. 1.9)
+
+fixed access to correspondence data in exxential_matrix estimator
+
+--------------
+
+Mon  5 Jan, 2009 15:25:33 author: edrosten
+    File: libtool (Rev. 1.13)
+    File: tag/fn.h (Rev. 1.7)
+
+Make member_iterator non-const. Add member_const_iterator
+
+--------------
+
+Tue  9 Dec, 2008 20:37:57 author: gerhard
+    File: tag/ransac_estimators.h (Rev. 1.8)
+
+missing ransac estimator for camera rotation
+
+--------------
+
+Tue  9 Dec, 2008 20:33:42 author: gerhard (Concatenated 2 entries at 1s)
+    File: tag/absorient.h (Rev. 1.3)
+    File: tag/helpers.h (Rev. 1.2)
+    File: tag/kalmanfilter.h (Rev. 1.9)
+    File: src/absorient.cpp (Rev. 1.3)
+
+fast rotation from rays
+
+--------------
+==========================================
+Repository tagged as SNAPSHOT_20081127
+==========================================
+
+Wed 20 Aug, 2008 14:14:13 author: gerhard
+    File: build/vc2005/tag.vcproj (Rev. 1.2)
+
+added missing file for handeye calibration
+
+--------------
+
+Mon 18 Aug, 2008 18:36:28 author: edrosten (Concatenated 2 entries at 1s)
+    File: tag/printf.h (Rev. 1.9)
+    File: libtool (Rev. 1.12)
+
+Fix in printf
+
+--------------
+
+Fri 15 Aug, 2008 14:24:49 author: gerhard (Concatenated 2 entries at 1s)
+    File: src/handeye.cpp (Rev. 1.1)
+    File: tag/handeye.h (Rev. 1.1)
+    File: Makefile.am (Rev. 1.10)
+    File: Makefile.in (Rev. 1.10)
+    File: libtool (Rev. 1.11)
+
+added hand eye calibration routines
+
+--------------
+
+Thu 10 Jul, 2008 11:56:56 author: gerhard
+    File: Makefile.in (Rev. 1.9)
+
+update for change in Makefile.am (long ago :)
+
+--------------
+
+Thu 29 May, 2008 17:36:23 author: gerhard
+    File: src/absorient.cpp (Rev. 1.2)
+    File: src/quartic.cpp (Rev. 1.3)
+
+build files and some fixes for Visual Studio 2005
+
+--------------
+
+Tue 20 May, 2008 03:15:30 author: edrosten (Concatenated 2 entries at 1s)
+    File: tag/printf.h (Rev. 1.8)
+    File: libtool (Rev. 1.10)
+
+64bit fix
+
+--------------
+
+Tue  1 Apr, 2008 03:40:52 author: ethaneade
+    File: src/quartic.cpp (Rev. 1.2)
+
+Addressed unlikely but possible boundary case in quartic solver.
+
+--------------
+
+Mon 31 Mar, 2008 17:35:42 author: ethaneade (Concatenated 2 entries at 1s)
+    File: src/threepointpose.cpp (Rev. 1.1)
+    File: src/quartic.cpp (Rev. 1.1)
+    File: tag/quartic.h (Rev. 1.1)
+    File: tag/threepointpose.h (Rev. 1.1)
+
+An efficient implementation of the perspective three point pose algorithm
+given by Fischer and Bolles, 1980.  The quartic solver uses a careful
+implementation of the quartic formula, and the resulting roots are refined
+using Newton's method.  On my hardware, the implementation takes about 3
+microseconds to run in the average case.
+
+--------------
+
+Tue 25 Mar, 2008 23:44:51 author: edrosten
+    File: tag/tuple.h (Rev. 1.6)
+
+Indexing for all tuple types
+
+--------------
+
+Mon 18 Feb, 2008 17:30:01 author: gerhard
+    File: tag/ransac.h (Rev. 1.10)
+
+use erase instead of resize to avoid the need for copy constructor
+
+--------------
+
+Tue 11 Dec, 2007 15:41:07 author: gerhard
+    File: tag/unscented.h (Rev. 1.2)
+
+made Sqrt versions accessible, removed some dependencies
+
+--------------
+
+Mon  3 Dec, 2007 17:39:31 author: gerhard (Concatenated 2 entries at 1s)
+    File: tag/unscented.h (Rev. 1.1)
+    File: Makefile.am (Rev. 1.8)
+    File: Makefile.in (Rev. 1.8)
+    File: aclocal.m4 (Rev. 1.7)
+    File: configure (Rev. 1.7)
+    File: libtool (Rev. 1.9)
+
+unscented transform implementations by Ethan Eade
+
+--------------
+
+Wed 31 Oct, 2007 10:26:50 author: gerhard
+    File: AUTHORS (Rev. 1.2)
+    File: Doxyfile (Rev. 1.4)
+    File: README (Rev. 1.2)
+
+documentation fixes
+
+--------------
+
+Wed 31 Oct, 2007 10:26:22 author: gerhard (Concatenated 2 entries at 1s)
+    File: tag/fourpointpose.h (Rev. 1.8)
+    File: tag/ransac.h (Rev. 1.9)
+    File: tag/ransac_estimators.h (Rev. 1.7)
+    File: Makefile.am (Rev. 1.7)
+    File: Makefile.in (Rev. 1.7)
+    File: aclocal.m4 (Rev. 1.6)
+    File: configure (Rev. 1.6)
+    File: libtool (Rev. 1.8)
+
+updated ransac interfaces to get minimal hypothesis size directly from estimators. backwards compatibility functions are still provided. also added helpers refactoring and adding some common code
+
+--------------
+
+Tue 30 Oct, 2007 18:56:38 author: gerhard
+    File: tag/ransac.h (Rev. 1.8)
+
+64bit compatibility (size of size_t type)
+
+--------------
+
+Thu 25 Oct, 2007 21:33:21 author: edrosten
+    File: libtool (Rev. 1.7)
+    File: tag/array.h (Rev. 1.2)
+
+Remove some compile warnings.
+
+--------------
+
+Tue 28 Aug, 2007 17:39:14 author: edrosten
+    File: tag/printf.h (Rev. 1.7)
+
+Fixed warning.
+
+--------------
+
+Mon 27 Aug, 2007 12:30:28 author: gerhard
+    File: tag/fourpointpose.h (Rev. 1.7)
+
+refactored
+
+--------------
+
+Fri 17 Aug, 2007 17:06:28 author: gerhard
+    File: tag/ransac_estimators.h (Rev. 1.6)
+
+homography estimator and some optimisations and fixes
+
+--------------
+
+Mon 23 Jul, 2007 18:51:51 author: gerhard
+    File: tag/fourpointpose.h (Rev. 1.6)
+
+add score function for likelihood-based ransac scoring
+
+--------------
+
+Tue 17 Jul, 2007 00:13:49 author: edrosten
+    File: tag/fn.h (Rev. 1.6)
+
+Make member_iterator work with pointers (which are valud iterators) by using
+the std::iterator_traits class.
+
+--------------
+
+Tue 12 Jun, 2007 21:05:08 author: gerhard
+    File: tag/ransac.h (Rev. 1.7)
+    File: tag/ransac_estimators.h (Rev. 1.5)
+
+added plane estimation
+
+--------------
+
+Wed 14 Feb, 2007 15:31:28 author: gerhard
+    File: tag/measurements.h (Rev. 1.4)
+
+corrected WorldPose and WorldPosition measurements
+
+--------------
+
+Wed 24 Jan, 2007 03:10:02 author: edrosten
+    File: tag/fn.h (Rev. 1.5)
+
+Removed extre qualifiers which cause errors in gcc 4.1.0
+
+--------------
+
+Thu 14 Dec, 2006 14:00:46 author: gerhard
+    File: tag/constantvelocity.h (Rev. 1.3)
+    File: tag/kalmanfilter.h (Rev. 1.8)
+
+optimizations through returning references instead of temporary return values and using reference variables in the filter
+
+--------------
+
+Tue  5 Dec, 2006 17:43:10 author: gerhard
+    File: tag/kalmanfilter.h (Rev. 1.7)
+
+traits for kalman filter template
+
+--------------
+
+Mon 25 Sep, 2006 22:29:14 author: edrosten
+    File: tag/tuple.h (Rev. 1.5)
+
+Added missing const to avoid some strange compile errors in some
+cases.
+
+--------------
+
+Mon 11 Sep, 2006 17:12:23 author: gerhard
+    File: tag/fn.h (Rev. 1.4)
+
+moved binary_function specialization to std namespace where it belongs
+
+--------------
+
+Mon  4 Sep, 2006 17:24:27 author: gerhard
+    File: tag/fn.h (Rev. 1.3)
+
+added a binary_function traits class for functional header
+
+--------------
+
+Mon  4 Sep, 2006 17:23:01 author: gerhard
+    File: src/fourpointpose.cpp (Rev. 1.6)
+
+refactored checks, avoids unnecessary use of acos, asin
+
+--------------
+
+Mon  4 Sep, 2006 16:50:04 author: jjneubert
+    File: libtool (Rev. 1.6)
+    File: src/fourpointpose.cpp (Rev. 1.5)
+
+fixed floating point error in fourPointPose
+
+--------------
+
+Wed 26 Jul, 2006 18:08:07 author: gerhard
+    File: src/fourpointpose.cpp (Rev. 1.4)
+    File: tag/fourpointpose.h (Rev. 1.5)
+
+added a tolerance value to four point pose estimation to come up with an estimation under measurement errors
+
+--------------
+
+Fri 21 Jul, 2006 11:45:04 author: gerhard
+    File: tag/intersection.h (Rev. 1.2)
+
+fixed triangle-triangle intersection
+
+--------------
+
+Wed 19 Jul, 2006 17:20:48 author: gerhard
+    File: tag/fn.h (Rev. 1.2)
+
+fixed member_iterator_t to work correct with constness and make it much cleaner
+
+--------------
+
+Wed 19 Jul, 2006 09:53:56 author: gerhard
+    File: tag/intersection.h (Rev. 1.1)
+
+added intersection functions
+
+--------------
+
+Fri 14 Jul, 2006 23:02:35 author: edrosten
+    File: tag/tuple.h (Rev. 1.4)
+
+Added more tuple functionality. Value and non-const reference lists also
+exist. These do not have most of the functionality of T_list, they are
+designed for multiple return vaules from functions. See the docs.
+
+--------------
+
+Wed 12 Jul, 2006 01:26:37 author: edrosten
+    File: tag/stdpp.h (Rev. 1.6)
+
+Utility function for std::pair, so that multiple values can be returned from
+functions directly in to two variables, eg:
+float f;
+int i;
+rpair(f, i) = make_pair(2.2f, 7);
+
+--------------
+
+Tue 11 Jul, 2006 19:00:43 author: edrosten
+    File: tag/tuple.h (Rev. 1.3)
+
+Namespace related fix
+
+--------------
+
+Thu  6 Jul, 2006 23:31:57 author: edrosten
+    File: tag/array.h (Rev. 1.1)
+
+I hate forgetting to add files.
+
+--------------
+
+Wed  5 Jul, 2006 21:43:55 author: edrosten
+    File: Makefile.am (Rev. 1.5)
+    File: Makefile.in (Rev. 1.5)
+    File: aclocal.m4 (Rev. 1.4)
+    File: configure (Rev. 1.4)
+    File: libtool (Rev. 1.4)
+
+Checked in an array type with a sequence constructor (using tuples).
+
+--------------
+
+Mon 19 Jun, 2006 11:55:07 author: gerhard
+    File: tag/fn.h (Rev. 1.1)
+
+added header for std functional and iterator add ons
+
+--------------
+
+Tue 13 Jun, 2006 18:19:27 author: gerhard
+    File: tag/fourpointpose.h (Rev. 1.4)
+    File: tag/kalmanfilter.h (Rev. 1.6)
+    File: tag/ransac.h (Rev. 1.6)
+
+some fixes after ransac update:
+namespace qualifiers in ransac.h and kalmanfilter.h
+interface update for fourpointpose.h ransac estimator
+
+--------------
+
+Tue 13 Jun, 2006 03:37:32 author: ethaneade
+    File: tag/ransac_estimators.h (Rev. 1.4)
+
+More fixes, mostly namespace qualification issues.
+
+--------------
+
+Tue 13 Jun, 2006 03:00:21 author: ethaneade
+    File: tag/ransac.h (Rev. 1.5)
+
+Small fix to find_RANSAC_inliers.
+
+--------------
+
+Tue 13 Jun, 2006 02:55:46 author: ethaneade
+    File: tag/ransac.h (Rev. 1.4)
+
+Small fix to find_RANSAC_inliers_guided_breadth_first.
+
+--------------
+
+Tue 13 Jun, 2006 02:50:44 author: ethaneade
+    File: tag/ransac.h (Rev. 1.3)
+    File: tag/ransac_estimators.h (Rev. 1.3)
+
+Updated RANSAC algorithms and estimators to fix bugs and improve efficiency.
+There are now (only) two estimators defined:
+
+- EssentialMatrix estimates the essential matrix given at least 8
+  correspondences (using the Torr-Fitzgibbon algorithm) and gives
+  decomposition into SE(3)
+- AffineHomography estimates a transformation of the form Ax+T given at least 4 correspondences
+
+More estimators will be added as they are tested.  The required interface is
+straightforward.
+
+There are three RANSAC algorithms defined:
+
+- find_RANSAC_inliers is classic RANSAC
+- find_RANSAC_inliers_breadth_first is preemptive RANSAC
+- find_RANSAC_inliers_guided_breadth_first is preemptive RANSAC with a non-uniform sampling density
+
+The interfaces of estimators and correspondences are slightly changed; see
+the doxygen for details.
+
+--------------
+
+Mon  5 Jun, 2006 23:29:50 author: edrosten
+    File: tag/printf.h (Rev. 1.6)
+
+Mistake in macros
+
+--------------
+
+Mon  5 Jun, 2006 19:04:57 author: gerhard
+    File: tag/kalmanfilter.h (Rev. 1.5)
+
+using optimized transformCovariance from TooN
+
+--------------
+
+Mon  5 Jun, 2006 16:19:30 author: gerhard
+    File: tag/constantvelocity.h (Rev. 1.2)
+    File: tag/kalmanfilter.h (Rev. 1.4)
+    File: tag/measurements.h (Rev. 1.3)
+
+various fixes to make kalman filter stuff actually compile :)
+
+--------------
+
+Sun  4 Jun, 2006 13:21:09 author: gerhard
+    File: src/fourpointpose.cpp (Rev. 1.3)
+
+refactored common code to helper function
+
+--------------
+
+Sun  4 Jun, 2006 13:09:19 author: gerhard
+    File: src/fourpointpose.cpp (Rev. 1.2)
+    File: tag/fourpointpose.h (Rev. 1.3)
+
+fixed four point pose estimation
+
+--------------
+
+Sun  4 Jun, 2006 13:08:49 author: gerhard
+    File: tag/measurements.h (Rev. 1.2)
+
+added convenience function
+
+--------------
+
+Sun  4 Jun, 2006 13:08:35 author: gerhard
+    File: tag/stdpp.h (Rev. 1.5)
+
+more constraint template parameters to avoid conflicts
+
+--------------
+
+Wed 31 May, 2006 17:46:20 author: gerhard
+    File: Makefile.am (Rev. 1.3)
+    File: Makefile.in (Rev. 1.3)
+    File: aclocal.m4 (Rev. 1.3)
+    File: configure (Rev. 1.3)
+    File: libtool (Rev. 1.3)
+    File: tag/absorient.h (Rev. 1.2)
+    File: tag/fourpointpose.h (Rev. 1.2)
+    File: tag/kalmanfilter.h (Rev. 1.3)
+    File: tag/printf.h (Rev. 1.5)
+    File: tag/ransac.h (Rev. 1.2)
+    File: tag/ransac_estimators.h (Rev. 1.2)
+    File: tag/stdpp.h (Rev. 1.4)
+
+- added Kalman filter models and measurement classes, some refactoring,
+  still need to fix a number of things
+- some doc fixes and proper include guards
+
+--------------
+
+Wed 31 May, 2006 01:09:48 author: edrosten
+    File: tag/printf.h (Rev. 1.4)
+    File: tag/tuple.h (Rev. 1.2)
+
+Fixed guards and include
+
+--------------
+
+Wed 31 May, 2006 01:08:29 author: edrosten
+    File: tag/printf.h (Rev. 1.3)
+
+Fixed guards
+
+--------------
+
+Wed 31 May, 2006 01:07:56 author: edrosten
+    File: tag/printf.h (Rev. 1.2)
+
+Fixed namespace
+
+--------------
+
+Wed 31 May, 2006 00:00:33 author: edrosten
+    File: Makefile.am (Rev. 1.2)
+    File: Makefile.in (Rev. 1.2)
+    File: aclocal.m4 (Rev. 1.2)
+    File: configure (Rev. 1.2)
+    File: libtool (Rev. 1.2)
+
+Added files to Makefile.am
+
+--------------
+
+Tue 30 May, 2006 23:59:51 author: edrosten
+    File: tag/printf.h (Rev. 1.1)
+    File: tag/tuple.h (Rev. 1.1)
+
+Added typesafe printf and tuple types.
+
+--------------
+
+Tue 30 May, 2006 20:53:22 author: gerhard
+    File: Doxyfile (Rev. 1.3)
+    File: tag/stdpp.h (Rev. 1.3)
+
+documentation fixes
+
+--------------
+
+Tue 30 May, 2006 19:47:46 author: edrosten
+    File: tag/stdpp.h (Rev. 1.2)
+
+Added add_fill, print and no_space ostream modifiers for use with
+operator<<. For some reason documentation doesn't work.
+
+--------------
+
+Mon 29 May, 2006 18:31:57 author: gerhard
+    File: tag/stdpp.h (Rev. 1.1)
+
+documentation updates and stdpp header with , op for streams
+
+--------------
+
+Mon 29 May, 2006 15:00:25 author: gerhard
+    File: config.guess (Rev. 1.1)
+    File: config.sub (Rev. 1.1)
+    File: depcomp (Rev. 1.1)
+    File: missing (Rev. 1.1)
+
+added missing build files
+
+--------------
+
+Mon 29 May, 2006 14:54:03 author: gerhard
+    File: AUTHORS (Rev. 1.1)
+    File: COPYING (Rev. 1.1)
+    File: ChangeLog (Rev. 1.1)
+    File: Doxyfile (Rev. 1.1)
+    File: INSTALL (Rev. 1.1)
+    File: Makefile.am (Rev. 1.1)
+    File: Makefile.in (Rev. 1.1)
+    File: NEWS (Rev. 1.1)
+    File: README (Rev. 1.1)
+    File: aclocal.m4 (Rev. 1.1)
+    File: configure (Rev. 1.1)
+    File: configure.in (Rev. 1.1)
+    File: install-sh (Rev. 1.1)
+    File: libtool (Rev. 1.1)
+    File: ltmain.sh (Rev. 1.1)
+    File: src/absorient.cpp (Rev. 1.1)
+    File: src/fourpointpose.cpp (Rev. 1.1)
+    File: tag/absorient.h (Rev. 1.1)
+    File: tag/fourpointpose.h (Rev. 1.1)
+    File: tag/kalmanfilter.h (Rev. 1.1)
+    File: tag/ransac.h (Rev. 1.1)
+    File: tag/ransac_estimators.h (Rev. 1.1)
+
+uploaded initial version to tag repository
+
+--------------
