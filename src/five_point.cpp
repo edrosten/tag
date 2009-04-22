@@ -1,19 +1,68 @@
 #include <tag/five_point.h>
+#include <tag/stdpp.h>
 
 #include <TooN/helpers.h>
 #include <TooN/gauss_jordan.h>
 #include <TooN/SVD.h>
 
-#include "ccmcomplex.h"
-
 using namespace TooN;
 using namespace std;
 using namespace std::tr1;
 
-//CCMath's polyroot
-extern "C" int plrt(double *cof,int n,Cpx *root,double ra,double rb);
+extern "C" {
+#include "solve.h"
+}
 
 namespace tag {
+
+vector<double> get_roots(const Vector<11> & p){
+	// uses Graphics Gem I code 
+	// for details see here:
+	// http://tog.acm.org/GraphicsGems/
+
+	poly	sseq[10];
+	Vector<11,double,Reference> v(sseq[0].coef);
+	v = p;
+
+	int num_poly = buildsturm(10, sseq);
+	int atmin, atmax;
+	int nroots = numroots(num_poly, sseq, &atmin, &atmax);
+
+	vector<double> roots(nroots);
+	if(nroots == 0)
+		return roots;
+
+	double min = -1.0;
+	int nchanges = numchanges(num_poly, sseq, min);
+	for (int i = 0; nchanges != atmin && i != MAXPOW; i++) { 
+		min *= 10.0;
+		nchanges = numchanges(num_poly, sseq, min);
+	}
+
+	if (nchanges != atmin) {
+			cerr << "solve: unable to bracket all negative roots" << endl;
+			atmin = nchanges;
+	}
+
+	double max = 1.0;
+	nchanges = numchanges(num_poly, sseq, max);
+	for (int i = 0; nchanges != atmax && i != MAXPOW; i++) { 
+		max *= 10.0;
+		nchanges = numchanges(num_poly, sseq, max);
+	}
+
+	if (nchanges != atmax) {
+			cerr << "solve: unable to bracket all positive roots" << endl;
+			atmax = nchanges;
+	}
+
+	nroots = atmin - atmax;
+
+	/*
+	 * perform the bisection.
+	 */
+	sbisect(num_poly, sseq, min, max, atmin, atmax, &roots[0]);
+}
 
 void build_matrix(const Vector<9>& X, const Vector<9>& Y, const Vector<9>& Z, const Vector<9>& W, Matrix<10,20>& R);
 
@@ -58,6 +107,23 @@ template<int N> double polyval(const Vector<N>& v, double x)
 
 	val += v[0];
 	return val;
+}
+
+template<int N> Vector<N-1> poly_diff(const Vector<N> & v)
+{
+	Vector<N-1> ret;
+	for(int i = 1; i < N; ++i){
+		ret[i-1] = v[i]*i;
+	}
+	return ret;
+}
+
+template<int N> pair<Vector<2>, Vector<N-1> > poly_div(const Vector<N> & num, const Vector<N-1> & denom)
+{
+	Vector<2> f;
+	Vector<N-1> r;
+	
+	
 }
 
 Matrix<3, 3, double, Reference::RowMajor> as_matrix(Vector<9>& v)
@@ -165,40 +231,28 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	//The polynomial is...
 	Vector<11> n = poly_mul(p1, b_31) + poly_mul(p2, b_32) + poly_mul(p3, b_33);
 
-	
-	//Use the CCMath root finder.
-	//-1, 1 seem to work OK.
-	//
-	// Return value means:
-	// 0 -> normal exit
-    // m>0 -> convergence failure for roots k<m
-	Cpx roots[10];	
-	int num = plrt(&n[0], 10, roots, 1, -1);
-
+	vector<double> roots = get_roots(n);
 	vector<Matrix<3> > Es;
 
-	for(int i=num; i < 10; i++)
+	for(int i=0; i <roots.size(); i++)
 	{
-		if(abs(roots[i].im) < 1e-10)
-		{
-			double z = roots[i].re;
-			
-			//Solve the linear system in x, y for the forst two rows of b
-			// [b11 b12 b13] [x]   [ 0 ]
-			// [b21 b22 b23] [y] = [ 0 ]
-			//
-			//  Rearrange to give:
-			//  
-			// [b11 b12] [x]    [ b13 ]
-			// [b21 b22] [y] = -[ b23 ]
-			//
-			// Solve and it gives:
-			// Eqn 28. 
-			double x = polyval(p1, z)/polyval(p3,z);
-			double y = polyval(p2, z)/polyval(p3,z);
+		double z = roots[i];
+		
+		//Solve the linear system in x, y for the forst two rows of b
+		// [b11 b12 b13] [x]   [ 0 ]
+		// [b21 b22 b23] [y] = [ 0 ]
+		//
+		//  Rearrange to give:
+		//  
+		// [b11 b12] [x]    [ b13 ]
+		// [b21 b22] [y] = -[ b23 ]
+		//
+		// Solve and it gives:
+		// Eqn 28. 
+		double x = polyval(p1, z)/polyval(p3,z);
+		double y = polyval(p2, z)/polyval(p3,z);
 
-			Es.push_back(x * as_matrix(X) + y*as_matrix(Y) + z*as_matrix(Z) + as_matrix(W));
-		}
+		Es.push_back(x * as_matrix(X) + y*as_matrix(Y) + z*as_matrix(Z) + as_matrix(W));
 	}
 
 	return Es;

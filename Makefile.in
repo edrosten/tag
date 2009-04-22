@@ -59,7 +59,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtoontag_la_LIBADD =
 am_libtoontag_la_OBJECTS = quartic.lo threepointpose.lo absorient.lo \
-	handeye.lo five_point.lo five_point_buildmatrix.lo plrt.lo
+	handeye.lo five_point.lo five_point_buildmatrix.lo sturm.lo \
+	util.lo
 libtoontag_la_OBJECTS = $(am_libtoontag_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -207,7 +208,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libtoontag.la
 libtoontag_la_SOURCES = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp \
-                          src/handeye.cpp src/five_point.cpp src/five_point_buildmatrix.cpp src/plrt.c
+                          src/handeye.cpp src/five_point.cpp src/five_point_buildmatrix.cpp src/sturm.c src/util.c
 
 
 # the header files to be installed
@@ -309,9 +310,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/five_point.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/five_point_buildmatrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handeye.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plrt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quartic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sturm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threepointpose.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -334,12 +336,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-plrt.lo: src/plrt.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT plrt.lo -MD -MP -MF $(DEPDIR)/plrt.Tpo -c -o plrt.lo `test -f 'src/plrt.c' || echo '$(srcdir)/'`src/plrt.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/plrt.Tpo $(DEPDIR)/plrt.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/plrt.c' object='plrt.lo' libtool=yes @AMDEPBACKSLASH@
+sturm.lo: src/sturm.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sturm.lo -MD -MP -MF $(DEPDIR)/sturm.Tpo -c -o sturm.lo `test -f 'src/sturm.c' || echo '$(srcdir)/'`src/sturm.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/sturm.Tpo $(DEPDIR)/sturm.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/sturm.c' object='sturm.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o plrt.lo `test -f 'src/plrt.c' || echo '$(srcdir)/'`src/plrt.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sturm.lo `test -f 'src/sturm.c' || echo '$(srcdir)/'`src/sturm.c
+
+util.lo: src/util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util.lo -MD -MP -MF $(DEPDIR)/util.Tpo -c -o util.lo `test -f 'src/util.c' || echo '$(srcdir)/'`src/util.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/util.Tpo $(DEPDIR)/util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/util.c' object='util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util.lo `test -f 'src/util.c' || echo '$(srcdir)/'`src/util.c
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
