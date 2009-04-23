@@ -14,8 +14,7 @@
  *
  *	evaluate polynomial defined in coef returning its value.
  */
-double
-evalpoly (ord, coef, x)
+inline double evalpoly (ord, coef, x)
 	int		ord;
 	double	*coef, x;
 {
@@ -93,6 +92,10 @@ modrf(ord, coef, a, b, val)
 		} else if (fabs(fx) < RELERROR) {
 				*val = x;
 				return(1);
+		} 
+		if(fabs(a-b)/(fabs(a)+1e-20) < RELERROR){
+			*val = x;
+			return(0);
 		}
 
 		if ((fa * fx) < 0) {
@@ -110,10 +113,7 @@ modrf(ord, coef, a, b, val)
 		lfx = fx;
 	}
 
-	// fprintf(stderr, "modrf overflow %f %f %f\n", a, b, fx);
+	fprintf(stderr, "\nmodrf overflow %20.17e %20.17e %20.17e %20.17e %20.17e %20.17e %20.17e\n", a, b, a-b, fa, fb, fx, fabs(a-b)/(fabs(a)+1e-20));
 
 	return(0);
 }
-	
-
-
