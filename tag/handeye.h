@@ -2,7 +2,7 @@
 #define TAG_HANDEYE_H_
 
 #include <vector>
-#include <TooN/SE3.h>
+#include <TooN/se3.h>
 
 namespace tag {
 
