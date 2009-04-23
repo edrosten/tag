@@ -210,10 +210,10 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	Vector<5> b_23 = makeVector(R[6][19], R[6][18], R[6][17], R[6][16], 0) - makeVector(0, R[7][19], R[7][18], R[7][17], R[7][16]);
 	Vector<5> b_33 = makeVector(R[8][19], R[8][18], R[8][17], R[8][16], 0) - makeVector(0, R[9][19], R[9][18], R[9][17], R[9][16]);
 
-	//Compute the Determinant of B using expansion by minors
-	//Not quite Eqn 24--28. Nister uses col/row not row/col
+	//Compute the Determinant of B using expansion along the bottom row.
+	//Eqn 24--28. 
 	//
-	// Det = b13 (b21 b32 -b31 b22) - b23 ( b11 b32 - b31 b12) + b33 ( b11 b22 - b21 b12)
+	// Det = b31 (b12 b23 -b13 b22) - b32 ( b11 b23 - b13 b21) + b33 ( b11 b22 - b12 b21)
 	//     = b13  * p1 - b23  * p2 + b33 * p3
 	Vector<8> p1 = poly_mul(b_12, b_23) - poly_mul(b_13, b_22);
 	Vector<8> p2 = poly_mul(b_13, b_21) - poly_mul(b_11, b_23);
