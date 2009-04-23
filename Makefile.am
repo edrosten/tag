@@ -1,5 +1,11 @@
 # the library we want to create and its source files
 
+WARN_OPTIONS=-Wall
+OPTIMIZATION_OPTIONS=-O3
+
+AM_CFLAGS= $(WARN_OPTIONS) $(OPTIMIZATION_OPTIONS)
+AM_CXXFLAGS= $(WARN_OPTIONS) $(OPTIMIZATION_OPTIONS)
+
 lib_LTLIBRARIES     = libtoontag.la
 libtoontag_la_SOURCES   = src/quartic.cpp src/threepointpose.cpp src/absorient.cpp \
                           src/handeye.cpp src/five_point.cpp src/five_point_buildmatrix.cpp src/sturm.c src/util.c
