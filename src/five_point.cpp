@@ -40,8 +40,8 @@ vector<double> get_roots(const Vector<11> & p){
 	}
 
 	if (nchanges != atmin) {
-			cerr << "solve: unable to bracket all negative roots" << endl;
-			atmin = nchanges;
+		cerr << "solve: unable to bracket all negative roots" << endl;
+		atmin = nchanges;
 	}
 
 	double max = 1.0;
@@ -52,15 +52,11 @@ vector<double> get_roots(const Vector<11> & p){
 	}
 
 	if (nchanges != atmax) {
-			cerr << "solve: unable to bracket all positive roots" << endl;
-			atmax = nchanges;
+		cerr << "solve: unable to bracket all positive roots" << endl;
+		atmax = nchanges;
 	}
 
 	nroots = atmin - atmax;
-
-	/*
-	 * perform the bisection.
-	 */
 	sbisect(num_poly, sseq, min, max, atmin, atmax, &roots[0]);
 }
 
@@ -160,7 +156,7 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 
 	Matrix<9, 9> Q = Zero;
 	for(int i=0; i < 5; i++)
-		Q[i] = stack_points(points[i].first, points[i].second);
+		Q[i] = stack_points(points[i].second, points[i].first);
 
 	SVD<9, 9> svd_Q(Q);
 
