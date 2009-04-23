@@ -105,23 +105,6 @@ template<int N> double polyval(const Vector<N>& v, double x)
 	return val;
 }
 
-template<int N> Vector<N-1> poly_diff(const Vector<N> & v)
-{
-	Vector<N-1> ret;
-	for(int i = 1; i < N; ++i){
-		ret[i-1] = v[i]*i;
-	}
-	return ret;
-}
-
-template<int N> pair<Vector<2>, Vector<N-1> > poly_div(const Vector<N> & num, const Vector<N-1> & denom)
-{
-	Vector<2> f;
-	Vector<N-1> r;
-	
-	
-}
-
 Matrix<3, 3, double, Reference::RowMajor> as_matrix(Vector<9>& v)
 {
 	return Matrix<3, 3, double, Reference::RowMajor>(&v[0]);
@@ -132,6 +115,7 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	//Equations numbers are given with reference to:
 	// "An efficient Solution to the Five-Point Relative Pose Problem",
 	// D. Nister, IEEE Tran. on Pat. Anal. and Mach. Intel.,  26(6) 2004.
+	// Franctional equations refer to equations between numbered ones.
 
 	//Given a pair of corresponding points, p, q, the
 	//epipolar constraint gives:
@@ -150,7 +134,7 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	//
 	// Q E~ = [0 0 0 0 0]'
 	//
-	// E~ is in the null space of Q, and so the real E# consists of a
+	// E~ is in the null space of Q, and so the real E consists of a
 	// linear sum of the remaining 4 null space vectors.
 	// See Eqn 10.
 
@@ -173,9 +157,20 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	build_matrix(X, Y, Z, W, R);
 
 
-	//Columns are:
+	//Columns are:                               
+	//                                            |    poly in x      poly in y        poly in 1
+	//     LEFT HAND SIDE                         |  ______________   _____________   _________________
+	//                                            |  '            '   '           '   '               '
+	// x^3 y^3 x^2y xy^2 x^2z x^2 y^2z y^2 xyz xy |  z^2x   zx   x    z^2y   zy   y   z^3   z^2   z   1 
+
 	gauss_jordan(R);
 
+	// The left side is now the Identity matrix matching Eqn 10 1/2. 
+	//
+	// Due to the careful ordering of the coefficients, performing the
+	// following subtractions (<k>, <l>, <m>) makes all parts on the left hand
+	// side become zero, leaving only the right hand side (polynomials in x, y
+	// and 1).
 
 	//Build the B matrix (Eqn 13 1/2)
 	//Polynomials of degree N are stored in a Vector<N+1> with Vector[0] as the coefficient of 1.
