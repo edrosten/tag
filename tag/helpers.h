@@ -73,7 +73,7 @@ template <class It> TooN::Matrix<3> getProjectiveHomography(It begin, It end){
 /// creates a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
 /// @param vec the 3 vector input
 /// @param[out] result the 3x3 matrix to set to the cross product matrix
-/// @ingroup helpersgroup
+/// @ingroup essentialgroup
 template<class V, class M > inline void getCrossProductMatrix( const V & vec, M & result ){
     assert(vec.size() == 3);
     assert(result.num_cols() == 3 && result.num_rows() == 3);
@@ -85,7 +85,7 @@ template<class V, class M > inline void getCrossProductMatrix( const V & vec, M 
 /// creates an returns a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
 /// @param vec the 3 vector input
 /// @return the 3x3 matrix to set to the cross product matrix
-/// @ingroup helpersgroup
+/// @ingroup essentialgroup
 template<class V> inline TooN::Matrix<3> getCrossProductMatrix( const V & vec ){
     TooN::Matrix<3> result;
     getCrossProductMatrix(vec, result);
@@ -95,7 +95,7 @@ template<class V> inline TooN::Matrix<3> getCrossProductMatrix( const V & vec ){
 /// creates the essential matrix corresponding to a given transformation
 /// @param transform the transformation as SE3
 /// @param[out] E the 3x3 matrix set to the essential matrix
-/// @ingroup helpersgroup
+/// @ingroup essentialgroup
 template<class M> inline void getEssentialMatrix(const TooN::SE3<> & transform , M & E){
     //assert(E.num_cols() == 3 && E.num_rows() == 3);
     const TooN::Vector<3> & t = transform.get_translation();
@@ -108,7 +108,7 @@ template<class M> inline void getEssentialMatrix(const TooN::SE3<> & transform ,
 /// creates and returns the essential matrix corresponding to a given transformation
 /// @param transform the transformation as SE3
 /// @return the 3x3 matrix set to the essential matrix
-/// @ingroup helpersgroup
+/// @ingroup essentialgroup
 inline TooN::Matrix<3> getEssentialMatrix(const TooN::SE3<> & transform ){
     TooN::Matrix<3> E;
     getEssentialMatrix(transform, E);
