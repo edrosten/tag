@@ -1,9 +1,12 @@
 #include <tag/five_point.h>
 #include <tag/stdpp.h>
+#include <tag/helpers.h>
 
 #include <TooN/helpers.h>
 #include <TooN/gauss_jordan.h>
 #include <TooN/SVD.h>
+
+#include <algorithm>
 
 using namespace TooN;
 using namespace std;
@@ -247,6 +250,114 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	}
 
 	return Es;
+}
+
+pair<Matrix<3>, Matrix<3> > essential_matrix_SVD( const TooN::Matrix<3> & E ){
+	const Vector<3> & ea = E.T()[0];
+	const Vector<3> & eb = E.T()[1];
+	const Vector<3> & ec = E.T()[2];
+	
+	const Vector<3> cross[3] = {ea ^ eb, eb ^ ec, ec ^ ea};
+	const Vector<3> norms = makeVector(norm_sq(cross[0]), norm_sq(cross[1]), norm_sq(cross[2]));
+	int max_index = max_element(&norms[0], &norms[0]+3) - &norms[0];
+	cout << norms << endl;
+	cout << max_index << "\t" << (max_index+1) % 3 << "\t" << (max_index+2)% 3 << endl;
+	
+	Matrix<3> U,V;
+#if 0	
+	V.T()[max_index] = unit(E.T()[max_index]);
+	V.T()[(max_index+2)%3] = unit(cross[max_index]);
+	V.T()[(max_index+1)%3] = V.T()[(max_index+2)%3] ^ V.T()[max_index];
+#else
+
+	V.T()[2] = unit(cross[max_index]);
+	V.T()[0] = unit(E.T()[1]);
+	V.T()[1] = V.T()[2] ^ V.T()[0];
+#endif
+
+	U.T()[0] = unit(E * V.T()[0]);
+	U.T()[1] = unit(E * V.T()[1]);
+	U.T()[2] = U.T()[0] ^ U.T()[1];
+
+	return make_pair(U,V);
+}
+
+pair<Matrix<3>, Matrix<3> > essential_matrix_SVD_2(const TooN::Matrix<3> & E ){
+	SVD<3> se(E);
+	cout << se.get_diagonal() << endl;
+	return make_pair(se.get_U(), se.get_VT().T());
+}
+
+std::vector<TooN::SE3<> > se3_from_E_nister_wrong( const TooN::Matrix<3> & E ){
+	static double elements[] = { 	 0, 1, 0,
+										-1, 0, 0,
+										 0, 0, 1};
+	static const Matrix<3,3,double,Reference::RowMajor> D(elements);
+
+	Matrix<3> diag = Zero;
+	diag(0,0) = 1;
+	diag(1,1) = 1;
+
+	cout << "D\n" << D << endl;
+
+	// returns U, V such that E = U * diag(1,1,0) * V'
+	pair<Matrix<3>, Matrix<3> > svd = essential_matrix_SVD(E);
+
+	cout << "SVD\n";
+	cout << E << "\n" << svd.first << "\n" << svd.second << endl;
+	cout << diag * svd.second.T() << endl;
+
+
+	// t = [u13 u23 u33]
+	const Vector<3> t = svd.first.T()[3];
+	const SO3<> Ra(svd.first * D * svd.second.T());
+	const SO3<> Rb(svd.first * D.T() * svd.second.T());
+
+	cout << t << "\n" << Ra << "\n" << Rb << endl;
+
+	vector<TooN::SE3<> > SE3s;
+	SE3s.push_back(SE3<>(Ra, t));
+	SE3s.push_back(SE3<>(Ra, -t));
+	SE3s.push_back(SE3<>(Rb, t));
+	SE3s.push_back(SE3<>(Rb, -t));
+
+	return SE3s;
+}
+
+std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E ){
+	// follows the computation in 
+	// Recovering Baseline and Orientation from 'Esssential' Matrix
+	// BKP Horn, Jan 1990
+	const Vector<3> & ea = E.T()[0];
+	const Vector<3> & eb = E.T()[1];
+	const Vector<3> & ec = E.T()[2];
+	
+	// cofactor matrix (19), used both to find largest vector product and later for rotation
+	Matrix<3> cf;
+	cf[0] = eb ^ ec;
+	cf[1] = ec ^ ea;
+	cf[2] = ea ^ eb;
+
+	// find largest vector product
+	const Vector<3> norms = makeVector(norm_sq(cf[0]), norm_sq(cf[1]), norm_sq(cf[2]));
+	const int max_index = max_element(&norms[0], &norms[0]+3) - &norms[0];
+
+	// calculate direction vector at proper length (18)
+	const Vector<3> t = unit(cf[max_index]) * sqrt(0.5 * (E[0] * E[0] + E[1] * E[1] + E[2] * E[2]));
+	// scaling for rotation matrix later in (24)
+	const double s = 1/(t*t);
+	// the two rotation matrices using t and -t (24)
+	const SO3<> Ra( s*(cf.T() - getCrossProductMatrix(t) * E) );
+	const SO3<> Rb( s*(cf.T() - getCrossProductMatrix(-t) * E) );
+
+	// put all the solutions together
+	vector<TooN::SE3<> > SE3s;
+	SE3s.push_back(SE3<>(Ra, t));
+	SE3s.push_back(SE3<>(Ra, -t));
+	SE3s.push_back(SE3<>(Rb, t));
+	SE3s.push_back(SE3<>(Rb, -t));
+
+	return SE3s;
 }
 
 }
