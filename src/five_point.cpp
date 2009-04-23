@@ -23,7 +23,7 @@ vector<double> get_roots(const Vector<11> & p){
 	// for details see here:
 	// http://tog.acm.org/GraphicsGems/
 
-	poly	sseq[10];
+	poly	sseq[MAX_ORDER];
 	Vector<11,double,Reference> v(sseq[0].coef);
 	v = p;
 
