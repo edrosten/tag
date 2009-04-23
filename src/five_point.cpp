@@ -61,6 +61,7 @@ vector<double> get_roots(const Vector<11> & p){
 
 	nroots = atmin - atmax;
 	sbisect(num_poly, sseq, min, max, atmin, atmax, &roots[0]);
+	return roots;
 }
 
 void build_matrix(const Vector<9>& X, const Vector<9>& Y, const Vector<9>& Z, const Vector<9>& W, Matrix<10,20>& R);
@@ -228,7 +229,7 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	vector<double> roots = get_roots(n);
 	vector<Matrix<3> > Es;
 
-	for(int i=0; i <roots.size(); i++)
+	for(unsigned i=0; i <roots.size(); i++)
 	{
 		double z = roots[i];
 		
