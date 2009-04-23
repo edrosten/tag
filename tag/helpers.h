@@ -3,6 +3,7 @@
 
 #include <TooN/se3.h>
 #include <TooN/wls.h>
+#include <cassert>
 
 namespace tag {
 
