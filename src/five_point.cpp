@@ -87,7 +87,7 @@ template<int AN, int BN> Vector<AN+BN-1> poly_mul(const Vector<AN>& a, const Vec
 {
 	//Polynomials are stored with the coefficient of zero in the first
 
-	Vector<AN+BN-1> ret = Zero;
+	Vector<AN+BN-1> ret = Zeros;
 
 	for(int ai=0; ai < a.size(); ai++)
 		for(int bi=0; bi <b.size(); bi++)
@@ -142,7 +142,7 @@ vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
 	// linear sum of the remaining 4 null space vectors.
 	// See Eqn 10.
 
-	Matrix<9, 9> Q = Zero;
+	Matrix<9, 9> Q = Zeros;
 	for(int i=0; i < 5; i++)
 		Q[i] = stack_points(points[i].second, points[i].first);
 

@@ -26,7 +26,7 @@ TooN::SO3<>  computeOrientation( const std::vector<TooN::Vector<3> > & a, const 
     const size_t N = a.size();
     // compute cross correlations
     const int x = 0, y = 1, z = 2;
-    TooN::Matrix<3> s = TooN::Zero;
+    TooN::Matrix<3> s = TooN::Zeros;
     for( unsigned int i = 0; i < N; i++){
         s += a[i].as_col() * b[i].as_row();
     }
@@ -82,7 +82,7 @@ TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a
     // std::assert(a.size() <= b.size());
     const size_t N = a.size();
 
-    TooN::Vector<3> ma = TooN::Zero, mb = TooN::Zero;
+    TooN::Vector<3> ma = TooN::Zeros, mb = TooN::Zeros;
 
     // compute centroids
     for(unsigned int i = 0; i < N; i++){
@@ -111,7 +111,7 @@ TooN::SO3<>  computeMeanOrientation( const std::vector<TooN::SO3<> > & r){
     std::vector<TooN::SO3<> > rt(N);
     TooN::SO3<>  base = r.front();
     TooN::SO3<>  baseInv = base.inverse();
-    TooN::Vector<3> center = TooN::Zero;
+    TooN::Vector<3> center = TooN::Zeros;
     for(unsigned int i = 0; i < N; i++){
         rt[i] = r[i] * baseInv;
         center += rt[i].ln();
@@ -119,7 +119,7 @@ TooN::SO3<>  computeMeanOrientation( const std::vector<TooN::SO3<> > & r){
     center /= N;
     TooN::SO3<> mean(center);
     do {
-        center = TooN::Zero;
+        center = TooN::Zeros;
         for(unsigned int i = 0; i < N; i++){
             TooN::SO3<>  diff = rt[i] * mean.inverse();
             center += diff.ln();

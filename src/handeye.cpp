@@ -48,8 +48,8 @@ SE3<>  computeHandEyeSingle( const vector<SE3<> > & AB, const vector<SE3<> > & C
         B[i] = AB[i].inverse() * AB[i+1];
     }
     SO3<> R = solveXABX(A,B);
-    Matrix<3> JTJ = Zero;
-    Vector<3> JTE = Zero;
+    Matrix<3> JTJ = Zeros;
+    Vector<3> JTE = Zeros;
     for(unsigned int i = 0; i < A.size(); ++i){
         Matrix<3> m =  eyeMinus( B[i].get_rotation().get_matrix());
         JTJ += m.T() * m;
