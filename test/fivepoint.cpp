@@ -123,9 +123,38 @@ void testRandom(){
     cout << "average error " << error / ITERATIONS << endl;
 }
 
+void testPerturbation(){
+    Vector<6> params;
+
+    srand(0); // same seed always
+
+    double error = 0;
+
+    const int ITERATIONS = 1000000;
+    const double scale = 1;
+    const double sigma = 0.1;
+
+    //ofstream diffile("diffs.txt");
+
+    const SE3<> start(makeVector(1,0,0,0,0,0));
+
+    for(int i = 0; i < ITERATIONS; ++i){
+        params = scale * makeVector(rand_u(), rand_u(), rand_u(), rand_u(), rand_u(), rand_u()); 
+        SE3<> T(params);
+        
+        vector<pair<Vector<3>, Vector<3> > > data;
+        for(int j = 0; j < 10; ++j){
+            Vector<3> p = scale * makeVector(rand_u(), rand_u(), rand_u());
+            data.push_back(make_pair(p + sigma * makeVector(rand_u(), rand_u(), rand_u()), T * p + sigma * makeVector(rand_u(), rand_u(), rand_u())));
+        }
+        SE3<> opt = tag::optimize_epipolar(data, SE3<>::exp(T.ln() + sigma * makeVector(rand_u(), rand_u(), rand_u(), rand_u(), rand_u(), rand_u())));
+        cout << norm_sq((opt.get_rotation().inverse() * T.get_rotation()).ln()) << "\t" << norm_sq(unit(opt.get_translation()) - unit(T.get_translation())) << endl;
+    }
+}
+
 int main(int argc, char ** argv){
 
-    testRandom();
+    testPerturbation();
 
     return 0;
 }

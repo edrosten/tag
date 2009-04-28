@@ -1,6 +1,7 @@
 #include <tag/five_point.h>
 #include <tag/stdpp.h>
 #include <tag/helpers.h>
+#include <tag/absorient.h>
 
 #include <TooN/helpers.h>
 #include <TooN/gauss_jordan.h>
@@ -114,7 +115,7 @@ Matrix<3, 3, double, Reference::RowMajor> as_matrix(Vector<9>& v)
 	return Matrix<3, 3, double, Reference::RowMajor>(&v[0]);
 }
 
-vector<Matrix<3> > five_point(array<pair<Vector<3>, Vector<3> >, 5> points)
+vector<Matrix<3> > five_point(const array<pair<Vector<3>, Vector<3> >, 5> & points)
 {
 	//Equations numbers are given with reference to:
 	// "An efficient Solution to the Five-Point Relative Pose Problem",
@@ -260,7 +261,7 @@ std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E ){
 	const Vector<3> & ea = E.T()[0];
 	const Vector<3> & eb = E.T()[1];
 	const Vector<3> & ec = E.T()[2];
-	
+
 	// cofactor matrix (19), used both to find largest vector product and later for rotation
 	Matrix<3> cf;
 	cf[0] = eb ^ ec;
@@ -287,6 +288,49 @@ std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E ){
 	SE3s.push_back(SE3<>(Rb, -t));
 
 	return SE3s;
+}
+
+
+TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN::Vector<3> > > & points, const TooN::SE3<> & initial){
+	static const Vector<3> X = makeVector(1,0,0);
+
+	// We represent E = [t]x R with t = Rn * [ 1 0 0 ]' and R = Rt
+	// The parameterisation of the optimization is then
+	// 3 parameters for Rt with left multiplication as update
+	// 2 parameters for Rn with _right_ multiplication as update !!
+	//   This allows as to have a minimal parameterization as 
+	//   Rn * G_0 * [1 0 0]' = 0
+	SO3<> Rt = initial.get_rotation();
+	SO3<> Rn; // Identity 
+	Vector<3> normal = X ^ unit(initial.get_translation());
+	// if the initial translation differs from X enough, then 
+	// compute a rotation in Rn that takes X -> initial translation
+	if(norm_sq(normal) > 1e-15)
+		Rn = computeOrientation(X, initial.get_translation(), normal, normal);
+
+	int count = 0;
+	WLS<5> wls;
+	do {
+		wls.clear();
+		const Matrix<3> C = getCrossProductMatrix(Rn * X);
+		double error = 0;
+		for(unsigned i = 0; i < points.size(); ++i){
+			Vector<5> J;
+			J[0] = (points[i].second * C) * Rt.generator(0) * (Rt * points[i].first);
+			J[1] = (points[i].second * C) * Rt.generator(1) * (Rt * points[i].first);
+			J[2] = (points[i].second * C) * Rt.generator(2) * (Rt * points[i].first);
+			J[3] = points[i].second * getCrossProductMatrix(Rn * Rn.generator(1) * X) * (Rt * points[i].first);
+			J[4] = points[i].second * getCrossProductMatrix(Rn * Rn.generator(2) * X) * (Rt * points[i].first);
+			const double e = 0 - (points[i].second * C) * (Rt * points[i].first);
+			wls.add_mJ(e, J);
+			error += e*e;
+		}
+		wls.compute();
+		Rt = SO3<>::exp(wls.get_mu().slice<0,3>()) * Rt;
+		Rn = Rn * SO3<>::exp(makeVector(0, wls.get_mu()[3], wls.get_mu()[4]));
+		++count;
+	} while(norm_sq(wls.get_mu()) > 1e-10 && count < 10);
+	return SE3<>(Rt, Rn * X);
 }
 
 }
