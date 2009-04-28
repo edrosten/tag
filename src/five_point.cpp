@@ -313,17 +313,17 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 	do {
 		wls.clear();
 		const Matrix<3> C = getCrossProductMatrix(Rn * X);
-		double error = 0;
 		for(unsigned i = 0; i < points.size(); ++i){
 			Vector<5> J;
-			J[0] = (points[i].second * C) * Rt.generator(0) * (Rt * points[i].first);
-			J[1] = (points[i].second * C) * Rt.generator(1) * (Rt * points[i].first);
-			J[2] = (points[i].second * C) * Rt.generator(2) * (Rt * points[i].first);
-			J[3] = points[i].second * getCrossProductMatrix(Rn * Rn.generator(1) * X) * (Rt * points[i].first);
-			J[4] = points[i].second * getCrossProductMatrix(Rn * Rn.generator(2) * X) * (Rt * points[i].first);
-			const double e = 0 - (points[i].second * C) * (Rt * points[i].first);
+			const Vector<3> LEFT = points[i].second * C;
+			const Vector<3> RIGHT = Rt * points[i].first;
+			J[0] = LEFT * Rt.generator_field(0, RIGHT);
+			J[1] = LEFT * Rt.generator_field(1, RIGHT);
+			J[2] = LEFT * Rt.generator_field(2, RIGHT);
+			J[3] = points[i].second * getCrossProductMatrix(Rn * Rn.generator_field(1, X)) * RIGHT;
+			J[4] = points[i].second * getCrossProductMatrix(Rn * Rn.generator_field(2, X)) * RIGHT;
+			const double e = 0 - LEFT * RIGHT;
 			wls.add_mJ(e, J);
-			error += e*e;
 		}
 		wls.compute();
 		Rt = SO3<>::exp(wls.get_mu().slice<0,3>()) * Rt;
