@@ -4,6 +4,12 @@
 #include <TooN/se3.h>
 #include <vector>
 
+namespace tag {
+
+
+/// @defgroup posegroup Camera pose estimation
+/// contains functions for estimating camera pose from different correspondences.
+
 /// The function for pose estimation from three 2D - 3D point correspondences.
 /// It implements the algorithm given by the Fischer and Bolles RANSAC paper, 1980.
 /// This function assumes that the three points are in general position (not collinear).
@@ -13,7 +19,9 @@
 /// @param[in] z an array containing the perspective projections of the points given by x in the current pose
 /// @param[out] poses the vector onto which any valid poses are appended
 /// @return the number of  poses appended to the vector
-
+/// @ingroup posegroup
 int three_point_pose(const TooN::Vector<3> x[], const TooN::Vector<2> z[], std::vector<TooN::SE3<> >& poses);
+
+}
 
 #endif

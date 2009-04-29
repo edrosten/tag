@@ -6,10 +6,11 @@
 using namespace TooN;
 using namespace std;
 
+namespace tag {
 
-inline double square(double x) { return x*x; }
+static inline double square(double x) { return x*x; }
 
-SE3<> three_point_absolute_orientation(const Vector<3> x[], const Vector<3> y[])
+static SE3<> three_point_absolute_orientation(const Vector<3> x[], const Vector<3> y[])
 {
     Matrix<3> D, D1;
     
@@ -114,3 +115,4 @@ int three_point_pose(const Vector<3> xi[], const Vector<2> zi[], vector<SE3<> >&
     return count;
 }
 
+}

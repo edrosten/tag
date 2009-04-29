@@ -5,16 +5,18 @@
 #include <algorithm>
 using namespace std;
 
+namespace tag {
+
 #ifdef WIN32
 
 // Visual Studio 2005 does not yet define the C99 cbrt function
-inline double cbrt( double x ){
+static inline double cbrt( double x ){
     return pow(fabs(x), 1.0/3.0) * (x>=0 ? 1 : -1);
 }
 
 #endif
 
-int depressed_cubic_real_roots(double P, double Q, double r[])
+static int depressed_cubic_real_roots(double P, double Q, double r[])
 {
     static const double third = 1.0/3.0;
     double third_P = third * P;
@@ -105,4 +107,6 @@ int find_quartic_real_roots(double B, double C, double D, double E, double r[])
 	r[count++] = -q_B - 0.5 * (W - sr);
     }
     return count;
+}
+
 }

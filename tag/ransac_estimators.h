@@ -174,7 +174,8 @@ namespace essential_matrix {
     };
 } // close namespace essential_matrix
 
- using essential_matrix::EssentialMatrix;
+// this is deprecated, use 5 point instead
+// using essential_matrix::EssentialMatrix;
 
 /// RANSAC estimator to compute an homography from a set of 2D-2D correspondences
 /// The observations passed (via iterators) to the estimate method must allow:
@@ -298,6 +299,16 @@ struct CameraRotation {
     }
 };
 
+/// RANSAC estimator to compute a plane fitting 3 or more points. 
+/// The points are Vector<3> or similar. The minimal set are three points, in
+/// which case a fast method is used to compute the plane. For more
+/// correspondences a method using SVD is employed. Pass in iterators where each
+/// element is represents a Vector<3>.
+///
+/// The estimated plane will be represented by (n,d), where n is a unit vector representing
+/// the plane normal and d the distance to the origin. If n == (0 0 0), then no plane
+/// was found.
+/// @ingroup ransac
 struct PlaneFromPoints {
     /// the plane equation coefficients as homogeneous vector with unit normal, or (0,0,0,1)
     TooN::Vector<4> plane;
@@ -306,37 +317,37 @@ struct PlaneFromPoints {
 
     PlaneFromPoints() : plane(TooN::zeros<4>()) {}
 
-    template <class It> void estimate(It begin, It end){
-	assert(std::distance(begin, end) >= 3);
-	if( std::distance(begin, end) == 3 ){  // fast special case
-	     const TooN::Vector<3> d1 = *(begin+1) - *begin;
-	     const TooN::Vector<3> d2 = *(begin+2) - *begin;
-	     plane.template slice<0,3>() = d1 ^ d2;
-	     TooN::normalize(plane.template slice<0,3>());
-	     plane[3] = -(*begin) * plane.template slice<0,3>();
-	} else {
-	     TooN::Matrix<> design(std::distance(begin, end), 4);
-	     for(It p = begin; p != end; ++p)
-		design[p-begin] = TooN::unproject(*p);
-             TooN::SVD<> s(design);
-	     plane = s.get_VT()[3];
-             const double d = sqrt(plane.template slice<0,3>() * plane.template slice<0,3>());
-	     if(d > 1e-10){
-		plane /= d;
-	     } else {
-		plane = (TooN::make_Vector, 0, 0, 0, 1);
-	     }
+	template <class It> void estimate(It begin, It end){
+		assert(std::distance(begin, end) >= 3);
+		if( std::distance(begin, end) == 3 ){  // fast special case
+			 const TooN::Vector<3> d1 = *(begin+1) - *begin;
+			 const TooN::Vector<3> d2 = *(begin+2) - *begin;
+			 plane.template slice<0,3>() = d1 ^ d2;
+			 TooN::normalize(plane.template slice<0,3>());
+			 plane[3] = -(*begin) * plane.template slice<0,3>();
+		} else {
+			 TooN::Matrix<> design(std::distance(begin, end), 4);
+			 for(It p = begin; p != end; ++p)
+				design[p-begin] = TooN::unproject(*p);
+			TooN::SVD<> s(design);
+			plane = s.get_VT()[3];
+			const double d = sqrt(plane.template slice<0,3>() * plane.template slice<0,3>());
+			if(d > 1e-10){
+				plane /= d;
+			} else {
+				plane = (TooN::make_Vector, 0, 0, 0, 1);
+			}
+		}
 	}
-    }
 
-    template <class M> inline double score(const M & m) const {
-	const double d = plane * TooN::unproject(m);
-	return d*d;
-    }
+	template <class M> inline double score(const M & m) const {
+		const double d = plane * TooN::unproject(m);
+		return d*d;
+	}
 
-    template <class M> inline bool isInlier(const M& m, double r) const {
-	return this->score(m) <= r*r * noise(m);
-    }
+	template <class M> inline bool isInlier(const M& m, double r) const {
+		return this->score(m) <= r*r * noise(m);
+	}
 };
 
 } // namespace tag
