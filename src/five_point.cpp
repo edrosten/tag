@@ -1,7 +1,6 @@
 #include <tag/five_point.h>
 #include <tag/stdpp.h>
 #include <tag/helpers.h>
-#include <tag/absorient.h>
 
 #include <TooN/helpers.h>
 #include <TooN/gauss_jordan.h>
@@ -301,12 +300,7 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 	//   This allows as to have a minimal parameterization as 
 	//   Rn * G_0 * [1 0 0]' = 0
 	SO3<> Rt = initial.get_rotation();
-	SO3<> Rn; // Identity 
-	Vector<3> normal = X ^ unit(initial.get_translation());
-	// if the initial translation differs from X enough, then 
-	// compute a rotation in Rn that takes X -> initial translation
-	if(norm_sq(normal) > 1e-15)
-		Rn = computeOrientation(X, initial.get_translation(), normal, normal);
+	SO3<> Rn(X, initial.get_translation()); // rotation from X -> initial translation or Identity 
 
 	int count = 0;
 	WLS<5> wls;
@@ -329,7 +323,7 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 		Rt = SO3<>::exp(wls.get_mu().slice<0,3>()) * Rt;
 		Rn = Rn * SO3<>::exp(makeVector(0, wls.get_mu()[3], wls.get_mu()[4]));
 		++count;
-	} while(norm_sq(wls.get_mu()) > 1e-10 && count < 10);
+	} while(norm_sq(wls.get_mu()) > 1e-15 && count < 10);
 	return SE3<>(Rt, Rn * X);
 }
 
