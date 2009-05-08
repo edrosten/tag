@@ -13,13 +13,14 @@
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
 #include <TooN/se3.h>
-#include <TooN/wls_cholesky.h>
+#include <TooN/wls.h>
 
 #include <tag/helpers.h>
 #include <tag/absorient.h>
 
 namespace tag {
 
+#if 0
 namespace essential_matrix {
 
     template <class M> inline int getValidPair(const TooN::Matrix<3>& R1, const TooN::Matrix<3>& R2, const TooN::Vector<2>& e, double z1, const M& m)
@@ -174,6 +175,8 @@ namespace essential_matrix {
     };
 } // close namespace essential_matrix
 
+#endif
+
 // this is deprecated, use 5 point instead
 // using essential_matrix::EssentialMatrix;
 
@@ -192,7 +195,7 @@ struct Homography {
     /// minimal number of correspondences
     static const int hypothesis_size = 4;
 
-    Homography() { TooN::Identity(H); }
+    Homography() { H = TooN::Identity; }
 
     template <class It> void estimate(It begin, It end) {
         tag::getProjectiveHomography(begin, end, H);
@@ -227,18 +230,18 @@ struct AffineHomography {
     /// minimal number of correspondences
     static const int hypothesis_size = 3;
 
-    AffineHomography() : A(TooN::zeros<2,2>()), t(TooN::zeros<2>()) {}
+    AffineHomography() : A(TooN::Zeros), t(TooN::Zeros) {}
 
     template <class It> void estimate(It begin, It end) {
-	TooN::WLSCholesky<3> wls_x, wls_y;
+	TooN::WLS<3> wls_x, wls_y;
 	wls_x.clear();
 	wls_y.clear();
         for (It it = begin; it!= end; ++it) {
 	    const TooN::Vector<2>& a = first_point(*it);
 	    const TooN::Vector<2>& b = second_point(*it);
 	    const double weight = 1.0 / noise(*it);
-	    wls_x.add_df(b[0], TooN::unproject(a), weight);
-	    wls_y.add_df(b[1], TooN::unproject(a), weight);
+	    wls_x.add_mJ(b[0], TooN::unproject(a), weight);
+	    wls_y.add_mJ(b[1], TooN::unproject(a), weight);
         }
 	wls_x.compute();
 	wls_y.compute();
@@ -274,7 +277,7 @@ struct AffineHomography {
 /// @ingroup ransac
 struct CameraRotation {
     /// homography
-    TooN::SO3 rotation;
+    TooN::SO3<> rotation;
     /// minimal number of correspondences
     static const int hypothesis_size = 2;
 
@@ -315,7 +318,7 @@ struct PlaneFromPoints {
     /// minimal number of correspondences
     static const int hypothesis_size = 3;
 
-    PlaneFromPoints() : plane(TooN::zeros<4>()) {}
+    PlaneFromPoints() : plane(TooN::Zeros) {}
 
 	template <class It> void estimate(It begin, It end){
 		assert(std::distance(begin, end) >= 3);
@@ -335,7 +338,7 @@ struct PlaneFromPoints {
 			if(d > 1e-10){
 				plane /= d;
 			} else {
-				plane = (TooN::make_Vector, 0, 0, 0, 1);
+				plane = TooN::makeVector( 0, 0, 0, 1);
 			}
 		}
 	}
