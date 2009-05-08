@@ -60,7 +60,7 @@ TooN::SO3<>  computeOrientation( const std::vector<TooN::Vector<3> > & a, const 
 // computes the orientation from (e1,e2,e3) -> (a,(a^b)^a,a^b), which means that b the second vector is in the a, b plane
 static inline TooN::SO3<>  canonicalOrientation( const TooN::Vector<3> & a, const TooN::Vector<3> & b ){
     TooN::Vector<3> n = a ^ b;
-    if(norm_sq(n) == 0)
+    if(norm_sq(n) < 1e-30)
 	return TooN::SO3<>();
     TooN::Matrix<3> result;
     result.T()[0] = unit(a);
