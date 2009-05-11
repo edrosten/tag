@@ -358,7 +358,7 @@ double sq(double x)
 double point_line_distance_squared(Vector<3> point, const Vector<3>& line)
 {	
 	//Normalize the point to [x0, y0, 1]
-	point.slice<0,2>() /= point[2];
+	point /= point[2];
 
 	return sq(point * line) / (sq(line[0]) + sq(line[1]));
 }
