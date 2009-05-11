@@ -327,4 +327,46 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 	return SE3<>(Rt, Rn * X);
 }
 
+
+namespace {
+double sq(double x)
+{
+	return x*x;
+}
+}
+// Define a line l = [a b c] so that [x y 1] . [a b c] = 0
+//
+// The line equation can be written as:
+//
+// y = -ax/b -c/b
+//
+// And written in vector form:
+//
+// [ x ]   [0   ]              [ b ]
+// [ y ] = [-c/b]  + x (1/b) * [ -a]
+//
+//The line normal therefore is v = [a b]
+//
+// r is the vector from [x0 y0] to any point on the line. The perpendicular diatance to the
+// line is |r . v| / |v|
+//
+// d = | (x - x0)*a + (y-y0) * b | / sqrt(a^2 + b^2)
+//
+// Rearranging and using ax + yb = -c:
+//
+// d = |ax0 + by0 + c| / sqrt(a*a + b*b)
+double point_line_distance_squared(Vector<3> point, const Vector<3>& line)
+{	
+	//Normalize the point to [x0, y0, 1]
+	point.slice<0,2>() /= point[2];
+
+	return sq(point * line) / (sq(line[0]) + sq(line[1]));
+}
+
+
+pair<double, double> essential_reprojection_errors_squared(const Matrix<3>& E, const Vector<3>& p, const Vector<3>& q)
+{
+	return make_pair(point_line_distance_squared(p, E*q), point_line_distance_squared(q, E.T()*p));
+}
+
 }

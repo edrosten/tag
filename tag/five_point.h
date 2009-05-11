@@ -35,6 +35,17 @@ std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E );
 /// @ingroup essentialgroup
 TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN::Vector<3> > > & points, const TooN::SE3<> & initial);
 
+/// Given an essential matrix \e E and two points \e p and \e q, this
+/// functions computes the reprojection errors given by the squared distance from 
+/// \e p to the line defined by \f$ E\vec{q} \f$ and the squared distance from 
+/// \e q to the line defined by \f$ E\vec{p} \f$. If \e E is not an essential matrix
+/// then the errors will not be sensible.
+///
+///@param E \e E
+///@param p \e p
+///@param q \e q
+///@returns the reprojection errors
+std::pair<double, double> essential_reprojection_errors_squared(const TooN::Matrix<3>& E, const TooN::Vector<3>&p, const TooN::Vector<3>& q);
 }
 
 #endif // TAG_FIVE_POINT
