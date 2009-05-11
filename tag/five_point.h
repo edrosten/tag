@@ -45,6 +45,7 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 ///@param p \e p
 ///@param q \e q
 ///@returns the reprojection errors
+/// @ingroup essentialgroup
 std::pair<double, double> essential_reprojection_errors_squared(const TooN::Matrix<3>& E, const TooN::Vector<3>&p, const TooN::Vector<3>& q);
 }
 
