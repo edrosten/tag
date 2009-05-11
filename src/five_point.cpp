@@ -364,7 +364,7 @@ double point_line_distance_squared(Vector<3> point, const Vector<3>& line)
 }
 
 
-pair<double, double> essential_reprojection_errors_squared(const Matrix<3>& E, const Vector<3>& p, const Vector<3>& q)
+pair<double, double> essential_reprojection_errors_squared(const Matrix<3>& E, const Vector<3>& q, const Vector<3>& p)
 {
 	return make_pair(point_line_distance_squared(p, E*q), point_line_distance_squared(q, E.T()*p));
 }
