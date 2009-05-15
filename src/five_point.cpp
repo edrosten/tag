@@ -7,62 +7,14 @@
 #include <TooN/SVD.h>
 
 #include <algorithm>
+#include "polynomial.h"
 
 using namespace TooN;
 using namespace std;
 using namespace std::tr1;
 
-extern "C" {
-#include "solve.h"
-}
 
 namespace tag {
-
-vector<double> get_roots(const Vector<11> & p){
-	// uses Graphics Gem I code 
-	// for details see here:
-	// http://tog.acm.org/GraphicsGems/
-
-	poly	sseq[MAX_ORDER];
-	Vector<11,double,Reference> v(sseq[0].coef);
-	v = p;
-
-	int num_poly = buildsturm(10, sseq);
-	int atmin, atmax;
-	int nroots = numroots(num_poly, sseq, &atmin, &atmax);
-
-	vector<double> roots(nroots);
-	if(nroots == 0)
-		return roots;
-
-	double min = -1.0;
-	int nchanges = numchanges(num_poly, sseq, min);
-	for (int i = 0; nchanges != atmin && i != MAXPOW; i++) { 
-		min *= 10.0;
-		nchanges = numchanges(num_poly, sseq, min);
-	}
-
-	if (nchanges != atmin) {
-		cerr << "solve: unable to bracket all negative roots" << endl;
-		atmin = nchanges;
-	}
-
-	double max = 1.0;
-	nchanges = numchanges(num_poly, sseq, max);
-	for (int i = 0; nchanges != atmax && i != MAXPOW; i++) { 
-		max *= 10.0;
-		nchanges = numchanges(num_poly, sseq, max);
-	}
-
-	if (nchanges != atmax) {
-		cerr << "solve: unable to bracket all positive roots" << endl;
-		atmax = nchanges;
-	}
-
-	nroots = atmin - atmax;
-	sbisect(num_poly, sseq, min, max, atmin, atmax, &roots[0]);
-	return roots;
-}
 
 void build_matrix(const Vector<9>& X, const Vector<9>& Y, const Vector<9>& Z, const Vector<9>& W, Matrix<10,20>& R);
 
@@ -114,6 +66,32 @@ Matrix<3, 3, double, Reference::RowMajor> as_matrix(Vector<9>& v)
 	return Matrix<3, 3, double, Reference::RowMajor>(&v[0]);
 }
 
+
+// This function finds some vectors spanning the null space of m, assuming
+// that none of the rows of m are linearly dependent.
+//
+//  m is a ahort, fat matrix.
+//  The Gauss-Jordan decomposition is [I|A]
+//
+//  [I|A] * [A^T|I]^T = [0]
+//
+// Since [I|A] spans the same space as m, then:
+//
+// m * [A^T|I]^T = [0]
+//
+// Therefore [A^T|I] spans the null space of m.
+template<int R, int C, class P> Matrix<C-R, C, P> dodgy_null(Matrix<R, C, P> m)
+{
+	gauss_jordan(m);
+
+	Matrix<C-R, C> null;
+	null.template slice<0,0,C-R, R>() = m.T().template slice<R,0,C-R, R>();
+	null.template slice<0,R, C-R, C-R>() = -Identity;
+
+	return null;
+}
+
+
 vector<Matrix<3> > five_point(const array<pair<Vector<3>, Vector<3> >, 5> & points)
 {
 	//Equations numbers are given with reference to:
@@ -142,21 +120,18 @@ vector<Matrix<3> > five_point(const array<pair<Vector<3>, Vector<3> >, 5> & poin
 	// linear sum of the remaining 4 null space vectors.
 	// See Eqn 10.
 
-	Matrix<9, 9> Q = Zeros;
+	Matrix<5, 9> Q = Zeros;
 	for(int i=0; i < 5; i++)
 		Q[i] = stack_points(points[i].second, points[i].first);
 
-	SVD<9, 9> svd_Q(Q);
+	Matrix<4,9> null = dodgy_null(Q);
 
-	//The null-space it the last 4 rows of svd_Q.get_VT()
-	//
 	// According to Eqn 10:
-	Vector<9> X = svd_Q.get_VT()[5];
-	Vector<9> Y = svd_Q.get_VT()[6];
-	Vector<9> Z = svd_Q.get_VT()[7];
-	Vector<9> W = svd_Q.get_VT()[8];
+	Vector<9> X = null[0];
+	Vector<9> Y = null[1];
+	Vector<9> Z = null[2];
+	Vector<9> W = null[3];
 
-	
 	Matrix<10,20> R;
 	build_matrix(X, Y, Z, W, R);
 
@@ -226,7 +201,7 @@ vector<Matrix<3> > five_point(const array<pair<Vector<3>, Vector<3> >, 5> & poin
 	//The polynomial is...
 	Vector<11> n = poly_mul(p1, b_31) + poly_mul(p2, b_32) + poly_mul(p3, b_33);
 
-	vector<double> roots = get_roots(n);
+	vector<double> roots = find_roots(n);
 	vector<Matrix<3> > Es;
 
 	for(unsigned i=0; i <roots.size(); i++)
@@ -363,10 +338,23 @@ double point_line_distance_squared(Vector<3> point, const Vector<3>& line)
 	return sq(point * line) / (sq(line[0]) + sq(line[1]));
 }
 
+double point_line_distance(Vector<3> point, const Vector<3>& line)
+{	
+	//Normalize the point to [x0, y0, 1]
+	point /= point[2];
+
+	return point * line / sqrt(sq(line[0]) + sq(line[1]));
+}
+
 
 pair<double, double> essential_reprojection_errors_squared(const Matrix<3>& E, const Vector<3>& q, const Vector<3>& p)
 {
 	return make_pair(point_line_distance_squared(p, E*q), point_line_distance_squared(q, E.T()*p));
+}
+
+pair<double, double> essential_reprojection_errors(const Matrix<3>& E, const Vector<3>& q, const Vector<3>& p)
+{
+	return make_pair(point_line_distance(p, E*q), point_line_distance(q, E.T()*p));
 }
 
 }

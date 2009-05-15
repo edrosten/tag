@@ -54,7 +54,8 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 /// functions computes the reprojection errors given by the squared distance from 
 /// \e p to the line defined by \f$ E\vec{q} \f$ and the squared distance from 
 /// \e q to the line defined by \f$ E^T\vec{p} \f$. If \e E is not an essential matrix
-/// then the errors will not be sensible.
+/// then the errors will not be sensible. This function avoids a sqrt compared to
+/// tag::essential_reprojection_errors.
 ///
 ///@param E \e E: essential matrix
 ///@param q \e q: right hand (first) point
@@ -62,6 +63,19 @@ TooN::SE3<> optimize_epipolar(const std::vector<std::pair<TooN::Vector<3>, TooN:
 ///@returns the reprojection errors
 /// @ingroup essentialgroup
 std::pair<double, double> essential_reprojection_errors_squared(const TooN::Matrix<3>& E, const TooN::Vector<3>&q, const TooN::Vector<3>& p);
+
+/// Given an essential matrix \e E and two points \e p and \e q, this
+/// functions computes the reprojection errors given by the signed distance from 
+/// \e p to the line defined by \f$ E\vec{q} \f$ and the signed distance from 
+/// \e q to the line defined by \f$ E^T\vec{p} \f$. If \e E is not an essential matrix
+/// then the errors will not be sensible.
+///
+///@param E \e E: essential matrix
+///@param q \e q: right hand (first) point
+///@param p \e p: left hand (second) point
+///@returns the reprojection errors
+/// @ingroup essentialgroup
+std::pair<double, double> essential_reprojection_errors(const TooN::Matrix<3>& E, const TooN::Vector<3>&q, const TooN::Vector<3>& p);
 }
 
 #endif // TAG_FIVE_POINT
