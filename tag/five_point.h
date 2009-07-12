@@ -3,7 +3,11 @@
 
 #include <vector>
 #include <utility>
+#ifndef WIN32
 #include <tr1/array>
+#else
+#include <array>
+#endif
 #include <TooN/TooN.h>
 #include <TooN/se3.h>
 

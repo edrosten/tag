@@ -244,7 +244,7 @@ std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E ){
 
 	// find largest vector product
 	const Vector<3> norms = makeVector(norm_sq(cf[0]), norm_sq(cf[1]), norm_sq(cf[2]));
-	const int max_index = max_element(&norms[0], &norms[0]+3) - &norms[0];
+	const int max_index = (int)(max_element(&norms[0], &norms[0]+3) - &norms[0]);
 
 	// calculate direction vector at proper length (18)
 	const Vector<3> t = unit(cf[max_index]) * sqrt(0.5 * (E[0] * E[0] + E[1] * E[1] + E[2] * E[2]));

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="tag"
 	ProjectGUID="{1637B117-A476-4861-8998-83C6C3B42086}"
 	RootNamespace="tag"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -47,7 +48,6 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -111,7 +111,6 @@
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -157,11 +156,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\fourpointpose.cpp"
+				RelativePath="..\..\src\five_point.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\five_point_buildmatrix.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\handeye.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\polynomial.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\polynomial.h"
 				>
 			</File>
 			<File
@@ -195,11 +206,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tag\fn.h"
+				RelativePath="..\..\tag\five_point.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tag\fourpointpose.h"
+				RelativePath="..\..\tag\fn.h"
 				>
 			</File>
 			<File

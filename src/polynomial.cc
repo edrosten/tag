@@ -1,8 +1,13 @@
 #include <TooN/TooN.h>
 #include <utility>
 #include <vector>
+#ifndef WIN32
 #include <tr1/tuple>
 #include <tr1/array>
+#else
+#include <tuple>
+#include <array>
+#endif
 
 #include "polynomial.h"
 
@@ -10,6 +15,11 @@ using namespace TooN;
 using namespace std;
 using namespace std::tr1;
 
+#ifdef WIN32
+inline bool signbit( const double & d ){
+	return d < 0.0;
+}
+#endif
 
 template<int AN, int BN> Vector<AN+BN-1> poly_mul(const Vector<AN>& a, const Vector<BN>& b)
 {
