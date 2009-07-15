@@ -65,7 +65,7 @@ pair<Vector<NumNum-NumDenom+1>, Vector<NumDenom-1> > poly_div(Vector<NumNum> num
 }
 
 template<int N, int M>
-pair<Vector<N>, Vector<M> > neg_second(const pair<Vector<N>, Vector<M> >& r)
+tuple<Vector<N>, Vector<M> > neg_second(const pair<Vector<N>, Vector<M> >& r)
 {
 	return make_pair(r.first, -r.second);
 }
@@ -119,7 +119,7 @@ struct SturmChain10
 	//
 	// Q_i is always of degree 1, so the number of sign changes
 	// can be evaluated using the recursion above efficiently.
-	pair<int, double> changes(double x) const
+	tuple<int, double> changes(double x) const
 	{
 		int changes=0;
 		double v_prev_2 = polyval(f0, x);
@@ -226,7 +226,7 @@ template<class F> double polish_root_bisection(double lower, double upper, doubl
 	return (upper + lower)/2;
 }
 
-template<class F> pair<double, double> polish_root_newton(double lower, double upper, double lower_val, double upper_val, const F& f)
+template<class F> tuple<double, double> polish_root_newton(double lower, double upper, double lower_val, double upper_val, const F& f)
 {
 	const double zeps = 1e-20;
 	const double eps  = 1e-15;
