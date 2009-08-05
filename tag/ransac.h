@@ -6,6 +6,19 @@
 
 namespace tag {
 
+#ifdef WIN32
+///	taken from http://www.azillionmonkeys.com/qed/random.html
+inline double drand48(void) {
+	const double RS_SCALE  = (1.0 / (1.0 + RAND_MAX));
+
+    double d;
+	do {
+		d = (((rand () * RS_SCALE) + rand ()) * RS_SCALE + rand ()) * RS_SCALE;
+    } while (d >= 1); /* Round off */
+    return d;
+}
+#endif
+
 /// @defgroup ransac RANSAC robust estimation
 /// This group contains a set of RANSAC implementations to estimate an
 /// inlier set from a set of correspondences under a transformation.

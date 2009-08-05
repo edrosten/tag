@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\.."
+				AdditionalIncludeDirectories="..\..;&quot;$(INCLUDEDIR)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="clapackd.lib blasd.lib libf2cd.lib"
 				OutputFile="..\..\lib\$(ProjectName)d.lib"
+				AdditionalLibraryDirectories="&quot;$(LIBDIR)&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -106,9 +108,10 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..;..\..\.."
+				AdditionalIncludeDirectories="..\..;&quot;$(INCLUDEDIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
+				EnableEnhancedInstructionSet="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -124,7 +127,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="clapack.lib blas.lib libf2c.lib"
 				OutputFile="..\..\lib\$(ProjectName).lib"
+				AdditionalLibraryDirectories="&quot;$(LIBDIR)&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -266,16 +271,6 @@
 				>
 			</File>
 		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
