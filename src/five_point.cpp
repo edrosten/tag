@@ -70,14 +70,14 @@ Matrix<3, 3, double, Reference::RowMajor> as_matrix(Vector<9>& v)
 // This function finds some vectors spanning the null space of m, assuming
 // that none of the rows of m are linearly dependent.
 //
-//  m is a ahort, fat matrix.
+//  m is a short, fat matrix.
 //  The Gauss-Jordan decomposition is [I|A]
 //
-//  [I|A] * [A^T|I]^T = [0]
+//  [I|A] * [A^T|-I]^T = [0]
 //
 // Since [I|A] spans the same space as m, then:
 //
-// m * [A^T|I]^T = [0]
+// m * [A^T|-I]^T = [0]
 //
 // Therefore [A^T|I] spans the null space of m.
 template<int R, int C, class P> Matrix<C-R, C, P> dodgy_null(Matrix<R, C, P> m)
@@ -322,7 +322,7 @@ double sq(double x)
 //
 //The line normal therefore is v = [a b]
 //
-// r is the vector from [x0 y0] to any point on the line. The perpendicular diatance to the
+// r is the vector from [x0 y0] to any point on the line. The perpendicular distance to the
 // line is |r . v| / |v|
 //
 // d = | (x - x0)*a + (y-y0) * b | / sqrt(a^2 + b^2)

@@ -21,9 +21,9 @@ namespace tag {
 /// Computes essential matrices representing the epipolar geometry between correspondences.
 /// This function implements Nister's 5 point algorithm. For all of the input points pairs,
 /// each out matrix satisfies the condition:
-/// \f[
-///  \vec{\text{second}}\  E \ \vec{\text{first}} = 0.
-/// \f]
+/// \f[ \
+///  \vec{\text{second}}\  E \ \vec{\text{first}} = 0. \
+///  \f]
 /// @param points a array of pairs of directions in 3 space containing correspondences
 /// @param initial an inital value for the transformation used as starting point of the optimization
 /// @return the optimized transformation
@@ -44,9 +44,9 @@ std::vector<TooN::SE3<> > se3_from_E( const TooN::Matrix<3> & E );
 /// This function minimizes the algebraic error of the epipolar geometry through non-linear optimization of the
 /// rotation and direction of the translation.
 /// For all of the input points pairs,
-/// each out matrix satisfies the condition: \f[
-/// \f[
-///  \vec{\text{second}}\  E \ \vec{\text{first}} = 0.
+/// each out matrix satisfies the condition:
+/// \f[ 
+/// \vec{\text{second}}\  E \ \vec{\text{first}} = 0. 
 /// \f]
 /// @param points a vector of pairs of directions in 3 space containing correspondences
 /// @param initial an inital value for the transformation used as starting point of the optimization
