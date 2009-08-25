@@ -1,18 +1,367 @@
 ==========================================
+Repository tagged as release-20090724
+==========================================
+
+Wed 15 Jul, 2009 18:38:14 author: edrosten
+    File: src/polynomial.cc (Rev. 1.3)
+
+Replace pair<A, B> with tuple<A, B> so that tie() works with older
+standard libraries.
+
+--------------
+
+Sun 12 Jul, 2009 13:28:32 author: gerhard (Concatenated 2 entries at 10s)
+    File: tag/five_point.h (Rev. 1.10)
+    File: src/five_point.cpp (Rev. 1.20)
+
+fixes for MS VC 2008 (VC9).
+Yes, it supports TR1, and but the headers are not in <tr1/...> ???
+
+--------------
+
+Fri 15 May, 2009 15:54:31 author: edrosten (Concatenated 2 entries at 10s)
+    File: tag/five_point.h (Rev. 1.9)
+    File: src/solve.h (Rev. 1.2)
+    File: src/sturm.c (Rev. 1.3)
+
+4x speedup to five_point. The new code will give slightly different results
+to the old code, due to differences in numerics, tolerances and etc.
+
+The nullspace is now found using Gauss-Jordan, instead of SVD (for a speedup
+of about 30x for this particular part).
+
+New hand written polynomial root finder, for a speedup of 4x and improved
+reliability (the old one would occasionally expect -1 roots due to numerical
+instabilities and fail with an alloc_error).
+
+The new root-finder will not attempt to find roots of p(x) for |x|>100, since
+it is not possible to find these root to high enough accuracy.
+
+Roots are bracketed using Sturm sequences (as before) but using the resursive
+implementation which is more efficient.
+
+The root polishing uses a hybrid Newton-Raphson/bisection rootfinder which
+usually gets roots to higher accuracy than the old bisection solver and almost
+always converges in < 8 iterations, and often in 4. It will give up after 10
+iterations.
+
+A new tolerance feps is introduced, so that for a numerical root at x, if
+|p(x)| > feps, the root will not be recorded.
+
+The other tolerances (eps and zeps) follow the convention of NR in C.
+
+--------------
+
+Fri 15 May, 2009 15:54:29 author: edrosten
+    File: Makefile.in (Rev. 1.15)
+
+4x speedup to five_point. The new code will give slightly different results
+to the old code, due to differences in numerics, tolerances and etc.
+
+The nullspace is now found using Gauss-Jordan, instead of SVD (for a speedup
+of about 30x for this particular part).
+
+New hand written polynomial root finder, for a speedup of 4x and improved
+reliability (the old one would occasionally expect -1 roots due to numerical
+instabilities and fail with an alloc_error).
+
+The new root-finder will not attempt to find roots of p(x) for |x|>100, since
+it is not possible to find these root to high enough accuracy.
+
+Roots are bracketed using Sturm sequences (as before) but using the resursive
+implementation which is more efficient.
+
+The root polishing uses a hybrid Newton-Raphson/bisection rootfinder which
+usually gets roots to higher accuracy than the old bisection solver and almost
+always converges in < 8 iterations, and often in 4. It will give up after 10
+iterations.
+
+A new tolerance feps is introduced, so that for a numerical root at x, if
+|p(x)| > feps, the root will not be recorded.
+
+The other tolerances (eps and zeps) follow the convention of NR in C.
+
+--------------
+
+Mon 11 May, 2009 20:56:53 author: edrosten
+    File: src/five_point.cpp (Rev. 1.18)
+
+Fixed a very silly bug.
+
+--------------
+
+Mon 11 May, 2009 18:54:40 author: edrosten (Concatenated 2 entries at 10s)
+    File: tag/five_point.h (Rev. 1.8)
+    File: Doxyfile (Rev. 1.6)
+
+Doc punt.
+
+Make essential_reprojection_errors_squared consistent wuith five_point
+in the argument ordering.
+
+--------------
+
+Mon 11 May, 2009 18:43:29 author: edrosten
+    File: tag/five_point.h (Rev. 1.7)
+
+Doc fix
+
+--------------
+
+Mon 11 May, 2009 18:32:31 author: edrosten
+    File: tag/five_point.h (Rev. 1.6)
+
+Reprojection error for the essential matrix.
+
+--------------
+
+Fri  8 May, 2009 13:25:13 author: gerhard
+    File: tag/ransac_estimators.h (Rev. 1.11)
+
+more TooN2 cleanup
+
+--------------
+
+Fri  8 May, 2009 13:08:11 author: gerhard
+    File: src/absorient.cpp (Rev. 1.9)
+
+more robust
+
+--------------
+
+Wed  6 May, 2009 13:52:20 author: gerhard
+    File: src/absorient.cpp (Rev. 1.8)
+
+make robust
+
+--------------
+
+Thu 30 Apr, 2009 18:52:20 author: gerhard
+    File: src/five_point.cpp (Rev. 1.15)
+
+use SO3 from vectors constructor
+
+--------------
+
+Wed 29 Apr, 2009 19:58:39 author: gerhard
+    File: doc/tag.h (Rev. 1.2)
+
+more doc polishing
+
+--------------
+
+Wed 29 Apr, 2009 19:48:58 author: gerhard (Concatenated 2 entries at 10s)
+    File: tag/threepointpose.h (Rev. 1.3)
+    File: src/threepointpose.cpp (Rev. 1.3)
+
+documentation updates to have a main page
+
+--------------
+
+Wed 29 Apr, 2009 19:48:55 author: gerhard
+    File: Doxyfile (Rev. 1.5)
+
+documentation updates to have a main page
+
+--------------
+
+Tue 28 Apr, 2009 15:27:43 author: gerhard
+    File: src/five_point.cpp (Rev. 1.14)
+
+generator fields give slight speed improvement
+
+--------------
+
+Tue 28 Apr, 2009 11:40:10 author: gerhard
+    File: tag/five_point.h (Rev. 1.5)
+
+small doc updates
+
+--------------
+
+Tue 28 Apr, 2009 11:36:41 author: gerhard
+    File: test/fivepoint.cpp (Rev. 1.2)
+
+essential matrix optimization code for more then 5 measurements
+
+--------------
+
+Mon 27 Apr, 2009 14:45:43 author: gerhard
+    File: src/five_point.cpp (Rev. 1.12)
+    File: src/handeye.cpp (Rev. 1.3)
+
+updates for Zeros
+
+--------------
+
+Thu 23 Apr, 2009 19:06:28 author: gerhard
+    File: test/handeye.cpp (Rev. 1.1)
+
+handeye calibration test code
+
+--------------
+
+Thu 23 Apr, 2009 18:42:42 author: gerhard
+    File: Makefile.in (Rev. 1.14)
+
+added warning and optimization flags
+
+--------------
+
+Thu 23 Apr, 2009 18:20:27 author: gerhard
+    File: src/util.c (Rev. 1.2)
+
+stop root finding from mindless iterations... big performance gain
+
+--------------
+
+Thu 23 Apr, 2009 16:50:55 author: gerhard
+    File: src/five_point.cpp (Rev. 1.11)
+
+fixed crash on OSX
+
+--------------
+
+Thu 23 Apr, 2009 16:13:15 author: gerhard
+    File: src/five_point.cpp (Rev. 1.10)
+
+some fixes
+
+--------------
+
+Thu 23 Apr, 2009 16:07:38 author: edrosten
+    File: src/sturm.c (Rev. 1.2)
+
+Added missing void
+
+--------------
+
+Thu 23 Apr, 2009 16:06:49 author: edrosten
+    File: tag/helpers.h (Rev. 1.6)
+
+Missing include
+
+--------------
+
+Thu 23 Apr, 2009 16:06:21 author: gerhard
+    File: test/fivepoint.cpp (Rev. 1.1)
+
+added fivepoint test program
+
+--------------
+
+Thu 23 Apr, 2009 14:26:10 author: gerhard
+    File: doc/five_point.mws (Rev. 1.1)
+    File: doc/five_point.pdf (Rev. 1.1)
+
+maple file for five point algorithm code generation and print out for documentation
+
+--------------
+
+Thu 23 Apr, 2009 13:07:45 author: gerhard
+    File: tag/helpers.h (Rev. 1.5)
+
+doc updates, created an essential matrix tools group
+
+--------------
+
+Thu 23 Apr, 2009 12:54:48 author: gerhard
+    File: src/five_point.cpp (Rev. 1.9)
+
+removed non working E->(R,t)
+
+--------------
+
+Thu 23 Apr, 2009 12:54:05 author: gerhard
+    File: tag/five_point.h (Rev. 1.2)
+
+reconstructing R,T from E, a working implementation based on Horn and a non-working one based on Nister
+
+--------------
+
+Thu 23 Apr, 2009 10:49:28 author: edrosten
+    File: src/five_point.cpp (Rev. 1.7)
+
+Doc fix.
+
+--------------
+
+Thu 23 Apr, 2009 10:22:49 author: edrosten
+    File: src/five_point.cpp (Rev. 1.6)
+
+Minor clean up + comments.
+
+--------------
+
+Thu 23 Apr, 2009 10:02:42 author: gerhard
+    File: tag/five_point.h (Rev. 1.1)
+
+generation of data matrix flipped order to be correct, added missing header file
+
+--------------
+
+Thu 23 Apr, 2009 09:55:53 author: edrosten
+    File: tag/handeye.h (Rev. 1.3)
+
+Case sensitive filesystem fix.
+
+--------------
+
+Thu 23 Apr, 2009 00:36:05 author: gerhard
+    File: tag/helpers.h (Rev. 1.4)
+
+fixes for TooN2
+
+--------------
+
+Thu 23 Apr, 2009 00:23:12 author: gerhard (Concatenated 2 entries at 10s)
+    File: src/solve.h (Rev. 1.1)
+    File: src/sturm.c (Rev. 1.1)
+    File: src/util.c (Rev. 1.1)
+    File: libtool (Rev. 1.17)
+
+replaced polynomial root solver with sturm chain-based one from Graphic Gems 1 -> works
+
+--------------
+
+Wed 22 Apr, 2009 21:47:47 author: gerhard
+    File: src/five_point_buildmatrix.cpp (Rev. 1.2)
+
+working five point, needs polynomial solver
+
+--------------
+
+Wed 22 Apr, 2009 20:59:37 author: gerhard (Concatenated 2 entries at 10s)
+    File: tag/helpers.h (Rev. 1.3)
+    File: src/five_point.cpp (Rev. 1.2)
+
+tag five point hacking
+
+--------------
+
+Wed 22 Apr, 2009 18:05:25 author: edrosten
+    File: src/ccmcomplex.h (Rev. 1.1)
+    File: src/five_point.cpp (Rev. 1.1)
+    File: src/five_point_buildmatrix.cpp (Rev. 1.1)
+    File: src/plrt.c (Rev. 1.1)
+
+Initial stab at 5 point pose
+
+--------------
+
+Mon 20 Apr, 2009 13:27:53 author: gerhard
+    File: src/absorient.cpp (Rev. 1.5)
+
+save a couple of normalisations
+
+--------------
+==========================================
 Repository tagged as SNAPSHOT_20090420
 ==========================================
 
-Mon 20 Apr, 2009 11:02:35 author: gerhard (Concatenated 2 entries at 1s)
-    File: libtool (Rev. 1.14)
-    File: src/absorient.cpp (Rev. 1.4)
-    File: src/handeye.cpp (Rev. 1.2)
-    File: src/threepointpose.cpp (Rev. 1.2)
-    File: tag/absorient.h (Rev. 1.4)
+Mon 20 Apr, 2009 11:02:35 author: gerhard (Concatenated 2 entries at 10s)
     File: tag/fourpointpose.h (Rev. 1.9)
-    File: tag/handeye.h (Rev. 1.2)
-    File: tag/stdpp.h (Rev. 1.7)
     File: tag/threepointpose.h (Rev. 1.2)
-    File: Makefile.am (Rev. 1.11)
     File: Makefile.in (Rev. 1.11)
 
 made tag work with TooN2, deprecated four point pose - use three point instread, much better
@@ -45,7 +394,6 @@ fixed access to correspondence data in exxential_matrix estimator
 --------------
 
 Mon  5 Jan, 2009 15:25:33 author: edrosten
-    File: libtool (Rev. 1.13)
     File: tag/fn.h (Rev. 1.7)
 
 Make member_iterator non-const. Add member_const_iterator
@@ -59,9 +407,7 @@ missing ransac estimator for camera rotation
 
 --------------
 
-Tue  9 Dec, 2008 20:33:42 author: gerhard (Concatenated 2 entries at 1s)
-    File: tag/absorient.h (Rev. 1.3)
-    File: tag/helpers.h (Rev. 1.2)
+Tue  9 Dec, 2008 20:33:42 author: gerhard (Concatenated 2 entries at 10s)
     File: tag/kalmanfilter.h (Rev. 1.9)
     File: src/absorient.cpp (Rev. 1.3)
 
@@ -79,7 +425,7 @@ added missing file for handeye calibration
 
 --------------
 
-Mon 18 Aug, 2008 18:36:28 author: edrosten (Concatenated 2 entries at 1s)
+Mon 18 Aug, 2008 18:36:28 author: edrosten (Concatenated 2 entries at 10s)
     File: tag/printf.h (Rev. 1.9)
     File: libtool (Rev. 1.12)
 
@@ -87,11 +433,9 @@ Fix in printf
 
 --------------
 
-Fri 15 Aug, 2008 14:24:49 author: gerhard (Concatenated 2 entries at 1s)
+Fri 15 Aug, 2008 14:24:49 author: gerhard (Concatenated 2 entries at 10s)
     File: src/handeye.cpp (Rev. 1.1)
     File: tag/handeye.h (Rev. 1.1)
-    File: Makefile.am (Rev. 1.10)
-    File: Makefile.in (Rev. 1.10)
     File: libtool (Rev. 1.11)
 
 added hand eye calibration routines
@@ -106,14 +450,13 @@ update for change in Makefile.am (long ago :)
 --------------
 
 Thu 29 May, 2008 17:36:23 author: gerhard
-    File: src/absorient.cpp (Rev. 1.2)
     File: src/quartic.cpp (Rev. 1.3)
 
 build files and some fixes for Visual Studio 2005
 
 --------------
 
-Tue 20 May, 2008 03:15:30 author: edrosten (Concatenated 2 entries at 1s)
+Tue 20 May, 2008 03:15:30 author: edrosten (Concatenated 2 entries at 10s)
     File: tag/printf.h (Rev. 1.8)
     File: libtool (Rev. 1.10)
 
@@ -128,7 +471,7 @@ Addressed unlikely but possible boundary case in quartic solver.
 
 --------------
 
-Mon 31 Mar, 2008 17:35:42 author: ethaneade (Concatenated 2 entries at 1s)
+Mon 31 Mar, 2008 17:35:42 author: ethaneade (Concatenated 2 entries at 10s)
     File: src/threepointpose.cpp (Rev. 1.1)
     File: src/quartic.cpp (Rev. 1.1)
     File: tag/quartic.h (Rev. 1.1)
@@ -163,12 +506,8 @@ made Sqrt versions accessible, removed some dependencies
 
 --------------
 
-Mon  3 Dec, 2007 17:39:31 author: gerhard (Concatenated 2 entries at 1s)
+Mon  3 Dec, 2007 17:39:31 author: gerhard (Concatenated 2 entries at 10s)
     File: tag/unscented.h (Rev. 1.1)
-    File: Makefile.am (Rev. 1.8)
-    File: Makefile.in (Rev. 1.8)
-    File: aclocal.m4 (Rev. 1.7)
-    File: configure (Rev. 1.7)
     File: libtool (Rev. 1.9)
 
 unscented transform implementations by Ethan Eade
@@ -176,22 +515,14 @@ unscented transform implementations by Ethan Eade
 --------------
 
 Wed 31 Oct, 2007 10:26:50 author: gerhard
-    File: AUTHORS (Rev. 1.2)
-    File: Doxyfile (Rev. 1.4)
     File: README (Rev. 1.2)
 
 documentation fixes
 
 --------------
 
-Wed 31 Oct, 2007 10:26:22 author: gerhard (Concatenated 2 entries at 1s)
-    File: tag/fourpointpose.h (Rev. 1.8)
-    File: tag/ransac.h (Rev. 1.9)
+Wed 31 Oct, 2007 10:26:22 author: gerhard (Concatenated 2 entries at 10s)
     File: tag/ransac_estimators.h (Rev. 1.7)
-    File: Makefile.am (Rev. 1.7)
-    File: Makefile.in (Rev. 1.7)
-    File: aclocal.m4 (Rev. 1.6)
-    File: configure (Rev. 1.6)
     File: libtool (Rev. 1.8)
 
 updated ransac interfaces to get minimal hypothesis size directly from estimators. backwards compatibility functions are still provided. also added helpers refactoring and adding some common code
@@ -206,7 +537,6 @@ Tue 30 Oct, 2007 18:56:38 author: gerhard
 --------------
 
 Thu 25 Oct, 2007 21:33:21 author: edrosten
-    File: libtool (Rev. 1.7)
     File: tag/array.h (Rev. 1.2)
 
 Remove some compile warnings.
@@ -250,7 +580,6 @@ the std::iterator_traits class.
 --------------
 
 Tue 12 Jun, 2007 21:05:08 author: gerhard
-    File: tag/ransac.h (Rev. 1.7)
     File: tag/ransac_estimators.h (Rev. 1.5)
 
 added plane estimation
@@ -272,7 +601,6 @@ Removed extre qualifiers which cause errors in gcc 4.1.0
 --------------
 
 Thu 14 Dec, 2006 14:00:46 author: gerhard
-    File: tag/constantvelocity.h (Rev. 1.3)
     File: tag/kalmanfilter.h (Rev. 1.8)
 
 optimizations through returning references instead of temporary return values and using reference variables in the filter
@@ -316,7 +644,6 @@ refactored checks, avoids unnecessary use of acos, asin
 --------------
 
 Mon  4 Sep, 2006 16:50:04 author: jjneubert
-    File: libtool (Rev. 1.6)
     File: src/fourpointpose.cpp (Rev. 1.5)
 
 fixed floating point error in fourPointPose
@@ -324,7 +651,6 @@ fixed floating point error in fourPointPose
 --------------
 
 Wed 26 Jul, 2006 18:08:07 author: gerhard
-    File: src/fourpointpose.cpp (Rev. 1.4)
     File: tag/fourpointpose.h (Rev. 1.5)
 
 added a tolerance value to four point pose estimation to come up with an estimation under measurement errors
@@ -387,10 +713,6 @@ I hate forgetting to add files.
 --------------
 
 Wed  5 Jul, 2006 21:43:55 author: edrosten
-    File: Makefile.am (Rev. 1.5)
-    File: Makefile.in (Rev. 1.5)
-    File: aclocal.m4 (Rev. 1.4)
-    File: configure (Rev. 1.4)
     File: libtool (Rev. 1.4)
 
 Checked in an array type with a sequence constructor (using tuples).
@@ -405,8 +727,6 @@ added header for std functional and iterator add ons
 --------------
 
 Tue 13 Jun, 2006 18:19:27 author: gerhard
-    File: tag/fourpointpose.h (Rev. 1.4)
-    File: tag/kalmanfilter.h (Rev. 1.6)
     File: tag/ransac.h (Rev. 1.6)
 
 some fixes after ransac update:
@@ -437,7 +757,6 @@ Small fix to find_RANSAC_inliers_guided_breadth_first.
 --------------
 
 Tue 13 Jun, 2006 02:50:44 author: ethaneade
-    File: tag/ransac.h (Rev. 1.3)
     File: tag/ransac_estimators.h (Rev. 1.3)
 
 Updated RANSAC algorithms and estimators to fix bugs and improve efficiency.
@@ -477,7 +796,6 @@ using optimized transformCovariance from TooN
 --------------
 
 Mon  5 Jun, 2006 16:19:30 author: gerhard
-    File: tag/constantvelocity.h (Rev. 1.2)
     File: tag/kalmanfilter.h (Rev. 1.4)
     File: tag/measurements.h (Rev. 1.3)
 
@@ -493,7 +811,6 @@ refactored common code to helper function
 --------------
 
 Sun  4 Jun, 2006 13:09:19 author: gerhard
-    File: src/fourpointpose.cpp (Rev. 1.2)
     File: tag/fourpointpose.h (Rev. 1.3)
 
 fixed four point pose estimation
@@ -515,17 +832,6 @@ more constraint template parameters to avoid conflicts
 --------------
 
 Wed 31 May, 2006 17:46:20 author: gerhard
-    File: Makefile.am (Rev. 1.3)
-    File: Makefile.in (Rev. 1.3)
-    File: aclocal.m4 (Rev. 1.3)
-    File: configure (Rev. 1.3)
-    File: libtool (Rev. 1.3)
-    File: tag/absorient.h (Rev. 1.2)
-    File: tag/fourpointpose.h (Rev. 1.2)
-    File: tag/kalmanfilter.h (Rev. 1.3)
-    File: tag/printf.h (Rev. 1.5)
-    File: tag/ransac.h (Rev. 1.2)
-    File: tag/ransac_estimators.h (Rev. 1.2)
     File: tag/stdpp.h (Rev. 1.4)
 
 - added Kalman filter models and measurement classes, some refactoring,
@@ -535,7 +841,6 @@ Wed 31 May, 2006 17:46:20 author: gerhard
 --------------
 
 Wed 31 May, 2006 01:09:48 author: edrosten
-    File: tag/printf.h (Rev. 1.4)
     File: tag/tuple.h (Rev. 1.2)
 
 Fixed guards and include
@@ -557,10 +862,6 @@ Fixed namespace
 --------------
 
 Wed 31 May, 2006 00:00:33 author: edrosten
-    File: Makefile.am (Rev. 1.2)
-    File: Makefile.in (Rev. 1.2)
-    File: aclocal.m4 (Rev. 1.2)
-    File: configure (Rev. 1.2)
     File: libtool (Rev. 1.2)
 
 Added files to Makefile.am
@@ -576,7 +877,6 @@ Added typesafe printf and tuple types.
 --------------
 
 Tue 30 May, 2006 20:53:22 author: gerhard
-    File: Doxyfile (Rev. 1.3)
     File: tag/stdpp.h (Rev. 1.3)
 
 documentation fixes
