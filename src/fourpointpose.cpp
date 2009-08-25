@@ -19,14 +19,14 @@ static inline bool computeDistances( const double xx, const double x, const doub
         double beta = std::asin(sqrt(distance) / x);
         double diff = fabs(alpha) - fabs(beta);
         if( diff > angularError ){
-            TooN::Zero(roots);
+			roots = TooN::Zeros;
             return false;
         }
         det = 0;
     } else {
         det = sqrt(det);
     }
-    roots = (TooN::make_Vector, -p*0.5 + det, -p*0.5 - det);
+    roots = TooN::makeVector( -p*0.5 + det, -p*0.5 - det);
     return true;
 }
 
@@ -103,8 +103,8 @@ static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std:
             distances[count] = diff * diff;
             angles[count] = 2* myPixels[i] * myPixels[j];
         }
-
-    TooN::Zero(A);
+	
+	A = TooN::Zeros;
     A.slice<0,0,1,5>() = getACoeffs(angles[0], angles[1], angles[3], distances[0], distances[1], distances[3]).as_row();
     A.slice<1,0,1,5>() = getACoeffs(angles[0], angles[2], angles[4], distances[0], distances[2], distances[4]).as_row();
     A.slice<2,0,1,5>() = getACoeffs(angles[1], angles[2], angles[5], distances[1], distances[2], distances[5]).as_row();
@@ -144,14 +144,14 @@ static bool fourPointSolver ( const std::vector<TooN::Vector<3> > & points, std:
 
     bool valid = true;
     double x = sqrt( xx );
-    length[0] = (TooN::make_Vector, x, -x); // possible distances to point 0
+    length[0] = TooN::makeVector( x, -x); // possible distances to point 0
     valid &= computeDistances( xx, x, angles[0], distances[0], angularError, length[1]);
     valid &= computeDistances( xx, x, angles[1], distances[1], angularError, length[2]);
     valid &= computeDistances( xx, x, angles[2], distances[2], angularError, length[3]);
     return valid;
 }
 
-TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
+TooN::SE3<> fourPointPose( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
     double orientationTest = ((points[1] - points[0]) ^ (points[2] - points[0])) * (points[3] - points[0]);
 
     // normalising scales for angle computation in next loop
@@ -164,7 +164,7 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
     TooN::Vector<6> distances;
     valid = fourPointSolver( points, myPixels, distances, length, angularError);
     if( !valid )
-        return TooN::SE3();
+        return TooN::SE3<>();
 
     // figure out the right lengths
     // brute force through all combinations, with some optimizations to stop early, if a better hypothesis exists
@@ -195,7 +195,7 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
     }
     if(minIndex == -1){
         valid = false;
-        return TooN::SE3();
+        return TooN::SE3<>();
     }
 
     // pixel directions extended to the right distance
@@ -209,7 +209,7 @@ TooN::SE3 fourPointPose( const std::vector<TooN::Vector<3> > & points, const std
 }
 
 // just a copy of the above code with modifications to the case search
-TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
+TooN::SE3<> fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points, const std::vector<TooN::Vector<3> > & pixels, bool & valid, const double angularError ){
     // normalising scales for angle computation in next loop
     std::vector<TooN::Vector<3> > myPixels(4);
     for(unsigned int i = 0; i < 4; i++)
@@ -220,7 +220,7 @@ TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points,
     TooN::Vector<6> distances;
     valid = fourPointSolver( points, myPixels, distances, length, angularError);
     if( !valid )
-        return TooN::SE3();
+        return TooN::SE3<>();
 
     // figure out the right lengths
     // brute force through all combinations, with some optimizations to stop early, if a better hypothesis exists
@@ -248,7 +248,7 @@ TooN::SE3 fourPointPoseFromCamera( const std::vector<TooN::Vector<3> > & points,
     }
     if(minIndex == -1){
         valid = false;
-        return TooN::SE3();
+        return TooN::SE3<>();
     }
 
     // pixel directions extended to the right distance
