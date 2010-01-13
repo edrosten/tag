@@ -17,8 +17,8 @@ namespace tag {
 /// test for plane and line being parallel might depend on the magnitude
 /// of these vectors.
 /// @ingroup intersection
-template<typename A, typename B, typename C, typename D>
-inline bool intersect_plane_line( const TooN::FixedVector<3,A> & normal, const double d, const TooN::FixedVector<3,B> & p1, const TooN::FixedVector<3,C> & p2, TooN::FixedVector<3,D> & i){
+template<typename A, typename B, typename C, typename D, typename ABase, typename BBase, typename CBase, typename DBase>
+inline bool intersect_plane_line( const TooN::Vector<3,A, ABase> & normal, const double d, const TooN::Vector<3,B, BBase> & p1, const TooN::Vector<3,C, CBase> & p2, TooN::Vector<3,D, DBase> & i){
     const double EPSILON = 0.000001;
 
     TooN::Vector<3> dir = p2 - p1;
@@ -186,10 +186,10 @@ inline bool intersect_triangles( const TooN::Vector<3> & v1, const TooN::Vector<
     // compute interval points by intersecting with respective planes
     // we know that they intersect, therefore no test for failure
     TooN::Matrix<4,3> intersections;
-    intersect_plane_line( nw, dw, *tv[iv], *tv[(iv+1)%3], intersections[0] );
-    intersect_plane_line( nw, dw, *tv[iv], *tv[(iv+2)%3], intersections[1] );
-    intersect_plane_line( nv, dv, *tw[iw], *tw[(iw+1)%3], intersections[2] );
-    intersect_plane_line( nv, dv, *tw[iw], *tw[(iw+2)%3], intersections[3] );
+    intersect_plane_line( nw, dw, *tv[iv], *tv[(iv+1)%3], intersections[0].ref() );
+    intersect_plane_line( nw, dw, *tv[iv], *tv[(iv+2)%3], intersections[1].ref() );
+    intersect_plane_line( nv, dv, *tw[iw], *tw[(iw+1)%3], intersections[2].ref() );
+    intersect_plane_line( nv, dv, *tw[iw], *tw[(iw+2)%3], intersections[3].ref() );
 
     // project onto line
     TooN::Vector<4> proj = intersections * d;
