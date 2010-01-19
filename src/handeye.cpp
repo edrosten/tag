@@ -65,10 +65,12 @@ std::pair<TooN::SE3<> , TooN::SE3<> > computeHandEye( const std::vector<TooN::SE
 }
 
 SO3<>  computeHandEyeSingle( const vector<SO3<> > & AB, const vector<SO3<> > & CD ){
-    vector<SO3<> > A(AB.size()-1),B(AB.size()-1);
+    vector<SO3<> > A,B;
     for(unsigned int i = 0; i < AB.size() - 1; ++i){
-        A[i] = CD[i] * CD[i+1].inverse();
-        B[i] = AB[i].inverse() * AB[i+1];
+		for(unsigned int j = i+1; j < AB.size(); ++j){
+			A.push_back(CD[i] * CD[j].inverse());
+			B.push_back(AB[i].inverse() * AB[j]);
+		}
     }
     return solveXABX(A,B);
 }
