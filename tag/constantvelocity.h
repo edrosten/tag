@@ -40,7 +40,7 @@ public:
     TooN::Matrix<STATE_DIMENSION> covariance;
 };
 
-/// operator to print out instances of State in a useable manner.
+/// operator to print out instances of State in a usable manner.
 /// @ingroup constantvelocitygroup
 template <class O>
 inline O & operator<< (O & os , const State & st){
@@ -67,7 +67,7 @@ public:
     }
 
     // Jacobian has pos, rot, vel, angularVel in this order
-    const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, const double dt) {
+    const TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & /*state*/, const double dt) {
             jacobian(0,6) = dt;
             jacobian(1,7) = dt;
             jacobian(2,8) = dt;
