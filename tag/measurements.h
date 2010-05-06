@@ -24,25 +24,25 @@ public:
     TooN::Vector<M_DIMENSION> measurement;
 
     IncrementalPose(void){
-        TooN::Identity(covariance);
-        TooN::Zero(jacobian);
-        TooN::Identity(jacobian.template slice<0,0,6,6>());
-        TooN::Zero(measurement);
+        covariance = TooN::Identity;
+        jacobian = TooN::Zeros;
+        jacobian.template slice<0,0,6,6>() = TooN::Identity;
+        measurement = TooN::Zeros;
     }
 
-    inline TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
+    TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
         return jacobian;
     }
 
-    inline TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
+    TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
+    TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
         return measurement;
     }
 
-    inline void setMeasurement( const TooN::SE3 & increment ){
+    void setMeasurement( const TooN::SE3<> & increment ){
         measurement = increment.ln();
     }
 };
@@ -57,25 +57,25 @@ public:
 
     TooN::Matrix<M_DIMENSION> covariance;
     TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> jacobian;
-    TooN::SE3 measurement;
+    TooN::SE3<> measurement;
 
     WorldPose(void){
-        TooN::Identity(covariance);
-        TooN::Zero(jacobian);
-        TooN::Identity(jacobian.template slice<0,0,6,6>());
+        covariance = TooN::Identity;
+        jacobian = TooN::Zeros;
+        jacobian.template slice<0,0,6,6>() = TooN::Identity;
     }
 
-    inline TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
+    TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
         return jacobian;
     }
 
-    inline const TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ) const {
+    const TooN::Matrix<M_DIMENSION> getMeasurementCovariance( const State & state ) const {
         TooN::Matrix<M_DIMENSION> localCovariance = covariance;
         state.pose.adjoint(localCovariance);
         return localCovariance;
     }
 
-    inline const TooN::Vector<M_DIMENSION> & getInnovation( const State & state ) const {
+    const TooN::Vector<M_DIMENSION> getInnovation( const State & state ) const {
         return (measurement * state.pose.inverse()).ln();
     }
 };
@@ -93,36 +93,35 @@ public:
     TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> jacobian;
 
     WorldPosition(void){
-        TooN::Identity(covariance);
-        TooN::Zero(position);
-        TooN::Zero(jacobian);
-        TooN::Identity(jacobian.template slice<0,0,3,3>());
+        covariance = TooN::Identity;
+        position = TooN::Zeros;
+        jacobian = TooN::Zeros;
+        jacobian.template slice<0,0,3,3>() = TooN::Identity;
     }
 
-    inline const TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ) const {
+    const TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ) const {
         return jacobian;
     }
 
-    inline const TooN::Matrix<M_DIMENSION> getMeasurementCovariance( const State & state ) const {
-        TooN::Matrix<2 * M_DIMENSION> localCovariance;
-        TooN::Zero(localCovariance);
+    const TooN::Matrix<M_DIMENSION> getMeasurementCovariance( const State & state ) const {
+        TooN::Matrix<2 * M_DIMENSION> localCovariance = TooN::Zeros;
         localCovariance.template slice<0,0,3,3>() = covariance;
         state.pose.adjoint(localCovariance);
         return localCovariance.template slice<0,0,3,3>();
     }
 
-    inline const TooN::Vector<M_DIMENSION> getInnovation( const State & state ) const {
+    const TooN::Vector<M_DIMENSION> getInnovation( const State & state ) const {
         /// the negative vector corresponds to the left transformation to get from the current reference
         /// frame to the new reference frame where position is the origin.
         return -(state.pose * position);
     }
 
-    inline void setCovariance( double sigma ){
-        TooN::Identity(covariance, sigma);
+    void setCovariance( double sigma ){
+        covariance = TooN::Identity * sigma;
     }
 
-    inline void setCovariance( const TooN::Vector<M_DIMENSION> & sigma ){
-        TooN::Zero(covariance);
+    void setCovariance( const TooN::Vector<M_DIMENSION> & sigma ){
+        covariance = TooN::Zeros;
         for(int i = 0; i < M_DIMENSION; ++i){
             covariance(i,i) = sigma[i];
         }
@@ -142,29 +141,29 @@ public:
     TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> jacobian;
 
     AngularVelocity(void){
-        TooN::Identity(covariance);
-        TooN::Zero(gyro);
+        covariance = TooN::Identity;
+        gyro = TooN::Zeros;
         // angularVelocity jacobian
-        TooN::Zero(jacobian);
-        TooN::Identity(jacobian.template slice<0,9,3,3>());
+        jacobian = TooN::Zeros;
+        jacobian.template slice<0,9,3,3>() = TooN::Identity;
     }
 
-    inline TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
+    TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
         return jacobian;
     }
 
-    inline TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
+    TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> getInnovation( const State & state ){
+    TooN::Vector<M_DIMENSION> getInnovation( const State & state ){
         // angular velocity
         /// @todo think about the -gyro and either document or remove
         return  (-gyro - state.angularVelocity);
     }
 
-    inline void setCovariance( double sigma ){
-        TooN::Identity(covariance, sigma);
+    void setCovariance( double sigma ){
+        covariance = TooN::Identity * sigma;
     }
 };
 
@@ -183,32 +182,31 @@ public:
     TooN::Matrix<M_DIMENSION> covariance;
 
     WorldDirection(void){
-        TooN::Identity(covariance);
-        TooN::Zero(measurement);
-        TooN::Zero(reference);
+        covariance = TooN::Identity;
+        measurement = TooN::Zeros;
+        reference = TooN::Zeros;
     }
 
-    inline TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> & getMeasurementJacobian( const State & state ){
-        TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> result;
-        TooN::Zero(result);
+    TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> getMeasurementJacobian( const State & state ){
+        TooN::Matrix<M_DIMENSION,State::STATE_DIMENSION> result = TooN::Zeros;
         // direction jacobian
         TooN::Vector<M_DIMENSION> local = state.pose.get_rotation() * reference;
-        result.template slice<0,3,3,1>() = TooN::SO3::generator_field(0, local ).as_col();
-        result.template slice<0,4,3,1>() = TooN::SO3::generator_field(1, local ).as_col();
-        result.template slice<0,5,3,1>() = TooN::SO3::generator_field(2, local ).as_col();
+        result.template slice<0,3,3,1>() = TooN::SO3<>::generator_field(0, local ).as_col();
+        result.template slice<0,4,3,1>() = TooN::SO3<>::generator_field(1, local ).as_col();
+        result.template slice<0,5,3,1>() = TooN::SO3<>::generator_field(2, local ).as_col();
         return result;
     }
 
-    inline TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
+    TooN::Matrix<M_DIMENSION> & getMeasurementCovariance( const State & state ){
         return covariance;
     }
 
-    inline TooN::Vector<M_DIMENSION> & getInnovation( const State & state ){
+    TooN::Vector<M_DIMENSION> getInnovation( const State & state ){
         return (measurement - (state.pose.get_rotation() * reference));
     }
 
-    inline void setCovariance( double sigma ){
-        TooN::Identity(covariance, sigma);
+    void setCovariance( double sigma ){
+        covariance = TooN::Identity * sigma;
     }
 };
 

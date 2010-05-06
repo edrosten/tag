@@ -3,7 +3,7 @@
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
-#include <TooN/LU.h>
+#include <TooN/Cholesky.h>
 
 namespace tag {
 
@@ -88,13 +88,15 @@ public:
     typedef Model model_type;
 
     KalmanFilter(){
-        TooN::Identity(identity);
+        identity = TooN::Identity;
     }
 
     /// predicts the state by applying the process model over the time interval dt
     /// @param[in] dt time interval
     void predict(double dt){
-        state.covariance = TooN::transformCovariance(model.getJacobian( state, dt ), state.covariance) + model.getNoiseCovariance( dt );
+        //state.covariance = TooN::transformCovariance(model.getJacobian( state, dt ), state.covariance) + model.getNoiseCovariance( dt );
+        const TooN::Matrix<State::STATE_DIMENSION> & A = model.getJacobian( state, dt );
+        state.covariance = A * state.covariance * A.T() + model.getNoiseCovariance( dt );
         TooN::Symmetrize(state.covariance);
         model.updateState( state, dt );
     }
@@ -104,14 +106,13 @@ public:
     template<class Measurement> void filter(Measurement & m){
         const TooN::Matrix<Measurement::M_DIMENSION,State::STATE_DIMENSION> & H = m.getMeasurementJacobian( state );
         const TooN::Matrix<Measurement::M_DIMENSION> & R = m.getMeasurementCovariance( state );
-        TooN::Matrix<Measurement::M_DIMENSION> I = TooN::transformCovariance(H, state.covariance) + R;
-        TooN::LU<Measurement::M_DIMENSION> lu(I);
-        TooN::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> K = state.covariance * H.T() * lu.get_inverse();
         const TooN::Vector<Measurement::M_DIMENSION> & innovation = m.getInnovation( state );
-        TooN::Vector<State::STATE_DIMENSION> stateInnovation = K * innovation;
+        const TooN::Matrix<State::STATE_DIMENSION, Measurement::M_DIMENSION> P12 = state.covariance * H.T();
+        TooN::Cholesky<Measurement::M_DIMENSION> denom(H * P12 + R);
+        state.covariance = state.covariance - P12 * denom.backsub(P12.T());
+        // TooN::Symmetrize(state.covariance);  // not necessary, above seems to be good enough
+        const TooN::Vector<State::STATE_DIMENSION> stateInnovation = P12 * denom.backsub(innovation);
         model.updateFromMeasurement( state, stateInnovation );
-        state.covariance = (identity - K * H) * state.covariance;
-        TooN::Symmetrize( state.covariance );
     }
 
     /// identity matrix of the right size, used in the measurement equations

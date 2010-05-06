@@ -22,12 +22,12 @@ public:
     }
 
     void reset(void){
-        position = TooN::SE3();
-        TooN::Identity(covariance);
+        pose = TooN::SE3<>();
+        covariance = TooN::Identity;
     }
 
     static const int STATE_DIMENSION = 6;
-    TooN::SE3 pose;
+    TooN::SE3<> pose;
     TooN::Matrix<STATE_DIMENSION> covariance;
 };
 
@@ -53,14 +53,14 @@ public:
     TooN::Matrix<State::STATE_DIMENSION> noise;
 
     Model(void){
-        TooN::Zero(sigma);
-        TooN::Zero(noise);
-        TooN::Identity(jacobian);
+        sigma = TooN::Zeros;
+        noise = TooN::Zeros;
+        jacobian = TooN::Identity;
     }
 
     /// Jacobian has pos, rot in this order
     TooN::Matrix<State::STATE_DIMENSION> & getJacobian(const State & state, double dt){
-            return jacobian;
+        return jacobian;
     }
 
     void updateState( State & state, const double dt ){
@@ -74,7 +74,7 @@ public:
     }
 
     void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
-        state.pose = TooN::SE3::exp(innovation) * state.pose;
+        state.pose = TooN::SE3<>::exp(innovation) * state.pose;
     }
 };
 

@@ -22,19 +22,19 @@ public:
     }
 
     void reset(void){
-        pose = TooN::SE3();
-        TooN::Zero(angularVelocity);
-        TooN::Zero(velocity);
-        TooN::Identity(covariance);
+        pose = TooN::SE3<>();
+        angularVelocity = TooN::Zeros;
+        velocity = TooN::Zeros;
+        covariance = TooN::Identity;
     }
 
     void resetVelocity(void){
-        TooN::Zero(angularVelocity);
-        TooN::Zero(velocity);
+        angularVelocity = TooN::Zeros;
+        velocity = TooN::Zeros;
     }
 
     static const int STATE_DIMENSION = 12;
-    TooN::SE3 pose;
+    TooN::SE3<> pose;
     TooN::Vector<3> angularVelocity;
     TooN::Vector<3> velocity;
     TooN::Matrix<STATE_DIMENSION> covariance;
@@ -60,10 +60,10 @@ public:
     double damp;
 
     Model(void){
-        TooN::Zero(sigma);
+        sigma = TooN::Zeros;
         damp = 1;
-        TooN::Identity(jacobian);
-        TooN::Zero(noise);
+        jacobian = TooN::Identity;
+        noise = TooN::Zeros;
     }
 
     // Jacobian has pos, rot, vel, angularVel in this order
@@ -84,7 +84,7 @@ public:
         vel.slice<3,3>() = state.angularVelocity;
 
         // update translational components
-        state.pose = TooN::SE3::exp(vel * dt) * state.pose;
+        state.pose = TooN::SE3<>::exp(vel * dt) * state.pose;
         // dampen velocitys
         double attenuation = pow(damp, dt);
         state.velocity *= attenuation;
@@ -103,7 +103,7 @@ public:
     }
 
     void updateFromMeasurement( State & state, const TooN::Vector<State::STATE_DIMENSION> & innovation ){
-        state.pose = TooN::SE3::exp(innovation.slice<0,6>()) * state.pose;
+        state.pose = TooN::SE3<>::exp(innovation.slice<0,6>()) * state.pose;
         state.velocity = state.velocity + innovation.slice<6,3>();
         state.angularVelocity = state.angularVelocity + innovation.slice<9,3>();
     }
