@@ -57,7 +57,7 @@ single kind of state. That simplifies sensor fusion and SCAAT style use of the K
 
 The following example demonstrates how to use the filter classes.
 @code
-KalmanFilter<ConstantVelocity::State, ConstantVelocity::Model> filter;
+tag::KalmanFilter<tag::ConstantVelocity::State, tag::ConstantVelocity::Model> filter;
 filter.state.pose = // Initial pose
 filter.state.covariance = // Initial covariance
 
@@ -65,7 +65,7 @@ while(true){
     double deltaT = 0.1; // interval between measurements
     filter.predict( deltaT );
 
-    ConstantVelocity::CameraMeasurement m;
+    tag::IncrementalPose m;
     m.measurement = // update vector = ln() of the correction SE3
     m.covariance =  // your measurement covariance
     filter.filter(m);
