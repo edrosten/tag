@@ -22,6 +22,18 @@ namespace tag {
 /// @ingroup posegroup
 int three_point_pose(const TooN::Vector<3> x[], const TooN::Vector<2> z[], std::vector<TooN::SE3<> >& poses);
 
+/// The function for pose estimation from three 2D - 3D point correspondences.
+/// It implements the algorithm given by the Fischer and Bolles RANSAC paper, 1980.
+/// This function assumes that the three points are in general position (not collinear).
+/// Input is an array of 3D cartesian positions and an array of 3D vectors that are rays corresponding to (unprojected) 2D observations of the 3D points.
+/// Ouput is up to four poses satisfying the input with positive depths (points in front of the camera).
+/// @param[in] x an array containing at least 3 points
+/// @param[in] z an array containing the rays corresponding to image points cast by x in the current pose
+/// @param[out] poses the vector onto which any valid poses are appended
+/// @return the number of  poses appended to the vector
+/// @ingroup posegroup
+int three_point_pose(const TooN::Vector<3> x[], const TooN::Vector<3> rays[], std::vector<TooN::SE3<> >& poses);
+
 }
 
 #endif
