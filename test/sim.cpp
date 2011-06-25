@@ -49,9 +49,11 @@ int main( int arg, char ** argv ){
         eb += norm_sq(b[i] - sb.first * (sb.second * a[i]));
         ec += norm_sq(c[i] - sc.first * (sc.second * a[i]));
     }
-
-    cout << sb.first.ln() << "\t" << sb.second << "\t" << sqrt( eb ) << "\n"
-         << sc.first.ln() << "\t" << sc.second << "\t" << sqrt( ec ) << endl;
+    
+    
+    cout << "test\t" << pose.ln() << "\t" << scale << "\n";
+    cout << "exact\t" << sb.first.ln() << "\t" << sb.second << "\t" << sqrt( eb ) << "\n"
+         << "noisy\t" << sc.first.ln() << "\t" << sc.second << "\t" << sqrt( ec ) << endl;
 
     return 0;
 }
