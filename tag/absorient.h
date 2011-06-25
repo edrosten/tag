@@ -39,6 +39,14 @@ TooN::SO3<> computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3
 /// @ingroup absorient
 TooN::SE3<> computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b);
 
+/// computes a similarity transformation between two corresponding point sets after Horn
+/// The result is an SE3 and a scale S that maps points from vector a to points from vector b : b[i] = SE3 * S * a[i]
+/// @param[in] a vector of 3D points
+/// @param[in] b vector of 3D points
+/// @return a pair consisting of a TooN::SE3 T and a double S containing the transformation such that b = T * S * a
+/// @ingroup absorient
+std::pair<TooN::SE3<>, double> computeSimilarity( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b);
+
 /// computes the mean rotation of a set of rotations. This is the rotation R such that R^{-1} * R_i is minimal for all R_i.
 /// @param[in] r a vector of rotations
 /// @return TooN::SO3 mean rotation of all input rotations

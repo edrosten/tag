@@ -81,7 +81,7 @@ TooN::SO3<>  computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<
 }
 
 TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
-    // std::assert(a.size() <= b.size());
+	assert(a.size() <= b.size());
     const size_t N = a.size();
 
     TooN::Vector<3> ma = TooN::Zeros, mb = TooN::Zeros;
@@ -106,6 +106,44 @@ TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a
     result.get_rotation() = computeOrientation( ap, bp );
     result.get_translation() = mb - result.get_rotation() * ma;
     return result;
+}
+
+std::pair<TooN::SE3<>, double> computeSimilarity( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
+	assert(a.size() <= b.size());
+	const size_t N = a.size();
+	
+	TooN::Vector<3> ma = TooN::Zeros, mb = TooN::Zeros;
+	
+	// compute centroids
+	for(unsigned int i = 0; i < N; ++i){
+		ma += a[i];
+		mb += b[i];
+	}
+	ma /= N;
+	mb /= N;
+	
+	// compute shifted locations
+	std::vector<TooN::Vector<3> > ap(N), bp(N);
+	for( unsigned int i = 0; i < N; ++i){
+		ap[i] = a[i] - ma;
+		bp[i] = b[i] - ma;
+	}
+	
+	// put resulting transformation together 
+	TooN::SE3<>  result;
+	result.get_rotation() = computeOrientation( ap, bp );
+	
+	// compute scale
+	double sa = 0, sbRa = 0;
+	for( unsigned int i = 0; i < N; ++i){
+		sa += norm_sq(ap[i]);
+		sbRa += bp[i] * (result.get_rotation() * ap[i]);
+	}
+	
+	const double scale = sbRa/sa;
+	
+	result.get_translation() = mb - result.get_rotation() * (scale * ma);
+	return std::make_pair(result, scale);
 }
 
 TooN::SO3<>  computeMeanOrientation( const std::vector<TooN::SO3<> > & r){
