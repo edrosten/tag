@@ -2,10 +2,13 @@
 
 #include <cassert>
 
-#include <TooN/SymEigen.h>
+#include <TooN/svd.h>
 #include <TooN/helpers.h>
+#include <TooN/determinant.h>
 
 namespace tag {
+
+static const TooN::DefaultPrecision eps = 1e-8;
 
 TooN::Matrix<3> quaternionToMatrix( const TooN::Vector<4> & q ){
     TooN::Matrix<3> result;
@@ -22,39 +25,42 @@ TooN::Matrix<3> quaternionToMatrix( const TooN::Vector<4> & q ){
     return result;
 }
 
-TooN::SO3<>  computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
-    const size_t N = a.size();
-    // compute cross correlations
-    const int x = 0, y = 1, z = 2;
-    TooN::Matrix<3> s = TooN::Zeros;
-    for( unsigned int i = 0; i < N; i++){
-        s += a[i].as_col() * b[i].as_row();
-    }
+static std::pair<TooN::SO3<>, TooN::DefaultPrecision> computeOrientationScale( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
+	const size_t N = a.size();
+	// compute cross correlations
+	TooN::Matrix<3> s = TooN::Zeros;
+	for( size_t i = 0; i < N; i++){
+		s += b[i].as_col() * a[i].as_row();
+	}
+	s /= N;
 
-    // create symmetric M for eigenvalue analysis
-    TooN::Matrix<4> M;
-    M[0][0] = s[x][x] + s[y][y] + s[z][z];
-    M[1][0] = M[0][1] = s[y][z] - s[z][y];
-    M[2][0] = M[0][2] = s[z][x] - s[x][z];
-    M[3][0] = M[0][3] = s[x][y] - s[y][x];
-    M[1][1] = s[x][x] - s[y][y] - s[z][z];
-    M[2][1] = M[1][2] = s[x][y] + s[y][x];
-    M[3][1] = M[1][3] = s[z][x] + s[x][z];
-    M[2][2] = - s[x][x] + s[y][y] - s[z][z];
-    M[3][2] = M[2][3] = s[y][z] + s[z][y];
-    M[3][3] = - s[x][x] - s[y][y] + s[z][z];
+	// SVD of cross correlation matrix
+	TooN::SVD<3> svd(s);
 
-    // eigenvalue decomposition to find eigenvector to largest eigenvalue
-    TooN::SymEigen<4> ev(M);
-    TooN::Vector<4> evals = ev.get_evalues();
-    int index = 0;
-    for(unsigned int i = index+1; i<4; i++)
-        if( evals[i] > evals[index] )
-            index = i;
-    TooN::Vector<4> evec = ev.get_evectors()[index];
-    TooN::SO3<>  result;
-    result = quaternionToMatrix(evec);
-    return result;
+	// build S for rotation matrix
+	TooN::Matrix<3> S = TooN::Identity;
+
+	const TooN::DefaultPrecision ds = determinant_gaussian_elimination(s);
+	if(ds < -eps){
+		S(2,2) = -1;
+	} else if(ds < eps) { // close to 0 let U * VT decide
+		const TooN::DefaultPrecision duv = determinant_gaussian_elimination(svd.get_U()) 
+										* determinant_gaussian_elimination(svd.get_VT());
+		if(duv <  0)
+			S(2,2) = -1;
+	}
+
+	// compute trace(DS)
+	TooN::DefaultPrecision scale = 0;
+	for(int i = 0; i < 3; ++i)
+		scale += svd.get_diagonal()[i] * S(i,i);
+
+	return std::make_pair(TooN::SO3<>(svd.get_U() * S * svd.get_VT()), scale);
+}
+
+TooN::SO3<> computeOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b ){
+	std::pair<TooN::SO3<>, TooN::DefaultPrecision> result = computeOrientationScale( a, b );
+	return result.first;
 }
 
 // computes the orientation from (e1,e2,e3) -> (a,(a^b)^a,a^b), which means that b the second vector is in the a, b plane
@@ -69,7 +75,7 @@ static inline TooN::SO3<>  canonicalOrientation( const TooN::Vector<3> & a, cons
     return TooN::SO3<> (result);
 }
 
-TooN::SO3<>  computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 ){
+TooN::SO3<> computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<3> & b1, const TooN::Vector<3> & a2, const TooN::Vector<3> & b2 ){
     TooN::SO3<>  r1 = canonicalOrientation( a1, a2 );
     TooN::SO3<>  r2 = canonicalOrientation( b1, b2 );
     const TooN::SO3<>  rAB = r2 * r1.inverse();
@@ -80,9 +86,13 @@ TooN::SO3<>  computeOrientation( const TooN::Vector<3> & a1, const TooN::Vector<
     return TooN::SO3<> ::exp(diff.ln() * 0.5) * rAB;
 }
 
-TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
+TooN::SE3<> computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
 	assert(a.size() <= b.size());
     const size_t N = a.size();
+
+	if(N == 1){    // quick special case
+		return TooN::SE3<>(TooN::SO3<>(), b[0] - a[0]);
+	}
 
     TooN::Vector<3> ma = TooN::Zeros, mb = TooN::Zeros;
 
@@ -108,9 +118,13 @@ TooN::SE3<>  computeAbsoluteOrientation( const std::vector<TooN::Vector<3> > & a
     return result;
 }
 
-std::pair<TooN::SE3<>, double> computeSimilarity( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
+std::pair<TooN::SE3<>, TooN::DefaultPrecision> computeSimilarity( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
 	assert(a.size() <= b.size());
 	const size_t N = a.size();
+	
+	if(N == 1){    // quick special case
+		return std::make_pair(TooN::SE3<>(TooN::SO3<>(), b[0] - a[0]), 1);
+	}
 	
 	TooN::Vector<3> ma = TooN::Zeros, mb = TooN::Zeros;
 	
@@ -131,16 +145,18 @@ std::pair<TooN::SE3<>, double> computeSimilarity( const std::vector<TooN::Vector
 	
 	// put resulting transformation together 
 	TooN::SE3<>  result;
-	result.get_rotation() = computeOrientation( ap, bp );
+	std::pair<TooN::SO3<>, TooN::DefaultPrecision> rs = computeOrientationScale( ap, bp );
+	result.get_rotation() = rs.first;
+	
+	std::cout << rs.second << std::endl;
 	
 	// compute scale
-	double sa = 0, sbRa = 0;
+	TooN::DefaultPrecision sa = 0;
 	for( unsigned int i = 0; i < N; ++i){
 		sa += norm_sq(ap[i]);
-		sbRa += bp[i] * (result.get_rotation() * ap[i]);
 	}
-	
-	const double scale = sbRa/sa;
+	sa /= N;
+	const TooN::DefaultPrecision scale = rs.second / sa;
 	
 	result.get_translation() = mb - result.get_rotation() * (scale * ma);
 	return std::make_pair(result, scale);
