@@ -8,7 +8,6 @@ using namespace TooN;
 using namespace tag;
 
 typedef vector<Vector<3> > Points;
-typedef pair<SE3<>, double> Sim;
 
 double inline rand_u(){
     return (double)rand()/RAND_MAX;
@@ -32,28 +31,28 @@ int main( int arg, char ** argv ){
 
     Points a(N), b(N), c(N);
     
-    SE3<> pose(makeVector(1,2,3,2,1,0.5));
-    const double scale = 0.37;
+    SIM3<> pose(makeVector(1,2,3,2,1,0.5, 0.37));
     
     for( unsigned i = 0; i < N; ++i ){
         a[i] = rand_vect<3>(-10, 10);
-        b[i] = pose * (scale * a[i]);
+        b[i] = pose * a[i];
         c[i] = b[i] + rand_vect<3>(-0.01, 0.01);
     }
 
-    Sim sb = computeSimilarity(a,b);
-    Sim sc = computeSimilarity(a,c);
+    SIM3<> sb = computeSimilarity(a,b);
+    SIM3<> sc = computeSimilarity(a,c);
 
     double eb = 0, ec = 0;
     for( unsigned i = 0; i < N; ++i){
-        eb += norm_sq(b[i] - sb.first * (sb.second * a[i]));
-        ec += norm_sq(c[i] - sc.first * (sc.second * a[i]));
+        eb += norm_sq(b[i] - sb * a[i]);
+        ec += norm_sq(c[i] - sc * a[i]);
     }
+    eb = sqrt(eb/N);
+    ec = sqrt(ec/N);
     
-    
-    cout << "test\t" << pose.ln() << "\t" << scale << "\n";
-    cout << "exact\t" << sb.first.ln() << "\t" << sb.second << "\t" << sqrt( eb ) << "\n"
-         << "noisy\t" << sc.first.ln() << "\t" << sc.second << "\t" << sqrt( ec ) << endl;
+    cout << "test\t" << pose.ln() << "\n";
+    cout << "exact\t" << sb.ln()  << "\t" << eb << "\n"
+         << "noisy\t" << sc.ln() << "\t" << ec << endl;
 
     return 0;
 }
