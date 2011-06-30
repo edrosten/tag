@@ -223,7 +223,7 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 	return std::tr1::make_tuple(Rs.first, mb - Rs.first * (scale * ma), scale);
 }
 
-/// overload of @ref computeSimilarity that computes the rigid transformation between two corresponding 3D point sets 
+/// alternative to @ref computeSimilarity that computes the rigid transformation between two corresponding 3D point sets 
 /// as an SE3 and a scale S that maps points from vector a to points from vector b : b[i] = SE3 * S * a[i]
 /// @param[in] a vector of 3D points
 /// @param[in] b vector of 3D points
@@ -234,7 +234,7 @@ inline TooN::SIM3<> computeSimilarity( const std::vector<TooN::Vector<3> > & a, 
 	return TooN::SIM3<>(TooN::SO3<>(std::tr1::get<0>(Rts)), std::tr1::get<1>(Rts), std::tr1::get<2>(Rts));
 }
 
-/// overload of @ref computeSimilarity that computes the rigid transformation between two corresponding 2D point sets 
+/// alternative to @ref computeSimilarity that computes the rigid transformation between two corresponding 2D point sets 
 /// as an SE2 and a scale S that maps points from vector a to points from vector b : b[i] = SE2 * S * a[i]
 /// @param[in] a vector of 2D points
 /// @param[in] b vector of 2D points
