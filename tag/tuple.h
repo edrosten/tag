@@ -368,7 +368,7 @@ namespace tag
 			};
 		
 	
-			template<class X, class Y> friend class R_list;
+			template<class X, class Y> friend struct R_list;
 			void operator=(const equivalent_V_list& vlist)
 			{
 				val = vlist.val;
