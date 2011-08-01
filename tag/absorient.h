@@ -2,7 +2,11 @@
 #define TAG_ABSORIENT_H_
 
 #include <vector>
+#ifdef WIN32
+#include <tuple>
+#else
 #include <tr1/tuple>
+#endif
 
 #include <TooN/TooN.h>
 #include <TooN/sim2.h>
