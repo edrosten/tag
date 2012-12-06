@@ -11,7 +11,7 @@
 #include <TooN/TooN.h>
 #include <TooN/sim2.h>
 #include <TooN/sim3.h>
-#include <TooN/svd.h>
+#include <TooN/SVD.h>
 
 namespace tag {
 
