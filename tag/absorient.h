@@ -136,6 +136,9 @@ std::pair<TooN::Matrix<D>, TooN::Vector<D> > computeAbsoluteOrientation( const s
 	}
 
 	// compute centroids
+	// Strictly speaking, it is not necessary to remove the centroids from both sets, 
+	// one set is enough. However, we do it nevertheless to improve the conditioning
+	// of the rotation/scale estimation.
 	TooN::Vector<D> ma = TooN::Zeros(DIM), mb = TooN::Zeros(DIM);
 	for(unsigned i = 0; i < N; ++i){
 		ma += a[i];
@@ -148,7 +151,7 @@ std::pair<TooN::Matrix<D>, TooN::Vector<D> > computeAbsoluteOrientation( const s
 	std::vector<TooN::Vector<D> > ap(N), bp(N);
 	for( unsigned i = 0; i < N; ++i){
 		ap[i] = a[i] - ma;
-		bp[i] = b[i] - ma;
+		bp[i] = b[i] - mb;
 	}
 	
 	// put resulting transformation together
@@ -200,6 +203,9 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 	}
 
 	// compute centroids
+	// Strictly speaking, it is not necessary to remove the centroids from both sets, 
+	// one set is enough. However, we do it nevertheless to improve the conditioning
+	// of the rotation/scale estimation.
 	TooN::Vector<D> ma = TooN::Zeros(DIM), mb = TooN::Zeros(DIM);
 	for(unsigned i = 0; i < N; ++i){
 		ma += a[i];
@@ -212,7 +218,7 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 	std::vector<TooN::Vector<D> > ap(N), bp(N);
 	for( unsigned i = 0; i < N; ++i){
 		ap[i] = a[i] - ma;
-		bp[i] = b[i] - ma;
+		bp[i] = b[i] - mb;
 	}
 	
 	// put resulting transformation together
