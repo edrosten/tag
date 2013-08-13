@@ -21,6 +21,16 @@ inline bool signbit( const double & d ){
 }
 #endif
 
+//Check for VisualStudio and variadic template hacks.
+
+#ifdef _MSC_VER 
+	#if _VARIADIC_MAX < 10
+		#error Visual Studio does not yet support variadic templates properly. Please define _VARIADIC_MAX project wide to 10
+		#error Visit http:/blogs.msdn.com/b/vcblog/archive/2011/09/12/10209291.aspx for more information.
+	#endif
+#endif
+
+
 template<int AN, int BN> Vector<AN+BN-1> poly_mul(const Vector<AN>& a, const Vector<BN>& b)
 {
 	//Polynomials are stored with the coefficient of zero in the first

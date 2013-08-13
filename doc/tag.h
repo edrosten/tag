@@ -28,10 +28,10 @@ Why use this library ?
 
 @section sDownload Getting the code and installing
 
-To get the code from cvs use:
+To get the code from use:
 
 @code
-cvs -z3 -d:pserver:anoncvs@cvs.savannah.nongnu.org:/cvsroot/toon co tag
+git clone git://github.com/edrosten/tag.git
 @endcode
 
 @subsection unix Unix
@@ -52,8 +52,24 @@ library and binary files (for DLLs).
 	- @c LIBDIR contains library files. tag static libraries (debug and release verions) will be copied into @c \%LIBDIR\%
 	- @c BINDIR is not used for tag, but would be the default directory for DLLs
 
+
+@subsubsection vs2012 Visual Studio 2012
+
+By default the compile fails on VS 2012. This is because visual studio does not yet 
+support variadic templates but simulates them with multiply included headers. The maximum
+depth for templates has been reduced from 10 to 5 in VS 2012.
+
+To correct, you need to set the macro <code>_VARIADIC_MAX</code> to 10.
+
+This is covered in more detail here:
+
+http://blogs.msdn.com/b/vcblog/archive/2011/09/12/10209291.aspx
+
+
+
 @section sLinks Links
-    - TooN - http://mi.eng.cam.ac.uk/~twd20/TooN/html/index.html
-    - CVS web interface - http://cvs.savannah.gnu.org/viewvc/tag/?root=toon
+    - TooN - http://www.edwardrosten.com/cvd/toon.html
+
+
 
 */
