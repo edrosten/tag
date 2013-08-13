@@ -23,7 +23,7 @@ inline bool signbit( const double & d ){
 
 //Check for VisualStudio and variadic template hacks.
 
-#ifdef _MSC_VER 
+#if _MSC_VER > 1600
 	#if _VARIADIC_MAX < 10
 		#error Visual Studio does not yet support variadic templates properly. Please define _VARIADIC_MAX project wide to 10
 		#error Visit http:/blogs.msdn.com/b/vcblog/archive/2011/09/12/10209291.aspx for more information.
