@@ -1,7 +1,7 @@
 #include <TooN/TooN.h>
 #include <utility>
 #include <vector>
-#ifndef WIN32
+#if !defined(WIN32) && !defined(NEWCPPSTD) 
 #include <tr1/tuple>
 #include <tr1/array>
 #else
@@ -13,7 +13,6 @@
 
 using namespace TooN;
 using namespace std;
-using namespace std::tr1;
 
 #ifdef WIN32
 inline bool signbit( const double & d ){
