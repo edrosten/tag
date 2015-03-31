@@ -13,6 +13,8 @@
 
 using namespace TooN;
 using namespace std;
+namespace std{namespace tr1{}}
+using namespace std::tr1;
 
 #ifdef WIN32
 inline bool signbit( const double & d ){
