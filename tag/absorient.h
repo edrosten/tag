@@ -2,10 +2,12 @@
 #define TAG_ABSORIENT_H_
 
 #include <vector>
-#ifdef WIN32
-#include <tuple>
-#else
+#if !defined(WIN32) && !defined(NEWCPPSTD) 
 #include <tr1/tuple>
+namespace tupns = std::tr1;
+#else
+#include <tuple>
+namespace tupns = std;
 #endif
 
 #include <TooN/TooN.h>
@@ -191,7 +193,7 @@ inline TooN::SE2<> computeAbsoluteOrientation( const std::vector<TooN::Vector<2>
 /// @return std::tuple containing R, t and s such that b[i] = s * R * a[i] + t
 /// @ingroup absorient
 template <int D>
-std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > computeSimilarity( const std::vector<TooN::Vector<D> > & a, const std::vector<TooN::Vector<D> > & b){
+tupns::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > computeSimilarity( const std::vector<TooN::Vector<D> > & a, const std::vector<TooN::Vector<D> > & b){
 	TooN::SizeMismatch<D,D>::test(a.front().size(), b.front().size());
 	const int DIM = a.front().size();
 	const size_t N = std::min(a.size(), b.size());
@@ -199,7 +201,7 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 	if(N == 1){    // quick special case
 		TooN::Matrix<D> R(DIM, DIM);
 		R = TooN::Identity;
-		return std::tr1::make_tuple(R, b.front() - a.front(), 1);
+		return tupns::make_tuple(R, b.front() - a.front(), 1);
 	}
 
 	// compute centroids
@@ -230,7 +232,7 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 	}
 	sa /= N;
 	const TooN::DefaultPrecision scale = Rs.second / sa;
-	return std::tr1::make_tuple(Rs.first, mb - Rs.first * (scale * ma), scale);
+	return tupns::make_tuple(Rs.first, mb - Rs.first * (scale * ma), scale);
 }
 
 /// alternative to @ref computeSimilarity that computes the rigid transformation between two corresponding 3D point sets 
@@ -240,8 +242,8 @@ std::tr1::tuple<TooN::Matrix<D>, TooN::Vector<D>, TooN::DefaultPrecision > compu
 /// @return a pair consisting of a TooN::SE3 T and a double S containing the transformation such that b = T * S * a
 /// @ingroup absorient
 inline TooN::SIM3<> computeSimilarity( const std::vector<TooN::Vector<3> > & a, const std::vector<TooN::Vector<3> > & b){
-	std::tr1::tuple<TooN::Matrix<3>, TooN::Vector<3>, TooN::DefaultPrecision > Rts = computeSimilarity<3>(a,b);
-	return TooN::SIM3<>(TooN::SO3<>(std::tr1::get<0>(Rts)), std::tr1::get<1>(Rts), std::tr1::get<2>(Rts));
+	tupns::tuple<TooN::Matrix<3>, TooN::Vector<3>, TooN::DefaultPrecision > Rts = computeSimilarity<3>(a,b);
+	return TooN::SIM3<>(TooN::SO3<>(tupns::get<0>(Rts)), tupns::get<1>(Rts), tupns::get<2>(Rts));
 }
 
 /// alternative to @ref computeSimilarity that computes the rigid transformation between two corresponding 2D point sets 
@@ -251,8 +253,8 @@ inline TooN::SIM3<> computeSimilarity( const std::vector<TooN::Vector<3> > & a, 
 /// @return a pair consisting of a TooN::SE2 T and a double S containing the transformation such that b = T * S * a
 /// @ingroup absorient
 inline TooN::SIM2<> computeSimilarity( const std::vector<TooN::Vector<2> > & a, const std::vector<TooN::Vector<2> > & b){
-	std::tr1::tuple<TooN::Matrix<2>, TooN::Vector<2>, TooN::DefaultPrecision > Rts = computeSimilarity<2>(a,b);
-	return TooN::SIM2<>(TooN::SO2<>(std::tr1::get<0>(Rts)), std::tr1::get<1>(Rts), std::tr1::get<2>(Rts));
+	tupns::tuple<TooN::Matrix<2>, TooN::Vector<2>, TooN::DefaultPrecision > Rts = computeSimilarity<2>(a,b);
+	return TooN::SIM2<>(TooN::SO2<>(tupns::get<0>(Rts)), tupns::get<1>(Rts), tupns::get<2>(Rts));
 }
 
 /// computes the mean rotation of a set of rotations. This is the rotation R such that R^{-1} * R_i is minimal for all R_i.

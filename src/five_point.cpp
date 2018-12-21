@@ -7,12 +7,13 @@
 #include <TooN/SVD.h>
 
 #include <algorithm>
+#include <tr1/array>
 #include "polynomial.h"
 
 using namespace TooN;
+namespace std{namespace tr1{}}
 using namespace std;
 using namespace std::tr1;
-
 
 namespace tag {
 

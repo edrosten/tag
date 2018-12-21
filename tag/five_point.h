@@ -3,10 +3,12 @@
 
 #include <vector>
 #include <utility>
-#ifndef WIN32
+#if !defined(WIN32) && !defined(NEWCPPSTD) 
 #include <tr1/array>
+namespace arrns = std::tr1;
 #else
 #include <array>
+namespace arrns = std;
 #endif
 #include <TooN/TooN.h>
 #include <TooN/se3.h>
@@ -29,7 +31,7 @@ namespace tag {
 /// @return the optimized transformation
 /// @ingroup essentialgroup
 /// @ingroup essentialgroup
-std::vector<TooN::Matrix<3> > five_point(const std::tr1::array<std::pair<TooN::Vector<3>, TooN::Vector<3> >, 5> & points);
+std::vector<TooN::Matrix<3> > five_point(const arrns::array<std::pair<TooN::Vector<3>, TooN::Vector<3> >, 5> & points);
 
 /// reconstructs possible R,t from essential matrix E.
 /// The implementation follows the algorithm in 
