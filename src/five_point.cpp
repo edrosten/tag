@@ -93,7 +93,7 @@ template<int R, int C, class P> Matrix<C-R, C, P> dodgy_null(Matrix<R, C, P> m)
 }
 
 
-vector<Matrix<3> > five_point(const array<pair<Vector<3>, Vector<3> >, 5> & points)
+vector<Matrix<3> > five_point(const arrns::array<pair<Vector<3>, Vector<3> >, 5> & points)
 {
 	//Equations numbers are given with reference to:
 	// "An efficient Solution to the Five-Point Relative Pose Problem",
